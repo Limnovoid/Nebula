@@ -1,10 +1,7 @@
-#ifndef NEBULA_ORION_TEMPLATE_HEADER_H
-#define NEBULA_ORION_TEMPLATE_HEADER_H
+#ifndef NEBULA_TEMPLATE_HEADER_H
+#define NEBULA_TEMPLATE_HEADER_H
 
 namespace Nebula
-{
-
-namespace Orion
 {
 
 template<typename T>
@@ -21,8 +18,6 @@ TemplateClass<T>::TemplateClass()
 {
 }
 
-} // namespace Orion
+} // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-} // namespace Nebula
-
-#endif//NEBULA_ORION_TEMPLATE_HEADER_H
+#endif//NEBULA_TEMPLATE_HEADER_H

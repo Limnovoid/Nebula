@@ -1,5 +1,7 @@
-#ifndef NEBULA_ORION_H
-#define NEBULA_ORION_H
+#ifndef NEBULA_ORION_UI_APPLICATION_H
+#define NEBULA_ORION_UI_APPLICATION_H
+
+#include "UiMenu.h"
 
 namespace Nebula
 {
@@ -7,14 +9,28 @@ namespace Nebula
 namespace Orion
 {
 
-class UiMenu;
+class UiApplication
+{
+public:
+	UiApplication(char const* name);
+
+	void Run();
+
+	UiMenu & GetRootMenu();
+
+private:
+	UiMenu		m_rootMenu;
+};
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void AddOptions(UiMenu const&);
+UiMenu & UiApplication::GetRootMenu()
+{
+	return m_rootMenu;
+}
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_ORION_H
+#endif//NEBULA_ORION_UI_APPLICATION_H

@@ -1,8 +1,6 @@
 #ifndef NEBULA_ORION_GET_TYPENAME_HELPER_H
 #define NEBULA_ORION_GET_TYPENAME_HELPER_H
 
-#include <cstring>
-
 namespace Nebula
 {
 
@@ -49,8 +47,8 @@ char const* GetTypenameHelper<T>::operator()() const
 	return Get();
 }
 
-} // namespace Orion
+} // namespace Orion --------------------------------------------------------------------------------------------------------------
 
-} // namespace Nebula
+} // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
 #endif//NEBULA_ORION_GET_TYPENAME_HELPER_H

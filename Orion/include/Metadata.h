@@ -26,8 +26,8 @@ public:
 	const GetTypenameHelper<TValue>			m_getTypenameHelper;
 };
 
-} // namespace Orion
+} // namespace Orion --------------------------------------------------------------------------------------------------------------
 
-} // namespace Nebula
+} // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
 #endif//NEBULA_ORION_METADATA_H

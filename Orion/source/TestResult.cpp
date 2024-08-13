@@ -1,0 +1,42 @@
+#include "TestResult.h"
+
+#include "ToString.h"
+
+namespace Nebula
+{
+
+namespace Orion
+{
+
+TestResult::TestResult() :
+	m_result(false),
+	m_message("")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+TestResult::TestResult(bool const result, std::string const& message) :
+	m_result(result),
+	m_message(message)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+TestResult::TestResult(bool const result, std::string && message) :
+	m_result(result),
+	m_message(std::move(message))
+{
+}
+
+} // namespace Orion --------------------------------------------------------------------------------------------------------------
+
+std::string ToString(Orion::TestResult const& testResult)
+{
+	static constexpr char FORMAT[] = "{"/*result*/"} \"{"/*message*/"}\"";
+
+	return std::format(FORMAT, ToString(testResult.GetResult()), testResult.GetMessage());
+}
+
+} // namespace Nebula -------------------------------------------------------------------------------------------------------------

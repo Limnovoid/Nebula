@@ -2,6 +2,6 @@ LimnNebula: Orion
 // --------------------------------------------------------------------------------------------------------------------------------
 
 Brief:
-Testing and debugging framework and useful classes.
+Development tools - test framework and useful debugging classes.
 Named after the Orion Nebula, the closest region of massive star formation to our Solar System, hosting numerous young stellar
-objects including the Trapezium Cluster.
+objects such as the Trapezium Cluster.

@@ -1,5 +1,10 @@
-#ifndef NEBULA_ORION_H
-#define NEBULA_ORION_H
+#include "Orion.h"
+
+#include "GetTypenameHelper.h"
+#include "Metadata.h"
+#include "TestResult.h"
+#include "UiMenu.h"
+#include "TextArt.h"
 
 namespace Nebula
 {
@@ -7,14 +12,11 @@ namespace Nebula
 namespace Orion
 {
 
-class UiMenu;
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-void AddOptions(UiMenu const&);
+void AddOptions(UiMenu const& consoleMenu)
+{
+	// TODO : add option "display text art"
+}
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
-
-#endif//NEBULA_ORION_H

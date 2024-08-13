@@ -1,20 +1,23 @@
-#ifndef NEBULA_ORION_H
-#define NEBULA_ORION_H
+#include "UiApplication.h"
 
 namespace Nebula
 {
-
+	
 namespace Orion
 {
 
-class UiMenu;
+UiApplication::UiApplication(char const* name) :
+	m_rootMenu(name)
+{
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void AddOptions(UiMenu const&);
+void UiApplication::Run()
+{
+	m_rootMenu.Execute();
+}
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
-
-#endif//NEBULA_ORION_H

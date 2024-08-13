@@ -1,5 +1,5 @@
-#ifndef NEBULA_ORION_H
-#define NEBULA_ORION_H
+#ifndef NEBULA_ORION_UI_OPTION_H
+#define NEBULA_ORION_UI_OPTION_H
 
 namespace Nebula
 {
@@ -7,14 +7,9 @@ namespace Nebula
 namespace Orion
 {
 
-class UiMenu;
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-void AddOptions(UiMenu const&);
-
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
+
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_ORION_H
+#endif//NEBULA_ORION_UI_OPTION_H
