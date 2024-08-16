@@ -3,7 +3,7 @@
 namespace Nebula
 {
 
-std::string ToString(bool const value)
+String ToString(bool const value)
 {
 	return (value ? "true" : "false");
 }

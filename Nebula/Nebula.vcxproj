@@ -139,11 +139,14 @@
   <ItemGroup>
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\ToString.cpp" />
+    <ClCompile Include="source\ToType.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Format.h" />
     <ClInclude Include="include\Stable.h" />
-    <ClInclude Include="include\Types.h" />
+    <ClInclude Include="include\NebulaTypes.h" />
     <ClInclude Include="include\ToString.h" />
+    <ClInclude Include="include\ToType.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

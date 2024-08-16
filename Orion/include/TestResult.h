@@ -13,19 +13,19 @@ public:
 	TestResult();
 	TestResult(TestResult const&) = default;
 	TestResult(TestResult &&) = default;
-	TestResult(bool const result, std::string const& message);
-	TestResult(bool const result, std::string && message);
+	TestResult(bool const result, StringView const message);
+	TestResult(bool const result, String && message);
 
 	void SetResult(bool const result);
-	void SetMessage(std::string const& message);
-	void SetMessage(std::string && message);
+	void SetMessage(StringView const message);
+	void SetMessage(String && message);
 
 	bool GetResult() const;
-	std::string_view GetMessage() const;
+	StringView GetMessage() const;
 
 private:
 	bool			m_result;
-	std::string		m_message;
+	String		m_message;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -37,14 +37,14 @@ inline void TestResult::SetResult(bool const result)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void TestResult::SetMessage(std::string const& message)
+inline void TestResult::SetMessage(StringView const message)
 {
 	m_message = message;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void TestResult::SetMessage(std::string && message)
+inline void TestResult::SetMessage(String && message)
 {
 	m_message = std::move(message);
 }
@@ -58,14 +58,14 @@ inline bool TestResult::GetResult() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline std::string_view TestResult::GetMessage() const
+inline StringView TestResult::GetMessage() const
 {
-	return std::string_view(m_message.data(), m_message.size());
+	return MakeStringView(m_message);
 }
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
 
-std::string ToString(Orion::TestResult const& testResult);
+String ToString(Orion::TestResult const& testResult);
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

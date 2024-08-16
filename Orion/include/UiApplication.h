@@ -20,11 +20,12 @@ public:
 
 private:
 	UiMenu		m_rootMenu;
+	UiIo		m_io;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-UiMenu & UiApplication::GetRootMenu()
+inline UiMenu & UiApplication::GetRootMenu()
 {
 	return m_rootMenu;
 }

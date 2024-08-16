@@ -1,11 +1,14 @@
-#ifndef NEBULA_TO_STRING_H
-#define NEBULA_TO_STRING_H
+#include "ToType.h"
 
 namespace Nebula
 {
 
-String ToString(bool const value);
+//template<>
+//size_t ToType<size_t>(StringView const from)
+//{
+//	assert(false); // TODO
+//
+//	return 0;
+//}
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
-
-#endif//NEBULA_TO_STRING_H

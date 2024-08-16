@@ -12,9 +12,25 @@ namespace Nebula
 namespace Orion
 {
 
-void AddOptions(UiMenu const& consoleMenu)
+void UiAddTextArtMenu(UiMenu & uiMenu)
 {
-	// TODO : add option "display text art"
+	SharedPtr<UiMenu> pTextArtMenu = MakeShared<UiMenu>("Text art");
+	
+	pTextArtMenu->AddOption("Display text art 1", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt(); });
+	pTextArtMenu->AddOption("Display text art 2", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt2(); });
+
+	uiMenu.AddOption(pTextArtMenu);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void UiAddOptions(UiMenu & uiMenu)
+{
+	SharedPtr<UiMenu> pOrionMenu = MakeShared<UiMenu>("Orion");
+
+	UiAddTextArtMenu(*pOrionMenu);
+
+	uiMenu.AddOption(pOrionMenu);
 }
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------

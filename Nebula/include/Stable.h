@@ -8,7 +8,8 @@
 #include <assert.h>
 #include <set>
 #include <functional>
+#include <concepts>
 
-#include "Types.h"
+#include "NebulaTypes.h"
 
 #endif//NEBULA_PRECOMPILED_H

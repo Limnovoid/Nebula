@@ -15,7 +15,7 @@ TestResult AddUiTest()
 {
 	static const GetTypenameHelper<T> getTypenameHelper;
 
-	std::string message = "AddUiTest definition missing for type '" + getTypenameHelper + "'.";
+	String message = "AddUiTest definition missing for type '" + getTypenameHelper + "'.";
 
 	return TestResult(false, std::move(message));
 }

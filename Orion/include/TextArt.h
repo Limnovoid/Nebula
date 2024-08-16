@@ -7,7 +7,7 @@ namespace Nebula
 namespace Orion
 {
 
-const char * GetTextArt()
+inline const char * GetTextArt()
 {
 	static const char TEXT_ART[] =
 		"    _/        _/                         _|      _|            _|                  _|          \n"
@@ -19,7 +19,7 @@ const char * GetTextArt()
 	return TEXT_ART;
 }
 
-const char * GetTextArt2()
+inline const char * GetTextArt2()
 {
 	static const char TEXT_ART2[] =
 		"    _//       _//                        _|\\   _|            _|                  _|          \n"
@@ -31,7 +31,7 @@ const char * GetTextArt2()
 	return TEXT_ART2;
 }
 
-const char * GetTextArt3()
+inline const char * GetTextArt3()
 {
 	static const char TEXT_ART3[] =
 		"    L/        i/                          N|     N|            b|                  l|          \n"
@@ -43,7 +43,7 @@ const char * GetTextArt3()
 	return TEXT_ART3;
 }
 
-const char * GetTextArt4()
+inline const char * GetTextArt4()
 {
 	static const char TEXT_ART4[] =
 		"...._/........_/..........................#|.....#|............#|..................#|..........\n"
@@ -55,7 +55,7 @@ const char * GetTextArt4()
 	return TEXT_ART4;
 }
 
-const char * GetTextArt5()
+inline const char * GetTextArt5()
 {
 	static const char TEXT_ART5[] =
 		"7777 /77777777 /7777777777777777777777777 %|     %|            %|                  %|          \n"
@@ -67,7 +67,7 @@ const char * GetTextArt5()
 	return TEXT_ART5;
 }
 
-const char * GetTextArt6()
+inline const char * GetTextArt6()
 {
 	static const char TEXT_ART6[] =
 		".......................................................................................................\n"
@@ -83,7 +83,7 @@ const char * GetTextArt6()
 	return TEXT_ART6;
 }
 
-const char * GetTextArt7()
+inline const char * GetTextArt7()
 {
 	static const char TEXT_ART7[] =
 		":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
@@ -97,7 +97,7 @@ const char * GetTextArt7()
 	return TEXT_ART7;
 }
 
-const char * GetTextArt8()
+inline const char * GetTextArt8()
 {
 	static const char TEXT_ART8[] =
 		":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
@@ -113,7 +113,7 @@ const char * GetTextArt8()
 	return TEXT_ART8;
 }
 
-const char * GetTextArt9()
+inline const char * GetTextArt9()
 {
 	static const char TEXT_ART9[] =
 		"::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
@@ -127,7 +127,7 @@ const char * GetTextArt9()
 	return TEXT_ART9;
 }
 
-const char * GetTextArt10()
+inline const char * GetTextArt10()
 {
 	static const char TEXT_ART10[] =
 		":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
@@ -143,7 +143,7 @@ const char * GetTextArt10()
 	return TEXT_ART10;
 }
 
-const char * GetTextArt11()
+inline const char * GetTextArt11()
 {
 	static const char TEXT_ART11[] =
 		":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"

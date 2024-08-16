@@ -16,7 +16,7 @@ TestResult::TestResult() :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-TestResult::TestResult(bool const result, std::string const& message) :
+TestResult::TestResult(bool const result, StringView const message) :
 	m_result(result),
 	m_message(message)
 {
@@ -24,7 +24,7 @@ TestResult::TestResult(bool const result, std::string const& message) :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-TestResult::TestResult(bool const result, std::string && message) :
+TestResult::TestResult(bool const result, String && message) :
 	m_result(result),
 	m_message(std::move(message))
 {
@@ -32,7 +32,7 @@ TestResult::TestResult(bool const result, std::string && message) :
 
 } // namespace Orion --------------------------------------------------------------------------------------------------------------
 
-std::string ToString(Orion::TestResult const& testResult)
+String ToString(Orion::TestResult const& testResult)
 {
 	static constexpr char FORMAT[] = "{"/*result*/"} \"{"/*message*/"}\"";
 
