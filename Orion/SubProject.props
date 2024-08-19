@@ -12,14 +12,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PrecompiledHeaderFile>$(SolutionDir)$(SolutionName)\include\Stable.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Stable.h</PrecompiledHeaderFile>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeaderOutputFile>$(IntDir)Stable.pch</PrecompiledHeaderOutputFile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ForcedIncludeFiles>$(SolutionDir)$(SolutionName)\include\Stable.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>Stable.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(SolutionName)\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

@@ -18,7 +18,7 @@
     <ClCompile Include="source\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ToString.cpp">
+    <ClCompile Include="source\NebulaString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\ToType.cpp">
@@ -29,7 +29,7 @@
     <ClInclude Include="include\Stable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ToString.h">
+    <ClInclude Include="include\NebulaString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NebulaTypes.h">
@@ -39,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Maths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

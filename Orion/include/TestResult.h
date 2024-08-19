@@ -1,6 +1,8 @@
 #ifndef NEBULA_ORION_TEST_RESULT_H
 #define NEBULA_ORION_TEST_RESULT_H
 
+#include "NebulaString.h"
+
 namespace Nebula
 {
 
@@ -24,7 +26,7 @@ public:
 	StringView GetMessage() const;
 
 private:
-	bool			m_result;
+	bool		m_result;
 	String		m_message;
 };
 

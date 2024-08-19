@@ -4,24 +4,32 @@
 namespace Nebula
 {
 
-using String = std::string;
-using StringView = std::string_view;
-
+// Type constraints ------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView MakeStringView(String const& string)
+template<typename T>
+concept IsSigned = std::is_signed_v<T>;
+
+template<typename T>
+concept IsUnsigned = std::is_unsigned_v<T>;
+
+template<typename T>
+concept IsInt = std::is_integral_v<T> && requires
 {
-	return StringView(string.data(), string.length());
-}
+	std::numeric_limits<T>::max();
+	std::numeric_limits<T>::min();
+};
 
-// --------------------------------------------------------------------------------------------------------------------------------
+template<typename T>
+concept IsUInt = IsInt<T> && !IsSigned<T>;
 
-inline StringView MakeStringView(char const& character)
-{
-	return StringView(&character, 1);
-}
+template<typename T>
+concept IsSInt = IsInt<T> && IsSigned<T>;
 
-// --------------------------------------------------------------------------------------------------------------------------------
+template<typename T>
+concept IsFloatingPoint = std::is_floating_point_v<T>;
+
+// Smart pointers -----------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>

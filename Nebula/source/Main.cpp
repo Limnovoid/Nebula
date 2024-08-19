@@ -5,6 +5,7 @@
 #include "TextArt.h"
 #include "UiApplication.h"
 #include "Orion.h"
+#include "Maths.h"
 
 int main(int argc, int** argv)
 {
@@ -26,9 +27,34 @@ int main(int argc, int** argv)
 	//int res = ToType<int>('c');
 	//unsigned res2 = ToType<unsigned>('c');
 
+	//String str1000 = ToString<unsigned>(1000);
+	//String strMax = ToString<unsigned>(std::numeric_limits<unsigned>::max());
+
+	std::vector<unsigned> myUIntVector;
+	for (unsigned i = 0; i < 100; ++i)
+	{
+		String myIntegerString = ToString<unsigned>(i);
+		myUIntVector.push_back(ToType<unsigned>(myIntegerString));
+	}
+	
+	for (unsigned i = 0; i < 100; ++i)
+		assert(myUIntVector[i] == i);
+
+	std::vector<int> myIntVector;
+	for (int i = -50; i < 50; ++i)
+	{
+		String myIntegerString = ToString<int>(i);
+		myIntVector.push_back(ToType<int>(myIntegerString));
+	}
+	
+	for (int i = -50; i < 50; ++i)
+		assert(myIntVector[50 + i] == i);
+
+	//constexpr size_t maxDigitsSizeT = Maths::NumDigits(std::numeric_limits<double>::max());
+
 	Orion::UiApplication uiApplication("Nebula");
-
+	
 	Orion::UiAddOptions(uiApplication.GetRootMenu());
-
+	
 	uiApplication.Run();
 }

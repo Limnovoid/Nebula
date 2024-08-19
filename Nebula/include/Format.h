@@ -1,6 +1,8 @@
 #ifndef NEBULA_FORMAT_H
 #define NEBULA_FORMAT_H
 
+#include "NebulaString.h"
+
 namespace Nebula
 {
 

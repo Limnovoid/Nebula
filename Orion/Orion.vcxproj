@@ -109,7 +109,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <ForcedIncludeFiles>$(SolutionDir)$(SolutionName)\include\Stable.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>Stable.h;NebulaTypes.h</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(SolutionName)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

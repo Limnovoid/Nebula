@@ -20,8 +20,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeaderOutputFile>$(IntDir)Stable.pch</PrecompiledHeaderOutputFile>
-      <ForcedIncludeFiles>
-      </ForcedIncludeFiles>
+      <ForcedIncludeFiles>Stable.h</ForcedIncludeFiles>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

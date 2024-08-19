@@ -1,5 +1,5 @@
-#ifndef NEBULA_PRECOMPILED_H
-#define NEBULA_PRECOMPILED_H
+#ifndef NEBULA_STABLE_H
+#define NEBULA_STABLE_H
 
 #include <stdlib.h>
 #include <cstring>
@@ -10,6 +10,4 @@
 #include <functional>
 #include <concepts>
 
-#include "NebulaTypes.h"
-
-#endif//NEBULA_PRECOMPILED_H
+#endif//NEBULA_STABLE_H
