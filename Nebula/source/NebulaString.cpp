@@ -3,14 +3,7 @@
 namespace Nebula
 {
 
-String ToString(bool const value)
-{
-	return (value ? "true" : "false");
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-bool IsWhitespace(char const c)
+bool String::IsWhitespace(char const c)
 {
 	switch (c)
 	{
@@ -24,7 +17,7 @@ bool IsWhitespace(char const c)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-StringView GetFirstWord(StringView string)
+StringView String::GetFirstWord(StringView string)
 {
 	size_t wordStartOffset = 0;
 

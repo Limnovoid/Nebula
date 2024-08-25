@@ -6,19 +6,22 @@
 namespace Nebula
 {
 
-class Format
+class Fmt
 {
 public:
 	template<typename... TArgs>
-	static String Fmt(char const* pFormatString, TArgs... args);
+	using FormatString = std::format_string<TArgs...>;
+
+	template<typename... TArgs>
+	static String Format(FormatString<TArgs...> formatString, TArgs... args);
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename... TArgs>
-inline String Format::Fmt(char const* pFormatString, TArgs... args)
+inline String Fmt::Format(FormatString<TArgs...> formatString, TArgs... args)
 {
-	return std::format(pFormatString, std::forward<TArgs>(args)...);
+	return std::vformat(formatString.get(), std::make_format_args(args...));
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

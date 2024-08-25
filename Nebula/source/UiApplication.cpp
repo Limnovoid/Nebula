@@ -1,13 +1,12 @@
 #include "UiApplication.h"
 
+#include "TextArt.h"
+
 namespace Nebula
 {
 	
-namespace Orion
-{
-
 UiApplication::UiApplication(char const* name) :
-	m_rootMenu(name),
+	m_rootMenu(name, true),
 	m_io(std::cout, std::cin)
 {
 }
@@ -16,9 +15,9 @@ UiApplication::UiApplication(char const* name) :
 
 void UiApplication::Run()
 {
+	m_io << GetTextArt13();
+
 	m_rootMenu.Execute(m_io);
 }
-
-} // namespace Orion --------------------------------------------------------------------------------------------------------------
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

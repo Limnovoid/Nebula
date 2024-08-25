@@ -137,20 +137,13 @@
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\UiApplication.h" />
-    <ClInclude Include="include\UiMenu.h" />
     <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\Metadata.h" />
     <ClInclude Include="include\Orion.h" />
-    <ClInclude Include="include\Test.h" />
     <ClInclude Include="include\TestResult.h" />
-    <ClInclude Include="include\TextArt.h" />
-    <ClInclude Include="include\UiOption.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\UiApplication.cpp" />
     <ClCompile Include="source\Orion.cpp" />
-    <ClCompile Include="source\Test.cpp" />
     <ClCompile Include="source\TestResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

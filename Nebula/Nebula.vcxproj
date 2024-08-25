@@ -117,7 +117,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Orion.lib;$(SolutionDir)$(Platform)\$(Configuration)\Trapezium.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,17 +137,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Nebula.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\NebulaString.cpp" />
+    <ClCompile Include="source\Result.cpp" />
+    <ClCompile Include="source\Test.cpp" />
+    <ClCompile Include="source\ToString.cpp" />
     <ClCompile Include="source\ToType.cpp" />
+    <ClCompile Include="source\UiApplication.cpp" />
+    <ClCompile Include="source\UiMenu.cpp" />
+    <ClCompile Include="source\UiOption.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Format.h" />
+    <ClInclude Include="include\IOption.h" />
     <ClInclude Include="include\Maths.h" />
+    <ClInclude Include="include\Result.h" />
     <ClInclude Include="include\Stable.h" />
     <ClInclude Include="include\NebulaTypes.h" />
     <ClInclude Include="include\NebulaString.h" />
+    <ClInclude Include="include\Test.h" />
+    <ClInclude Include="include\TextArt.h" />
+    <ClInclude Include="include\ToString.h" />
     <ClInclude Include="include\ToType.h" />
+    <ClInclude Include="include\Nebula.h" />
+    <ClInclude Include="include\UiApplication.h" />
+    <ClInclude Include="include\UiIo.h" />
+    <ClInclude Include="include\UiMenu.h" />
+    <ClInclude Include="include\UiOption.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

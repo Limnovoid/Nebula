@@ -27,22 +27,7 @@
     <ClInclude Include="include\Orion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\TestResult.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TextArt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UiApplication.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UiMenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UiOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,13 +35,7 @@
     <ClCompile Include="source\Orion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\TestResult.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UiApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

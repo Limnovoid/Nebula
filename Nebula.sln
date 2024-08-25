@@ -4,14 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Nebula", "Nebula\Nebula.vcxproj", "{0CEAB916-F7DA-4AC1-B69A-CC81C7D9CE55}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2ACD4D66-0942-4BD8-8CA4-630A89BFD861} = {2ACD4D66-0942-4BD8-8CA4-630A89BFD861}
-		{9F8F44A4-330E-4064-9DCF-654893360526} = {9F8F44A4-330E-4064-9DCF-654893360526}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Orion", "Orion\Orion.vcxproj", "{2ACD4D66-0942-4BD8-8CA4-630A89BFD861}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0CEAB916-F7DA-4AC1-B69A-CC81C7D9CE55} = {0CEAB916-F7DA-4AC1-B69A-CC81C7D9CE55}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Trapezium", "Trapezium\Trapezium.vcxproj", "{9F8F44A4-330E-4064-9DCF-654893360526}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0CEAB916-F7DA-4AC1-B69A-CC81C7D9CE55} = {0CEAB916-F7DA-4AC1-B69A-CC81C7D9CE55}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D8FB8F77-E360-4331-BABB-0122EC0062BA}"
 	ProjectSection(SolutionItems) = preProject

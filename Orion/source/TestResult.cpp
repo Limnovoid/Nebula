@@ -1,5 +1,7 @@
 #include "TestResult.h"
 
+#include "Format.h"
+
 namespace Nebula
 {
 
@@ -34,7 +36,7 @@ String ToString(Orion::TestResult const& testResult)
 {
 	static constexpr char FORMAT[] = "{"/*result*/"} \"{"/*message*/"}\"";
 
-	return std::format(FORMAT, ToString(testResult.GetResult()), testResult.GetMessage());
+	return Fmt::Format(FORMAT, ToString(testResult.GetResult()), testResult.GetMessage());
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

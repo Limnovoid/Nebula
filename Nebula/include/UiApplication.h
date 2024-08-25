@@ -6,9 +6,6 @@
 namespace Nebula
 {
 
-namespace Orion
-{
-
 class UiApplication
 {
 public:
@@ -19,8 +16,8 @@ public:
 	UiMenu & GetRootMenu();
 
 private:
-	UiMenu		m_rootMenu;
-	UiIo		m_io;
+	UiMenu					m_rootMenu;
+	UiIo					m_io;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -29,8 +26,6 @@ inline UiMenu & UiApplication::GetRootMenu()
 {
 	return m_rootMenu;
 }
-
-} // namespace Orion --------------------------------------------------------------------------------------------------------------
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
