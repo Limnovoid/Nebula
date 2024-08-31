@@ -8,7 +8,8 @@
 #define RESULT_CODE_LIST(d)																	\
 	d(RESULT_CODE_SUCCESS, "Success")														\
 	d(RESULT_CODE_FAILURE, "Failure")														\
-	d(RESULT_CODE_INVALID_PARAMETER, "Invalid Parameter")
+	d(RESULT_CODE_INVALID_PARAMETER, "Invalid parameter")									\
+	d(RESULT_CODE_MISSING_DEFINITION, "Missing definition")
 
 #define RESULT_CODE_GET_ENUMS(resultCode, resultCodeString) resultCode,
 #define RESULT_CODE_GET_SWITCH_CASES(resultCode, resultCodeString) case resultCode: return resultCodeString;

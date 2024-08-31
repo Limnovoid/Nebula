@@ -19,6 +19,13 @@ public:
 	template<typename T>
 	void Get(T & t) const { m_inputStream >> t; }
 
+	template<typename T>
+	void Get(char const* prompt, T & t) const
+	{
+		m_outputStream << prompt << ": ";
+		m_inputStream >> t;
+	}
+
 private:
 	std::ostream &		m_outputStream;
 	std::istream &		m_inputStream;

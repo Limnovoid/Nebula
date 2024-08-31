@@ -1,0 +1,22 @@
+Nebula Development Notes
+--------------------------------------------------------------------------------------------------------------------------------
+
+2024-08-31
+
+1.
+Unit test:
+> A function call with known arguments and an expected return value.
+> The function return value may depend on calling context:
+--> E.g, a non-static method call which depends on the parent object's state.
+--> E.g, a standalone function which depends on static variables.
+
+2.
+Test framework guidelines:
+> Tests appear in the same files as the source they test:
+--> Keeps it obvious to developers which tests are relevant to their projects.
+--> I.e., if your project includes a header file that declares tests, it is a good idea to run those tests as part of your own project's development to make sure they are behaving as you expect.
+--> Unit tests should therefore allow a calling context to define its own arguments and expected return values.
+> Runtime testing a project means building an application to run tests:
+--> Nebula's test framework can work with the application class to automate unit testing.
+--> E.g., a user application could register its unit tests with the base application class to run automatically on startup.
+--> This behaviour can be configurable, e.g., noisy/quiet/silent logging behaviour, logging target (console and/or file), etc.
