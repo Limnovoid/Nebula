@@ -12,7 +12,7 @@ namespace Nebula
 class UiMenu : public IOption
 {
 public:
-	UiMenu(char const* header, bool isRootMenu = false);
+	UiMenu(StringView header, bool isRootMenu = false);
 
 	// IOption interface
 	virtual StringView GetPrompt() override;

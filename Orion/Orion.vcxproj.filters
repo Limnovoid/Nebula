@@ -21,21 +21,12 @@
     <ClInclude Include="include\Metadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\GetTypenameHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Orion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TestResult.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Orion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\TestResult.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,10 +5,12 @@
 namespace Nebula
 {
 	
-UiApplication::UiApplication(char const* name) :
+UiApplication::UiApplication(StringView name) :
 	m_rootMenu(name, true),
-	m_io(std::cout, std::cin)
+	m_io(std::cout, std::cin),
+	m_testHandler(m_io)
 {
+	m_rootMenu.AddOption(m_testHandler.GetMenu());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

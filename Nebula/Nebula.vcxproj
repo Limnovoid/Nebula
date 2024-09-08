@@ -145,11 +145,13 @@
     <ClCompile Include="source\ToString.cpp" />
     <ClCompile Include="source\ToType.cpp" />
     <ClCompile Include="source\UiApplication.cpp" />
+    <ClCompile Include="source\UiIo.cpp" />
     <ClCompile Include="source\UiMenu.cpp" />
     <ClCompile Include="source\UiOption.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Format.h" />
+    <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\IOption.h" />
     <ClInclude Include="include\Maths.h" />
     <ClInclude Include="include\Result.h" />

@@ -11,6 +11,7 @@ int main(int argc, int** argv)
 	UiApplication uiApplication("Nebula");
 
 	UiAddOptions(uiApplication.GetRootMenu());
-	
+	AddTests(uiApplication.GetTestHandler());
+
 	uiApplication.Run();
 }

@@ -3,7 +3,7 @@
 namespace Nebula
 {
 
-UiOption::UiOption(char const* prompt, Function function) :
+UiOption::UiOption(StringView prompt, Function function) :
 	m_prompt(prompt),
 	m_function(function)
 {

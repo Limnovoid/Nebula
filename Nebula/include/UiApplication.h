@@ -2,6 +2,7 @@
 #define NEBULA_ORION_UI_APPLICATION_H
 
 #include "UiMenu.h"
+#include "Test.h"
 
 namespace Nebula
 {
@@ -9,15 +10,18 @@ namespace Nebula
 class UiApplication
 {
 public:
-	UiApplication(char const* name);
+	UiApplication(StringView name);
 
 	void Run();
 
 	UiMenu & GetRootMenu();
 
+	TestHandler & GetTestHandler();
+
 private:
 	UiMenu					m_rootMenu;
 	UiIo					m_io;
+	TestHandler				m_testHandler;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -25,6 +29,13 @@ private:
 inline UiMenu & UiApplication::GetRootMenu()
 {
 	return m_rootMenu;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline TestHandler & UiApplication::GetTestHandler()
+{
+	return m_testHandler;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ class UiOption : public IOption
 public:
 	using Function = std::function<void(UiIo const&)>;
 
-	UiOption(char const* prompt, Function function);
+	UiOption(StringView prompt, Function function);
 
 	virtual ~UiOption() = default;
 

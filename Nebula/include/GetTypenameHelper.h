@@ -1,10 +1,7 @@
-#ifndef NEBULA_ORION_GET_TYPENAME_HELPER_H
-#define NEBULA_ORION_GET_TYPENAME_HELPER_H
+#ifndef NEBULA_GET_TYPENAME_HELPER_H
+#define NEBULA_GET_TYPENAME_HELPER_H
 
 namespace Nebula
-{
-
-namespace Orion
 {
 
 /// <summary>
@@ -22,7 +19,7 @@ public:
 	char const* operator()() const;
 
 private:
-	static constexpr size_t		FRONT_LENGTH = sizeof("Nebula::Orion::GetTypeNameHelper<") - 1;
+	static constexpr size_t		FRONT_LENGTH = sizeof("Nebula::GetTypeNameHelper<") - 1;
 	static constexpr size_t		BACK_LENGTH = sizeof(">::Get") - 1;
 };
 
@@ -47,8 +44,6 @@ char const* GetTypenameHelper<T>::operator()() const
 	return Get();
 }
 
-} // namespace Orion --------------------------------------------------------------------------------------------------------------
-
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_ORION_GET_TYPENAME_HELPER_H
+#endif//NEBULA_GET_TYPENAME_HELPER_H

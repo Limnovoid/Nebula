@@ -137,14 +137,11 @@
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\Metadata.h" />
     <ClInclude Include="include\Orion.h" />
-    <ClInclude Include="include\TestResult.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Orion.cpp" />
-    <ClCompile Include="source\TestResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

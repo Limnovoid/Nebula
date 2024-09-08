@@ -3,12 +3,12 @@
 namespace Nebula
 {
 
-UiMenu::UiMenu(char const* header, bool isRootMenu) :
+UiMenu::UiMenu(StringView header, bool isRootMenu) :
 	m_prompt(header),
-	m_header(m_prompt),
 	m_returnKey('Q')
 {
 	m_prompt += "...";
+	m_header = MakeStringView(m_prompt); // Initialize after the above line in case the append causes a reallocation (invalidating the string view).
 
 	m_returnOption = MakeShared<UiOption>((isRootMenu ? "Exit" : "Return"), [this](UiIo const&) { Return(); });
 }
@@ -56,7 +56,7 @@ void UiMenu::DisplayReturnOption(UiIo const& uiIo)
 
 void UiMenu::SelectOption(UiIo const& uiIo, char const selection)
 {
-	if (ToUpper(selection) == m_returnKey)
+	if (String::ToUpper(selection) == m_returnKey)
 	{
 		m_returnOption->Execute(uiIo);
 	}

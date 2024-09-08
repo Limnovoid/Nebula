@@ -6,276 +6,126 @@
 #include "Format.h"
 #include "UiMenu.h"
 #include "TextArt.h"
+#include "Test.h"
+#include "GetTypenameHelper.h"
 
 namespace Nebula
 {
 
-//template<typename TReturn, typename... TParams>
-//class UnitTest
-//{
-//public:
-//	struct Iteration
-//	{
-//		Iteration(size_t index) : m_index(index) {}
-//
-//		Iteration & operator+=(Iteration rhs)
-//		{
-//			m_index += rhs.m_index;
-//			return *this;
-//		}
-//
-//		bool operator!=(Iteration rhs) const
-//		{
-//			return (m_index != rhs.m_index);
-//		}
-//
-//		size_t		m_index;
-//	};
-//
-//	struct Parameters
-//	{
-//		Iteration	m_first;
-//		Iteration	m_last;
-//		Iteration	m_step;
-//
-//		TReturn *	m_expectedResults;
-//
-//	};
-//
-//	UnitTest() {}
-//
-//	bool Run(TReturn expectedResult, TParams... parameters)
-//	{
-//		return (Invoke(std::forward<TParams>(parameters)...) == expectedResult);
-//	}
-//
-//	bool RunSeries(Iteration first, Iteration last, Iteration step, TReturn * expectedResults, TParams... parameters)
-//	{
-//		bool overallResult = true;
-//		Iteration iteration = first;
-//		do
-//		{
-//			TReturn unitTestReturnValue = InvokeIteration(iteration, std::forward<TParams>(parameters)...);
-//
-//			if (unitTestReturnValue != expectedResults[iteration.m_index])
-//			{
-//				std::cout << Fmt::Format("Failed iteration {}: unit returned {}, expected {}",
-//					iteration.m_index, unitTestReturnValue, expectedResults[iteration.m_index]) << std::endl;
-//
-//				overallResult = false;
-//			}
-//
-//			iteration += step;
-//		}
-//		while (iteration != last);
-//
-//		return overallResult;
-//	}
-//
-//protected:
-//	virtual TReturn Invoke(TParams...) { return TReturn(); }
-//	virtual TReturn InvokeIteration(Iteration, TParams...) { return TReturn(); }
-//};
-//
-//class UnitTestHelper
-//{
-//public:
-//	template<typename TFunc, typename TReturn, typename TParameters>
-//	static Result Run(TFunc functor, TReturn const expectedReturn, TParameters const& parameters)
-//	{
-//		bool isExpectedReturn = (expectedReturn == functor(parameters);
-//
-//		return isExpectedReturn ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE;
-//	}
-//};
-//
-//template<typename TFunc, typename TReturn, typename... TArgs>
-//class UiUnitTest : public IOption, UnitTestHelper
-//{
-//public:
-//	UiUnitTest(char const* prompt) :
-//		m_prompt(prompt)
-//	{
-//	}
-//
-//	virtual StringView GetPrompt()
-//	{
-//		return MakeStringView(m_prompt);
-//	}
-//
-//	virtual void Execute(UiIo const& uiIo)
-//	{
-//		TReturn expected;
-//		uiIo.Get("Expected return value", expected);
-//
-//		// args????
-//
-//		UnitTestHelper::Run(TFunc(), expected, )
-//	}
-//
-//private:
-//	String		m_prompt;
-//};
-
-template<typename TReturn, class TParameters>
-class IUnitTest
-{
-public:
-	struct Iteration
-	{
-		Iteration(size_t index) : m_index(index) {}
-
-		Iteration & operator+=(Iteration rhs)
-		{
-			m_index += rhs.m_index;
-			return *this;
-		}
-
-		bool operator!=(Iteration rhs) const
-		{
-			return (m_index != rhs.m_index);
-		}
-
-		size_t		m_index;
-	};
-
-	virtual void Initialize(Iteration const iteration, TParameters & parameters) = 0;
-	virtual Result Execute(Iteration const iteration, TParameters const& parameters, TReturn & returned) = 0;
-	virtual Result Compare(Iteration const iteration, TReturn const& returned) = 0;
-};
-
-template<typename TFunc>
-concept IsTestUnit = requires (TFunc & func)
-{
-	func();
-};
-
-class TestHandler
-{
-public:
-	template<typename TFunc, typename TParams, typename TReturn>// requires IsTestUnit<TFunc>
-	bool Assert(TFunc & func, TParams const& parameters, TReturn const& expectedReturn)
-	{
-		return (func(parameters) == expectedReturn);
-	}
-};
-
 template<typename TTo> requires IsInt<TTo>
-class UnitTestToType : public IUnitTest<TTo, char>
+class UnitTestCharToType : public IUnitTest<TTo, char>
 {
-	using Iteration = IUnitTest<TTo, char>::Iteration;
+public:
+	using IUnitTest = IUnitTest<TTo, char>;
 	using TParameters = char;
 	using TReturn = TTo;
 
-	UnitTestToType() {}
-
-	virtual void Initialize(Iteration const iteration, TParameters & parameters) override
+	struct GetParameters
 	{
-		parameters += static_cast<uint8_t>(iteration.m_index);
-	}
-
-	virtual Result Execute(Iteration const iteration, TParameters const& parameters, TReturn & returned) override
-	{
-		return ToType<int>(parameters, returned);
-	}
-
-	virtual Result Compare(Iteration const iteration, TReturn const& returned) override
-	{
-
-	}
-};
-
-void UiTestTypeConversion(UiIo const& uiIo)
-{
-	Result result;
-
-	int myInt;
-	result = ToType<int>('9', myInt);
-
-	struct ToTypeIntFunctor
-	{
-		int operator()(char c)
+		TParameters operator()(size_t index)
 		{
-			int convertedInt;
-			Result result = ToType<int>(c, convertedInt);
-			return convertedInt;
+			assert(index < 10);
+			return '0' + static_cast<char>(index);
 		}
 	};
 
-
-	uiIo << "Test: ToType<unsigned>(char)" << '\n';
-
-	static const unsigned TEST_RANGE_START = 0, TEST_RANGE_END = 100, TEST_RANGE_STEP = 1;
-
-	uiIo << Fmt::Format("Iterations: {} - {} (step {})", TEST_RANGE_START, TEST_RANGE_END, TEST_RANGE_STEP) << '\n';
-
-	bool allPassed = true;
-	for (unsigned i = TEST_RANGE_START; i < TEST_RANGE_END; i += TEST_RANGE_STEP)
+	struct GetExpected
 	{
-		unsigned returnValue;
-		Result result = ToType<unsigned>(static_cast<char>(static_cast<unsigned>('0') + i), returnValue);
-
-		if ((RESULT_CODE_SUCCESS != result) || (i != returnValue))
+		TReturn operator()(size_t index)
 		{
-			allPassed = false;
-			uiIo << Fmt::Format("Failed iteration {}: expected {}, returned {}", i, i, returnValue) << '\n';
+			assert(index < 10);
+			return static_cast<TReturn>(index);
 		}
+	};
+
+	UnitTestCharToType(StringView title) : IUnitTest(title) {}
+
+	virtual ~UnitTestCharToType() {}
+
+	virtual Result Invoke(TParameters const& parameters, TReturn & returned) override
+	{
+		return ToType<TTo>(parameters, returned);
 	}
+};
 
-	uiIo << "Result: " << (allPassed ? "pass" : "fail") << '\n';
+// ---------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
 
-	//class ToTypeUnitTest : public UnitTest<int, char>
-	//{
-	//public:
-	//	ToTypeUnitTest() {}
+template<typename TTo> requires IsInt<TTo>
+class TestProgramCharToType : public ITestProgram
+{
+public:
 
-	//	virtual int Invoke(char c) override
-	//	{
-	//		int convertedInt;
-	//		Result result = ToType<int>(c, convertedInt);
-	//		return convertedInt;
-	//	}
+	TestProgramCharToType() : ITestProgram(Fmt::Format("ToType<{}>(char)", GetTypenameHelper<TTo>::Get())) {}
 
-	//	virtual int InvokeIteration(Iteration i, char c) override
-	//	{
-	//		c += static_cast<uint8_t>(i.m_index);
+	virtual ~TestProgramCharToType() {}
 
-	//		int convertedInt;
-	//		Result result = ToType<int>(c, convertedInt);
-	//		return convertedInt;
-	//	}
-	//};
+	virtual void Run(TestHandler & testHandler) override
+	{
+		String const unitTestTitle;
 
-	//ToTypeUnitTest test;
-	//test.Run(9, '9');
+		SharedPtr<UnitTestCharToType<TTo>> pUnitTestCharToType = MakeShared<UnitTestCharToType<TTo>>(unitTestTitle);
 
-	//int expectedResults[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	//test.RunSeries(0, 9, 1, expectedResults, '0');
+		testHandler.Assert<TTo, char>(pUnitTestCharToType, '7', 8);
 
-	//// -------------------------
+		char parameters[] = { '0', '5', '2', '3', '4', '1', '6', '7', '9', '8' };
+		const TTo expectedValues[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		testHandler.Assert<TTo, char>(pUnitTestCharToType, parameters, expectedValues, { 0, 9 });
 
-	//struct ToTypeIntFunctor
-	//{
-	//	int operator()(char c)
-	//	{
-	//		int convertedInt;
-	//		Result result = ToType<int>(c, convertedInt);
-	//		return convertedInt;
-	//	}
-	//};
+		char ascii0 = '0';
+		TTo zero = 0;
+		testHandler.Assert<TTo, char>(pUnitTestCharToType, &ascii0, &zero);
 
-	//struct ToTypeIntFunctor2
-	//{
-	//	std::pair<Result, int> operator()(char c)
-	//	{
-	//		int convertedInt;
-	//		Result result = ToType<int>(c, convertedInt);
-	//		return { result, convertedInt };
-	//	}
-	//};
+		testHandler.Assert<TTo, char>(pUnitTestCharToType, UnitTestCharToType<TTo>::GetParameters(), UnitTestCharToType<TTo>::GetExpected(), { 0, 9 });
+	}
+};
 
-	//uiIo << "ToType<int>(char):" << ToString(UnitTestHelper::Run(ToTypeIntFunctor(), int(9), '9')) << '\n';
-	//uiIo << "ToType<int>(char) 2:" << ToString(UnitTestHelper::Run(ToTypeIntFunctor2(), std::pair<Result, int>(RESULT_CODE_SUCCESS, 9), '9')) << '\n';
+// ---------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+void UiAddTextArtMenu(UiMenu & uiMenu)
+{
+	SharedPtr<UiMenu> pTextArtMenu = MakeShared<UiMenu>("Text art");
+
+	pTextArtMenu->AddOption("Display text art 1", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt(); });
+	pTextArtMenu->AddOption("Display text art 2", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt2(); });
+	pTextArtMenu->AddOption("Display text art 3", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt3(); });
+	pTextArtMenu->AddOption("Display text art 4", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt4(); });
+	pTextArtMenu->AddOption("Display text art 5", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt5(); });
+	pTextArtMenu->AddOption("Display text art 6", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt6(); });
+	pTextArtMenu->AddOption("Display text art 7", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt7(); });
+	pTextArtMenu->AddOption("Display text art 8", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt8(); });
+	pTextArtMenu->AddOption("Display text art 9", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt9(); });
+	pTextArtMenu->AddOption("Display text art 10", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt10(); });
+	pTextArtMenu->AddOption("Display text art 11", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt11(); });
+	pTextArtMenu->AddOption("Display text art 12", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt12(); });
+	pTextArtMenu->AddOption("Display text art 13", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt13(); });
+	pTextArtMenu->AddOption("Display text art 14", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt14(); });
+	pTextArtMenu->AddOption("Display text art 15", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt15(); });
+	pTextArtMenu->AddOption("Display text art 16", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt16(); });
+	pTextArtMenu->AddOption("Display text art 17", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt17(); });
+
+	uiMenu.AddOption(pTextArtMenu);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void UiAddOptions(UiMenu & uiMenu)
+{
+	UiAddTextArtMenu(uiMenu);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void AddTests(TestHandler & testHandler)
+{
+	SharedPtr<TestProgramCharToType<int>> pTestProgramCharToInt = MakeShared<TestProgramCharToType<int>>();
+
+	testHandler.Register(pTestProgramCharToInt);
+
+	//const int dummyExpectedValue = 0;
+	//testHandler.Assert<int, char>(pUnitTestCharToInt, &ascii0, &dummyExpectedValue,
+	//	std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
 	/*unsigned res2 = ToType<unsigned>('9');
 	String str1000 = ToString<unsigned>(1000);
@@ -300,53 +150,9 @@ void UiTestTypeConversion(UiIo const& uiIo)
 
 	for (int i = -50; i < 50; ++i)
 		assert(myIntVector[50 + i] == i);*/
-}
 
-// ---------------------------------------------------------------------------------------------------------------------------------
-
-void TestFormat()
-{
-	String formattedString = Fmt::Format("{}", 0);
-	std::cerr << formattedString << std::endl;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-void UiAddTextArtMenu(UiMenu & uiMenu)
-{
-	SharedPtr<UiMenu> pTextArtMenu = MakeShared<UiMenu>("Text art");
-
-	pTextArtMenu->AddOption("Display text art 1", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt(); });
-	pTextArtMenu->AddOption("Display text art 2", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt2(); });
-
-	uiMenu.AddOption(pTextArtMenu);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-void UiAddOptions(UiMenu & uiMenu)
-{
-	//String message1 = "test message 1";
-	//String message2 = "test message 2";
-	//
-	//Orion::TestResult testResult1(false, message1);
-	//Orion::TestResult testResult2(false, std::move(message2));
-	//
-	//assert(message2.empty());
-	//
-	//testResult1.SetMessage(message1);
-	//testResult2.SetMessage(std::move(message1));
-	//
-	//assert(message1.empty());
-
-	UiAddTextArtMenu(uiMenu);
-
-	SharedPtr<UiMenu> pTestMenu = MakeShared<UiMenu>("Nebula tests");
-
-	pTestMenu->AddOption("Type conversion", UiTestTypeConversion);
-	pTestMenu->AddOption("Format", [](UiIo const&) { TestFormat(); });
-
-	uiMenu.AddOption(pTestMenu);
+	//String formattedString = Fmt::Format("{}", 0);
+	//std::cerr << formattedString << std::endl;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
