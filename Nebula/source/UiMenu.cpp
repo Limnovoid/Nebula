@@ -1,16 +1,21 @@
 #include "UiMenu.h"
 
+#include "Format.h"
+#include "ToString.h"
+#include "ToType.h"
+
 namespace Nebula
 {
 
 UiMenu::UiMenu(StringView header, bool isRootMenu) :
 	m_prompt(header),
-	m_returnKey('Q')
+	m_returnKey('Q'),
+	m_isExecuting(false)
 {
 	m_prompt += "...";
 	m_header = MakeStringView(m_prompt); // Initialize after the above line in case the append causes a reallocation (invalidating the string view).
 
-	m_returnOption = MakeShared<UiOption>((isRootMenu ? "Exit" : "Return"), [this](UiIo const&) { Return(); });
+	m_returnOption = MakeShared<UiOption>((isRootMenu ? "Exit" : "Return"), [this](UiIo const& uiIo) { Return(); }, isRootMenu);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -26,10 +31,10 @@ void UiMenu::Execute(UiIo const& uiIo)
 		DisplayOptions(uiIo);
 		DisplayReturnOption(uiIo);
 
-		uiIo << "\n# ";
+		uiIo.Newline();
 
-		char selection;
-		uiIo >> selection;
+		String selection;
+		uiIo.Get(selection, "Choose");
 
 		SelectOption(uiIo, selection);
 	}
@@ -54,9 +59,9 @@ void UiMenu::DisplayReturnOption(UiIo const& uiIo)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void UiMenu::SelectOption(UiIo const& uiIo, char const selection)
+void UiMenu::SelectOption(UiIo const& uiIo, StringView selection)
 {
-	if (String::ToUpper(selection) == m_returnKey)
+	if ((1 == selection.size()) && (String::ToUpper(selection.front()) == m_returnKey))
 	{
 		m_returnOption->Execute(uiIo);
 	}

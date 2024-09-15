@@ -13,45 +13,6 @@ namespace Nebula
 {
 
 template<typename TTo> requires IsInt<TTo>
-class UnitTestCharToType : public IUnitTest<TTo, char>
-{
-public:
-	using IUnitTest = IUnitTest<TTo, char>;
-	using TParameters = char;
-	using TReturn = TTo;
-
-	struct GetParameters
-	{
-		TParameters operator()(size_t index)
-		{
-			assert(index < 10);
-			return '0' + static_cast<char>(index);
-		}
-	};
-
-	struct GetExpected
-	{
-		TReturn operator()(size_t index)
-		{
-			assert(index < 10);
-			return static_cast<TReturn>(index);
-		}
-	};
-
-	UnitTestCharToType(StringView title) : IUnitTest(title) {}
-
-	virtual ~UnitTestCharToType() {}
-
-	virtual Result Invoke(TParameters const& parameters, TReturn & returned) override
-	{
-		return ToType<TTo>(parameters, returned);
-	}
-};
-
-// ---------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TTo> requires IsInt<TTo>
 class TestProgramCharToType : public ITestProgram
 {
 public:
@@ -60,7 +21,8 @@ public:
 
 	virtual ~TestProgramCharToType() {}
 
-	virtual void Run(TestHandler & testHandler) override
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override
 	{
 		String const unitTestTitle;
 
@@ -104,6 +66,7 @@ void UiAddTextArtMenu(UiMenu & uiMenu)
 	pTextArtMenu->AddOption("Display text art 15", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt15(); });
 	pTextArtMenu->AddOption("Display text art 16", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt16(); });
 	pTextArtMenu->AddOption("Display text art 17", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt17(); });
+	pTextArtMenu->AddOption("Display text art 18", [](UiIo const& uiIo) { uiIo << '\n' << GetTextArt18(); });
 
 	uiMenu.AddOption(pTextArtMenu);
 }

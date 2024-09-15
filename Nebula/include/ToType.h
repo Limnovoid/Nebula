@@ -3,6 +3,7 @@
 
 #include "NebulaString.h"
 #include "Result.h"
+#include "IUnitTest.h"
 
 namespace Nebula
 {
@@ -21,13 +22,13 @@ namespace // detail
 {
 
 template<typename TTo> requires Nebula::IsInt<TTo>
-TTo ToTypeImpl(Nebula::StringView const from)
+Nebula::Result ToTypeImpl(Nebula::StringView const from, TTo & to)
 {
 	assert('-' != from.front()); // Encoded value should never be signed.
 
 	Nebula::Result result;
 
-	TTo unsignedInteger = 0;
+	to = 0;
 
 	for (size_t offset = 0; offset < from.size(); ++offset)
 	{
@@ -37,18 +38,19 @@ TTo ToTypeImpl(Nebula::StringView const from)
 			break;
 
 		// In case of overflow, return maximum possible value.
-		if (((std::numeric_limits<TTo>::max() / 10) < unsignedInteger) ||
-			((std::numeric_limits<TTo>::max() / 10) == unsignedInteger) && (0 != thisDigit))
+		if (((std::numeric_limits<TTo>::max() / 10) < to) ||
+			((std::numeric_limits<TTo>::max() / 10) == to) && (0 != thisDigit))
 		{
-			unsignedInteger = std::numeric_limits<TTo>::max();
+			to = std::numeric_limits<TTo>::max();
+			result = Nebula::RESULT_CODE_OVERFLOW;
 			break;
 		}
 
-		unsignedInteger *= 10;
-		unsignedInteger += thisDigit;
+		to *= 10;
+		to += thisDigit;
 	}
 
-	return unsignedInteger;
+	return result;
 }
 
 } // detail ------------------------------------------------------------------------------------------------------------------------
@@ -57,33 +59,24 @@ namespace Nebula
 {
 
 template<typename TTo> requires IsUInt<TTo>
-inline TTo ToType(StringView const from)
+inline Result ToType(StringView from, TTo & to)
 {
-	return ToTypeImpl<TTo>(from);
+	return ToTypeImpl<TTo>(from, to);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TTo> requires IsSInt<TTo>
-inline TTo ToType(StringView const from)
+inline Result ToType(StringView from, TTo & to)
 {
 	bool const isNegative = ('-' == from.front());
 
-	TTo integer = ToTypeImpl<TTo>(isNegative ? from.substr(1) : from);
+	Result result = ToTypeImpl<TTo>(isNegative ? from.substr(1) : from, to);
 
 	if (isNegative)
-		integer *= static_cast<TTo>(-1);
+		to *= static_cast<TTo>(-1);
 
-	return integer;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TTo>
-inline TTo ToType(String const& from)
-{
-	// Use ToType instead of ToTypeImpl to re-use concepts.
-	return ToType<TTo>(MakeStringView(from));
+	return result;
 }
 
 // Conversion checks --------------------------------------------------------------------------------------------------------------
@@ -104,6 +97,45 @@ inline bool IsNumeric(StringView const valueStringView)
 
 	return true;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TTo> requires IsInt<TTo>
+class UnitTestCharToType : public IUnitTest<TTo, char>
+{
+public:
+	using IUnitTest = IUnitTest<TTo, char>;
+	using TParameters = char;
+	using TReturn = TTo;
+
+	struct GetParameters
+	{
+		TParameters operator()(size_t index)
+		{
+			assert(index < 10);
+			return '0' + static_cast<char>(index);
+		}
+	};
+
+	struct GetExpected
+	{
+		TReturn operator()(size_t index)
+		{
+			assert(index < 10);
+			return static_cast<TReturn>(index);
+		}
+	};
+
+	UnitTestCharToType(StringView title) : IUnitTest(title) {}
+
+	virtual ~UnitTestCharToType() {}
+
+	virtual Result Invoke(TParameters const& parameters, TReturn & returned) override
+	{
+		return ToType<TTo>(parameters, returned);
+	}
+};
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

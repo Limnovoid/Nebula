@@ -34,23 +34,23 @@ Result TestHandler::Register(SharedPtr<ITestProgram> pTestProgram)
 TestHandler::IndexRange::IndexRange(size_t start, size_t end, size_t stepsize) :
 	m_first(start),
 	m_last(end),
-	m_stepSize(stepsize)
+	m_stepSize(stepsize),
+	m_numIterations(ComputeNumIterations())
 {
 	if (end < start)
 		throw std::exception(); // TODO : custom exception with message
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
 
-ITestProgram::ITestProgram(StringView title) : m_title(title)
+size_t TestHandler::IndexRange::ComputeNumIterations() const
 {
-}
+	size_t numIterations = 1;
 
-// --------------------------------------------------------------------------------------------------------------------------------
+	if (m_first != m_last)
+		numIterations += ((m_last - m_first) / m_stepSize);
 
-ITestProgram::~ITestProgram()
-{
+	return numIterations;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

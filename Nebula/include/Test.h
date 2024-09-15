@@ -1,6 +1,8 @@
 #ifndef NEBULA_ORION_TEST_H
 #define NEBULA_ORION_TEST_H
 
+#include "IUnitTest.h"
+#include "ITestProgram.h"
 #include "NebulaTypes.h"
 #include "UiIo.h"
 #include "UiMenu.h"
@@ -9,52 +11,6 @@
 
 namespace Nebula
 {
-
-template<typename TReturn, typename TParameters>
-class IUnitTest
-{
-public:
-	IUnitTest(StringView title);
-
-	virtual ~IUnitTest();
-
-	StringView GetTitle();
-
-	virtual Result Invoke(TParameters const& parameters, TReturn & returned) = 0;
-
-private:
-	String	m_title;
-};
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TReturn, typename TParameters>
-inline IUnitTest<TReturn, TParameters>::IUnitTest(StringView title) :
-	m_title(title)
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TReturn, typename TParameters>
-inline IUnitTest<TReturn, TParameters>::~IUnitTest()
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TReturn, typename TParameters>
-inline StringView IUnitTest<TReturn, TParameters>::GetTitle()
-{
-	return MakeStringView(m_title);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-class ITestProgram;
-
-// --------------------------------------------------------------------------------------------------------------------------------
 
 class TestHandler
 {
@@ -68,11 +24,14 @@ public:
 		/// <exception cref="std::exception">Range is ill-defined.</exception>
 		IndexRange(size_t first = 0, size_t last = 0, size_t stepsize = 1);
 
-		size_t GetNumIterations() const;
 
 		size_t const	m_first;
 		size_t const	m_last;
 		size_t const	m_stepSize;
+		size_t const	m_numIterations;
+
+	private:
+		size_t ComputeNumIterations() const;
 	};
 
 	TestHandler(UiIo const& uiIo);
@@ -96,6 +55,9 @@ public:
 
 private:
 	template<typename TReturn, typename TParameters>
+	void PrintPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange const& testRange);
+
+	template<typename TReturn, typename TParameters>
 	void PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue);
 
 	template<typename TReturn, typename TParameters>
@@ -103,6 +65,8 @@ private:
 
 	template<typename TReturn, typename TParameters>
 	void PrintPassed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue);
+
+	void PrintSummary(size_t const nPassed, IndexRange const& testRange);
 
 	template<typename TReturn, typename TParameters>
 		requires (IsWriteable<TParameters> && IsWriteable<TReturn>)
@@ -120,11 +84,15 @@ private:
 		requires (!IsWriteable<TParameters> && !IsWriteable<TReturn>)
 	void PrintEvaluation(TParameters const& parameters, TReturn const& value);
 
-	UiIo const&								m_io;
-	std::vector<SharedPtr<ITestProgram>>	m_testPrograms;
+	using TestProgramList = std::vector<SharedPtr<ITestProgram>>;
 
-	SharedPtr<UiMenu>						m_pMenu;
-	SharedPtr<UiMenu>						m_pTestProgramMenu;
+	UiIo const&				m_io;
+	TestProgramList			m_testPrograms;
+
+	SharedPtr<UiMenu>		m_pMenu;
+	SharedPtr<UiMenu>		m_pTestProgramMenu;
+
+	SharedPtr<ITestProgram>	m_currentProgram;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -134,15 +102,7 @@ template<typename TReturn, typename TParameters, typename TFuncGetParameters, ty
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
 	TFuncGetExpected funcGetExpected, IndexRange testRange)
 {
-	const size_t nIterations = testRange.GetNumIterations();
-
-	m_io << "Unit test " << pUnitTest->GetTitle();
-	if (1 < nIterations)
-	{
-		m_io << Fmt::Format(", iterating {} - {} (step size {})",
-			testRange.m_first, testRange.m_last, testRange.m_stepSize);
-	}
-	m_io << '\n';
+	PrintPreamble(pUnitTest, testRange);
 
 	size_t nPassed = 0;
 	Result result;
@@ -166,12 +126,9 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 		m_io << '\n';
 	}
 
-	if (1 < nIterations)
-		m_io << Fmt::Format("Summary: passed {} / {} (failed {})", nPassed, nIterations, (nIterations - nPassed)) << '\n';
+	PrintSummary(nPassed, testRange);
 
-	m_io << '\n';
-
-	return ((nIterations == nPassed) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
+	return ((testRange.m_numIterations == nPassed) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -242,6 +199,22 @@ inline SharedPtr<UiMenu> TestHandler::GetMenu()
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
+inline void TestHandler::PrintPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange const& testRange)
+{
+	m_io << "Unit test " << pUnitTest->GetTitle();
+
+	if (1 < testRange.m_numIterations)
+	{
+		m_io << Fmt::Format(", iterating {} - {} (step size {})",
+			testRange.m_first, testRange.m_last, testRange.m_stepSize);
+	}
+
+	m_io << '\n';
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn, typename TParameters>
 inline void TestHandler::PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue)
 {
 	m_io << Fmt::Format("{0:>4}: Assert ", iteration);
@@ -271,6 +244,17 @@ inline void TestHandler::PrintPassed(size_t const iteration, TParameters const& 
 	PrintAssertion(iteration, parameters, expectedValue);
 
 	m_io << "passed";
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void TestHandler::PrintSummary(size_t const nPassed, IndexRange const& testRange)
+{
+	if (1 < testRange.m_numIterations)
+		m_io << Fmt::Format("Summary: passed {} / {} (failed {})",
+			nPassed, testRange.m_numIterations, (testRange.m_numIterations - nPassed)) << '\n';
+
+	m_io << '\n';
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -307,44 +291,6 @@ template<typename TReturn, typename TParameters>
 inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn const& value)
 {
 	m_io << Fmt::Format("f(!) -> !", parameters, value);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline size_t TestHandler::IndexRange::GetNumIterations() const
-{
-	size_t numIterations = 1;
-
-	if (m_first != m_last)
-		numIterations += ((m_last - m_first) / m_stepSize);
-
-	return numIterations;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-class ITestProgram
-{
-public:
-	ITestProgram(StringView title);
-
-	virtual ~ITestProgram();
-
-	virtual void Run(TestHandler & testHandler) = 0;
-
-	StringView GetTitle();
-
-private:
-	String		m_title;
-};
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline StringView ITestProgram::GetTitle()
-{
-	return MakeStringView(m_title);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
-#ifndef NEBULA_IOPTION_H
-#define NEBULA_IOPTION_H
+#ifndef NEBULA_I_OPTION_H
+#define NEBULA_I_OPTION_H
 
 #include "NebulaString.h"
 #include "UiIo.h"
@@ -18,4 +18,4 @@ public:
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_IOPTION_H
+#endif//NEBULA_I_OPTION_H

@@ -2,9 +2,6 @@
 #define NEBULA_ORION_UI_MENU_H
 
 #include "UiOption.h"
-#include "Format.h"
-#include "ToString.h"
-#include "ToType.h"
 
 namespace Nebula
 {
@@ -26,7 +23,7 @@ public:
 
 	void DisplayReturnOption(UiIo const& uiIo);
 
-	void SelectOption(UiIo const& uiIo, char const selection);
+	void SelectOption(UiIo const& uiIo, StringView selection);
 
 	void Return();
 

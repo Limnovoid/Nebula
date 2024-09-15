@@ -17,7 +17,7 @@ UiApplication::UiApplication(StringView name) :
 
 void UiApplication::Run()
 {
-	m_io << GetTextArt13();
+	m_io << GetTextArt18();
 
 	m_rootMenu.Execute(m_io);
 }

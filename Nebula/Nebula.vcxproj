@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Nebula.cpp" />
+    <ClCompile Include="source\ITestProgram.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\NebulaString.cpp" />
     <ClCompile Include="source\Result.cpp" />
@@ -153,6 +154,8 @@
     <ClInclude Include="include\Format.h" />
     <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\IOption.h" />
+    <ClInclude Include="include\ITestProgram.h" />
+    <ClInclude Include="include\IUnitTest.h" />
     <ClInclude Include="include\Maths.h" />
     <ClInclude Include="include\Result.h" />
     <ClInclude Include="include\Stable.h" />

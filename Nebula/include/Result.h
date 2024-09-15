@@ -10,7 +10,9 @@
 	d(RESULT_CODE_FAILURE, "Failure")														\
 	d(RESULT_CODE_INVALID_PARAMETER, "Invalid Parameter")									\
 	d(RESULT_CODE_MISSING_DEFINITION, "Missing Definition")									\
-	d(RESULT_CODE_OUT_OF_RANGE, "Out of Range")
+	d(RESULT_CODE_OUT_OF_RANGE, "Out of Range")												\
+	d(RESULT_CODE_OVERFLOW, "Overflow")														\
+	d(RESULT_CODE_UNDERFLOW, "Underflow")
 
 #define RESULT_CODE_GET_ENUMS(resultCode, resultCodeString) resultCode,
 #define RESULT_CODE_GET_SWITCH_CASES(resultCode, resultCodeString) case resultCode: return resultCodeString;

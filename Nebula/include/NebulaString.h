@@ -22,8 +22,12 @@ public:
 	/// <returns>The length of the string including null terminator.</returns>
 	static constexpr size_t GetLength(char const*const cstring);
 
-	static char constexpr ToLower(char c);
 	static char constexpr ToUpper(char c);
+	static char constexpr ToLower(char c);
+	static void constexpr ToUpper(char * stringData, size_t length);
+	static void constexpr ToLower(char * stringData, size_t length);
+	static String constexpr ToUpper(StringView string);
+	static String constexpr ToLower(StringView string);
 
 	constexpr String();
 	constexpr String(String const& string);
@@ -71,6 +75,44 @@ inline constexpr char String::ToLower(char c)
 		c += ('a' - 'A');
 
 	return c;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr void String::ToUpper(char * stringData, size_t length)
+{
+	for (size_t i = 0; i < length; ++i)
+		stringData[i] = ToUpper(stringData[i]);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr void String::ToLower(char * stringData, size_t length)
+{
+	for (size_t i = 0; i < length; ++i)
+		stringData[i] = ToLower(stringData[i]);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr String String::ToUpper(StringView string)
+{
+	String returnString = string;
+
+	ToUpper(returnString.data(), returnString.length());
+
+	return returnString;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr String String::ToLower(StringView string)
+{
+	String returnString = string;
+
+	ToLower(returnString.data(), returnString.length());
+
+	return returnString;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

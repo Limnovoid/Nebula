@@ -18,12 +18,11 @@ public:
 	void Print(T const& t) const;
 
 	template<typename T>
-	void Get(T & t) const;
+	void Get(T & t, StringView prompt = "") const;
 
-	template<typename T>
-	void Get(StringView prompt, T & t) const;
+	Result GetConfirmation(StringView prompt = "Are you sure", bool const defaultPositive = false) const;
 
-	Result GetConfirmation(StringView prompt, bool const defaultPositive = false) const;
+	void Newline(size_t const numNewlines = 1) const;
 
 private:
 	std::ostream &		m_outputStream;
@@ -41,17 +40,11 @@ inline void UiIo::Print(T const& t) const
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline void UiIo::Get(T & t) const
+inline void UiIo::Get(T & t, StringView prompt) const
 {
-	m_inputStream >> t;
-}
+	if ("" != prompt)
+		m_outputStream << prompt << " > ";
 
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline void UiIo::Get(StringView prompt, T & t) const
-{
-	m_outputStream << prompt << ": ";
 	m_inputStream >> t;
 }
 
@@ -61,9 +54,17 @@ inline Result UiIo::GetConfirmation(StringView prompt, bool const defaultPositiv
 {
 	char confirmationChar;
 
-	Get(Fmt::Format("{}? ({}|{}):", prompt, (defaultPositive ? 'Y' : 'y'), (defaultPositive ? 'n' : 'N')), confirmationChar);
+	Get(confirmationChar, Fmt::Format("{}? ({}|{})", prompt, (defaultPositive ? 'Y' : 'y'), (defaultPositive ? 'n' : 'N')));
 
 	return ((String::ToUpper(confirmationChar) == 'Y') ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void UiIo::Newline(size_t const numNewlines) const
+{
+	for (size_t i = 0; i < numNewlines; ++i)
+		m_outputStream << '\n';
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ class UiOption : public IOption
 public:
 	using Function = std::function<void(UiIo const&)>;
 
-	UiOption(StringView prompt, Function function);
+	UiOption(StringView prompt, Function function, bool const requiresConfirmation = false);
 
 	virtual ~UiOption() = default;
 
@@ -22,6 +22,7 @@ public:
 private:
 	String		m_prompt;
 	Function	m_function;
+	bool const	m_requiresConfirmation;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -35,7 +36,8 @@ inline StringView UiOption::GetPrompt()
 
 inline void UiOption::Execute(UiIo const& uiIo)
 {
-	m_function(uiIo);
+	if (!m_requiresConfirmation || (RESULT_CODE_SUCCESS == uiIo.GetConfirmation()))
+		m_function(uiIo);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
