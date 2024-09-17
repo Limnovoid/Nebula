@@ -79,6 +79,27 @@ inline Result ToType(StringView from, TTo & to)
 	return result;
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Result ToType(StringView from, String & to)
+{
+	to = from;
+
+	return RESULT_CODE_SUCCESS;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Result ToType(StringView from, char & to)
+{
+	if (from.empty())
+		return RESULT_CODE_INVALID_PARAMETER;
+
+	to = from.front();
+
+	return RESULT_CODE_SUCCESS;
+}
+
 // Conversion checks --------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 

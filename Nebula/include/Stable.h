@@ -9,5 +9,6 @@
 #include <set>
 #include <functional>
 #include <concepts>
+#include <sstream>
 
 #endif//NEBULA_STABLE_H

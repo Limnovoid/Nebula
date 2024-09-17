@@ -4,6 +4,7 @@
 #include "NebulaTypes.h"
 #include "Result.h"
 #include "Format.h"
+#include "ToType.h"
 
 namespace Nebula
 {
@@ -18,7 +19,7 @@ public:
 	void Print(T const& t) const;
 
 	template<typename T>
-	void Get(T & t, StringView prompt = "") const;
+	Result Get(T & t, StringView prompt, bool hasDefault = false) const;
 
 	Result GetConfirmation(StringView prompt = "Are you sure", bool const defaultPositive = false) const;
 
@@ -40,23 +41,35 @@ inline void UiIo::Print(T const& t) const
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline void UiIo::Get(T & t, StringView prompt) const
+inline Result UiIo::Get(T & t, StringView prompt, bool hasDefault) const
 {
-	if ("" != prompt)
-		m_outputStream << prompt << " > ";
+	m_outputStream << prompt << ' ';
 
-	m_inputStream >> t;
+	if (hasDefault)
+		m_outputStream << '<' << t;
+
+	m_outputStream << "> ";
+	
+	String inputString;
+	do
+	{
+		std::getline(m_inputStream, inputString);
+	}
+	while (!hasDefault && inputString.empty());
+
+	return ((inputString.empty()) ? RESULT_CODE_UNCHANGED : ToType(inputString, t));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline Result UiIo::GetConfirmation(StringView prompt, bool const defaultPositive) const
 {
-	char confirmationChar;
+	char confirmationChar = (defaultPositive ? 'y' : 'n');
 
-	Get(confirmationChar, Fmt::Format("{}? ({}|{})", prompt, (defaultPositive ? 'Y' : 'y'), (defaultPositive ? 'n' : 'N')));
+	Result result = Get(confirmationChar, Fmt::Format("{}?", prompt), true);
 
-	return ((String::ToUpper(confirmationChar) == 'Y') ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
+	return ((RESULT_CODE_SUCCESS == result) && (String::ToUpper(confirmationChar) == 'Y')) ?
+		RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +96,7 @@ inline UiIo const& operator<<(UiIo const& uiIo, T const& t)
 template<typename T>
 inline UiIo const& operator>>(UiIo const& uiIo, T & t)
 {
-	uiIo.Get(t);
+	uiIo.Get(t, "");
 
 	return uiIo;
 }

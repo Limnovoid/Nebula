@@ -12,7 +12,8 @@
 	d(RESULT_CODE_MISSING_DEFINITION, "Missing Definition")									\
 	d(RESULT_CODE_OUT_OF_RANGE, "Out of Range")												\
 	d(RESULT_CODE_OVERFLOW, "Overflow")														\
-	d(RESULT_CODE_UNDERFLOW, "Underflow")
+	d(RESULT_CODE_UNDERFLOW, "Underflow")													\
+	d(RESULT_CODE_UNCHANGED, "Unchanged")
 
 #define RESULT_CODE_GET_ENUMS(resultCode, resultCodeString) resultCode,
 #define RESULT_CODE_GET_SWITCH_CASES(resultCode, resultCodeString) case resultCode: return resultCodeString;
