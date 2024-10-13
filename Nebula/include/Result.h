@@ -3,7 +3,8 @@
 
 #include "NebulaString.h"
 
-// --------------------------------------------------------------------------------------------------------------------------------
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
+{
 
 #define RESULT_CODE_LIST(d)																	\
 	d(RESULT_CODE_SUCCESS, "Success")														\
@@ -13,14 +14,27 @@
 	d(RESULT_CODE_OUT_OF_RANGE, "Out of Range")												\
 	d(RESULT_CODE_OVERFLOW, "Overflow")														\
 	d(RESULT_CODE_UNDERFLOW, "Underflow")													\
-	d(RESULT_CODE_UNCHANGED, "Unchanged")
+	d(RESULT_CODE_UNCHANGED, "Unchanged")													\
+	d(RESULT_CODE_ALREADY_INITIALIZED, "Already Initialized")								\
+	d(RESULT_CODE_NOT_INITIALIZED, "Not Initialized")										\
+	d(RESULT_CODE_NOT_OPEN, "Not Open")														\
+	d(RESULT_CODE_ALREADY_OPEN, "Already Open")
 
 #define RESULT_CODE_GET_ENUMS(resultCode, resultCodeString) resultCode,
 #define RESULT_CODE_GET_SWITCH_CASES(resultCode, resultCodeString) case resultCode: return resultCodeString;
 #define RESULT_CODE_STRINGS(resultCode, resultCodeString) static char const cstr_##resultCode[] = resultCodeString;
 
-namespace Nebula // ---------------------------------------------------------------------------------------------------------------
-{
+// --------------------------------------------------------------------------------------------------------------------------------
+
+#define RETURN_RESULT_IF(resultCode, comparisonOperator, expression) { if (Result const result = expression; result comparisonOperator resultCode) return result; }
+
+#ifdef  _DEBUG
+#define DEBUG_RETURN_RESULT_IF(resultCode, comparisonOperator, expression) RETURN_RESULT_IF(resultCode, comparisonOperator, expression)
+#else //_DEBUG
+#define DEBUG_RETURN_RESULT_IF(resultCode, comparisonOperator, expression) { expression }
+#endif//_DEBUG
+
+// --------------------------------------------------------------------------------------------------------------------------------
 
 enum ResultCode : uint8_t
 {
@@ -34,7 +48,7 @@ enum ResultCode : uint8_t
 class Result
 {
 public:
-	Result();
+	Result() = delete;
 	Result(ResultCode resultCode);
 
 	ResultCode GetCode() const;

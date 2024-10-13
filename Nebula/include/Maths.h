@@ -20,7 +20,7 @@ inline constexpr size_t NumDigitsIntImpl(uint64_t value, uint64_t result = 1)
 
 } // detail ------------------------------------------------------------------------------------------------------------------------
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 namespace Maths
@@ -85,6 +85,22 @@ constexpr size_t NumDigits(T value)
 	}*/
 
 	static_assert(false); // TODO !
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T> requires IsFloatingPoint<T>
+T Ceiling(T value)
+{
+	return std::ceil(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T> requires IsFloatingPoint<T>
+T Floor(T value)
+{
+	return std::floor(value);
 }
 
 } // namespace Maths --------------------------------------------------------------------------------------------------------------

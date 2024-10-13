@@ -1,9 +1,9 @@
-#ifndef NEBULA_ORION_UI_MENU_H
-#define NEBULA_ORION_UI_MENU_H
+#ifndef NEBULA_UI_MENU_H
+#define NEBULA_UI_MENU_H
 
 #include "UiOption.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class UiMenu : public IOption
@@ -12,7 +12,7 @@ public:
 	UiMenu(StringView header, bool isRootMenu = false);
 
 	// IOption interface
-	virtual StringView GetPrompt() override;
+	virtual StringView GetPrompt() const override;
 	virtual void Execute(UiIo const& uiIo) override;
 
 	void AddOption(SharedPtr<IOption> pOption);
@@ -55,7 +55,7 @@ inline void UiMenu::AddOption(char const* prompt, UiOption::Function function)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView UiMenu::GetPrompt()
+inline StringView UiMenu::GetPrompt() const
 {
 	return MakeStringView(m_prompt);
 }
@@ -69,4 +69,4 @@ inline void UiMenu::Return()
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_ORION_UI_MENU_H
+#endif//NEBULA_UI_MENU_H

@@ -4,7 +4,7 @@
 #include "Result.h"
 #include "NebulaString.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 template<typename TReturn, typename TParameters>

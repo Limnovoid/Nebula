@@ -1,12 +1,13 @@
 #include "ITestProgram.h"
 
-#include "Test.h"
+#include "TestHandler.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-ITestProgram::ITestProgram(StringView title) : m_title(title)
+ITestProgram::ITestProgram(StringView title)
 {
+	m_title = title;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

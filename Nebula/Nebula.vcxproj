@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -74,6 +74,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
     <PublicIncludeDirectories>$(ProjectDir)include;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <OutDir>$(SolutionDir)lib\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -109,9 +112,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Orion\include;$(SolutionDir)Trapezium\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ForcedIncludeFiles>Stable.h;NebulaTypes.h</ForcedIncludeFiles>
+      <PrecompiledHeaderOutputFile>$(IntDir)Stable.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -119,6 +123,9 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -137,12 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Nebula.cpp" />
+    <ClCompile Include="source\Exception.cpp" />
+    <ClCompile Include="source\Nebula.cpp" />
+    <ClCompile Include="source\File.cpp" />
     <ClCompile Include="source\ITestProgram.cpp" />
-    <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\NebulaString.cpp" />
     <ClCompile Include="source\Result.cpp" />
-    <ClCompile Include="source\Test.cpp" />
+    <ClCompile Include="source\TestHandler.cpp" />
     <ClCompile Include="source\ToString.cpp" />
     <ClCompile Include="source\ToType.cpp" />
     <ClCompile Include="source\UiApplication.cpp" />
@@ -151,17 +159,23 @@
     <ClCompile Include="source\UiOption.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bitset.h" />
+    <ClInclude Include="include\Exception.h" />
+    <ClInclude Include="include\File.h" />
     <ClInclude Include="include\Format.h" />
+    <ClInclude Include="include\UnitTest.h" />
     <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\IOption.h" />
     <ClInclude Include="include\ITestProgram.h" />
     <ClInclude Include="include\IUnitTest.h" />
+    <ClInclude Include="include\Macros.h" />
     <ClInclude Include="include\Maths.h" />
+    <ClInclude Include="include\Metadata.h" />
     <ClInclude Include="include\Result.h" />
     <ClInclude Include="include\Stable.h" />
     <ClInclude Include="include\NebulaTypes.h" />
     <ClInclude Include="include\NebulaString.h" />
-    <ClInclude Include="include\Test.h" />
+    <ClInclude Include="include\TestHandler.h" />
     <ClInclude Include="include\TextArt.h" />
     <ClInclude Include="include\ToString.h" />
     <ClInclude Include="include\ToType.h" />

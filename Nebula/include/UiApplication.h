@@ -1,16 +1,22 @@
-#ifndef NEBULA_ORION_UI_APPLICATION_H
-#define NEBULA_ORION_UI_APPLICATION_H
+#ifndef NEBULA_UI_APPLICATION_H
+#define NEBULA_UI_APPLICATION_H
 
 #include "UiMenu.h"
-#include "Test.h"
+#include "TestHandler.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class UiApplication
 {
 public:
-	UiApplication(StringView name);
+	struct Settings
+	{
+		String					m_applicationName;
+		TestHandler::Settings	m_testHandlerSettings;
+	};
+
+	UiApplication(Settings const& settings);
 
 	void Run();
 
@@ -40,4 +46,4 @@ inline TestHandler & UiApplication::GetTestHandler()
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_ORION_UI_APPLICATION_H
+#endif//NEBULA_UI_APPLICATION_H

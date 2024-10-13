@@ -1,7 +1,7 @@
 #ifndef NEBULA_GET_TYPENAME_HELPER_H
 #define NEBULA_GET_TYPENAME_HELPER_H
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 /// <summary>

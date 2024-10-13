@@ -1,7 +1,7 @@
 #ifndef NEBULA_H
 #define NEBULA_H
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class UiMenu;

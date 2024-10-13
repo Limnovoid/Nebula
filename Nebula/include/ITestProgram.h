@@ -1,7 +1,7 @@
 #ifndef NEBULA_I_TEST_PROGRAM_H
 #define NEBULA_I_TEST_PROGRAM_H
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class TestHandler;
@@ -17,9 +17,9 @@ public:
 
 	void Run(TestHandler & testHandler);
 
-	StringView GetTitle();
+	StringView GetTitle() const;
 
-private:
+protected:
 	virtual void RunImpl(TestHandler & testHandler) = 0;
 
 	String		m_title;
@@ -27,7 +27,7 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView ITestProgram::GetTitle()
+inline StringView ITestProgram::GetTitle() const
 {
 	return MakeStringView(m_title);
 }

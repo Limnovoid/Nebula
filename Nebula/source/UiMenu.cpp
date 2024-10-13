@@ -4,7 +4,7 @@
 #include "ToString.h"
 #include "ToType.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 UiMenu::UiMenu(StringView header, bool isRootMenu) :
@@ -12,8 +12,9 @@ UiMenu::UiMenu(StringView header, bool isRootMenu) :
 	m_returnKey('Q'),
 	m_isExecuting(false)
 {
+	size_t nPromptCharacters = m_prompt.size();
 	m_prompt += "...";
-	m_header = MakeStringView(m_prompt); // Initialize after the above line in case the append causes a reallocation (invalidating the string view).
+	m_header = StringView(m_prompt.data(), nPromptCharacters); // Initialize after the above line in case the append causes a reallocation (invalidating the string view).
 
 	m_returnOption = MakeShared<UiOption>((isRootMenu ? "Exit" : "Return"), [this](UiIo const& uiIo) { Return(); }, isRootMenu);
 }
@@ -34,7 +35,7 @@ void UiMenu::Execute(UiIo const& uiIo)
 		uiIo.Newline();
 
 		String selection;
-		uiIo.Get(selection, "Choose");
+		uiIo.Get(selection, "Select");
 
 		SelectOption(uiIo, selection);
 	}

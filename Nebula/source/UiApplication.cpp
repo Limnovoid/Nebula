@@ -2,13 +2,13 @@
 
 #include "TextArt.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 	
-UiApplication::UiApplication(StringView name) :
-	m_rootMenu(name, true),
+UiApplication::UiApplication(Settings const& settings) :
+	m_rootMenu(settings.m_applicationName, true),
 	m_io(std::cout, std::cin),
-	m_testHandler(m_io)
+	m_testHandler(settings.m_testHandlerSettings)
 {
 	m_rootMenu.AddOption(m_testHandler.GetMenu());
 }

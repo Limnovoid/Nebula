@@ -15,16 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\NebulaString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\ToType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Nebula.cpp">
+    <ClCompile Include="source\Nebula.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Result.cpp">
@@ -42,13 +39,19 @@
     <ClCompile Include="source\UiMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Test.cpp">
+    <ClCompile Include="source\TestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\UiIo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\ITestProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\File.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,7 +101,7 @@
     <ClInclude Include="include\IOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Test.h">
+    <ClInclude Include="include\TestHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\GetTypenameHelper.h">
@@ -108,6 +111,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ITestProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\File.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Metadata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UnitTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

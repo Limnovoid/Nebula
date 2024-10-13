@@ -4,7 +4,7 @@
 #include "NebulaString.h"
 #include "UiIo.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class IOption
@@ -12,7 +12,7 @@ class IOption
 public:
 	virtual ~IOption() = default;
 
-	virtual StringView GetPrompt() = 0;
+	virtual StringView GetPrompt() const = 0;
 	virtual void Execute(UiIo const&) = 0;
 };
 

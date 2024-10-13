@@ -10,5 +10,12 @@
 #include <functional>
 #include <concepts>
 #include <sstream>
+#include <fstream>
+#include <filesystem>
+#include <bitset>
+#include <cmath>
+#include <exception>
+#include <source_location>
+#include <memory>
 
 #endif//NEBULA_STABLE_H

@@ -1,7 +1,7 @@
 #ifndef NEBULA_STRING_H
 #define NEBULA_STRING_H
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 using StringView = std::string_view;

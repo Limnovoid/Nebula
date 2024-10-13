@@ -3,7 +3,7 @@
 
 #include "IOption.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 class UiOption : public IOption
@@ -16,18 +16,18 @@ public:
 	virtual ~UiOption() = default;
 
 	// IOption interface
-	virtual StringView GetPrompt() override;
+	virtual StringView GetPrompt() const override;
 	virtual void Execute(UiIo const& uiIo) override;
 
 private:
-	String		m_prompt;
-	Function	m_function;
-	bool const	m_requiresConfirmation;
+	String const		m_prompt;
+	Function const		m_function;
+	bool const			m_requiresConfirmation;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView UiOption::GetPrompt()
+inline StringView UiOption::GetPrompt() const
 {
 	return MakeStringView(m_prompt);
 }
@@ -36,7 +36,7 @@ inline StringView UiOption::GetPrompt()
 
 inline void UiOption::Execute(UiIo const& uiIo)
 {
-	if (!m_requiresConfirmation || (RESULT_CODE_SUCCESS == uiIo.GetConfirmation()))
+	if (!m_requiresConfirmation || (RESULT_CODE_SUCCESS == uiIo.GetConfirmation(Fmt::Format("{} - Are you sure", m_prompt.c_str()))))
 		m_function(uiIo);
 }
 

@@ -1,6 +1,6 @@
 #include "NebulaString.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 bool String::IsWhitespace(char const c)

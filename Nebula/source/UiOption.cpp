@@ -1,6 +1,6 @@
 #include "UiOption.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 UiOption::UiOption(StringView prompt, Function function, bool requiresConfirmation) :

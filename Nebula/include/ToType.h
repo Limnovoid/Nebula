@@ -3,9 +3,13 @@
 
 #include "NebulaString.h"
 #include "Result.h"
-#include "IUnitTest.h"
 
-namespace Nebula
+#include "IUnitTest.h"
+#include "ITestProgram.h"
+#include "Format.h"
+#include "GetTypenameHelper.h"
+
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 template<typename TTo> requires IsInt<TTo>
@@ -26,7 +30,7 @@ Nebula::Result ToTypeImpl(Nebula::StringView const from, TTo & to)
 {
 	assert('-' != from.front()); // Encoded value should never be signed.
 
-	Nebula::Result result;
+	Nebula::Result result = Nebula::RESULT_CODE_INVALID_PARAMETER;
 
 	to = 0;
 
@@ -55,7 +59,7 @@ Nebula::Result ToTypeImpl(Nebula::StringView const from, TTo & to)
 
 } // detail ------------------------------------------------------------------------------------------------------------------------
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
 template<typename TTo> requires IsUInt<TTo>
@@ -148,7 +152,7 @@ public:
 		}
 	};
 
-	UnitTestCharToType(StringView title) : IUnitTest(title) {}
+	UnitTestCharToType() : IUnitTest(Fmt::Format("ToType<{}>(char)", GetTypenameHelper<TTo>::Get())) {}
 
 	virtual ~UnitTestCharToType() {}
 

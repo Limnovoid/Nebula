@@ -4,8 +4,10 @@
 #include "Stable.h"
 #include "NebulaString.h"
 
-namespace Nebula
+namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
+
+using byte_t = uint8_t;
 
 // Type constraints & Concepts -------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -66,12 +68,23 @@ concept IsStringType = requires (T t)
 template<typename T>
 using SharedPtr = std::shared_ptr<T>;
 
+template<typename T>
+using WeakPtr = std::weak_ptr<T>;
+
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename... TArgs>
 inline SharedPtr<T> MakeShared(TArgs... args)
 {
 	return std::make_shared<T>(std::forward<TArgs>(args)...);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename U>
+inline SharedPtr<T> StaticPtrCast(SharedPtr<U> pT)
+{
+	return std::static_pointer_cast<T, U>(pT);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
