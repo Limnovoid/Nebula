@@ -151,4 +151,13 @@ inline StringView MakeStringView(char const& character)
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
+template<>
+struct std::formatter<Nebula::String> : std::formatter<char const*>
+{
+	auto format(Nebula::String const& string, std::format_context & ctx) const
+	{
+		return std::format_to(ctx.out(), "{}", string.c_str());
+	}
+};
+
 #endif//NEBULA_STRING_H

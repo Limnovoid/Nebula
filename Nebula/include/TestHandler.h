@@ -58,13 +58,60 @@ public:
 
 	template<typename TReturn, typename TParameters>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
+		StringView title, IndexRange const testRange = IndexRange());
+
+	template<typename TReturn, typename TParameters>
+	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		IndexRange const testRange = IndexRange());
 
 	Result Register(SharedPtr<ITestProgram> pTestProgram);
 
+	void Run(SharedPtr<ITestProgram> pTestProgram);
+
 	SharedPtr<UiMenu> GetMenu();
 
 private:
+	class ProgramStats
+	{
+	public:
+		ProgramStats() :
+			m_numAsserts(0),
+			m_numAssertsPassed(0)
+		{
+		}
+
+		void Reset()
+		{
+			m_numAsserts = 0;
+			m_numAssertsPassed = 0;
+		}
+
+		void AddFail()
+		{
+			++m_numAsserts;
+		}
+
+		void AddPass()
+		{
+			++m_numAsserts;
+			++m_numAssertsPassed;
+		}
+
+		size_t GetNumAsserts() const
+		{
+			return m_numAsserts;
+		}
+
+		size_t GetNumAssertsPassed() const
+		{
+			return m_numAssertsPassed;
+		}
+
+	private:
+		size_t	m_numAsserts;
+		size_t	m_numAssertsPassed;
+	};
+
 	void Print(StringView message);
 
 	template<typename TReturn, typename TParameters>
@@ -109,6 +156,8 @@ private:
 	bool					m_shouldOutputToSharedFile;
 	bool					m_shouldOutputToProgramFile;
 	bool					m_shouldOutputToUi;
+
+	ProgramStats			m_currentProgramStats;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -120,7 +169,6 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 {
 	OutputPreamble(pUnitTest, testRange);
 
-	size_t nPassed = 0;
 	Result result = RESULT_CODE_NOT_INITIALIZED;
 	TReturn returnValue;
 
@@ -131,18 +179,20 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 		if ((RESULT_CODE_SUCCESS != result) || (funcGetExpected(i) != returnValue))
 		{
 			OutputFailed(i, funcGetParameters(i), funcGetExpected(i), returnValue, result);
+
+			m_currentProgramStats.AddFail();
 		}
 		else
 		{
-			++nPassed;
-
 			OutputPassed(i, funcGetParameters(i), funcGetExpected(i));
+
+			m_currentProgramStats.AddPass();
 		}
 	}
 
-	OutputSummary(nPassed, testRange);
+	OutputSummary(m_currentProgramStats.GetNumAssertsPassed(), testRange);
 
-	return ((testRange.m_numIterations == nPassed) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
+	return ((testRange.m_numIterations == m_currentProgramStats.GetNumAssertsPassed()) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -207,14 +257,23 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 template<typename TReturn, typename TParameters>
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
-	TReturn const& expected, IndexRange const testRange)
+	TReturn const& expected, StringView title, IndexRange const testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
 
-	SharedPtr<UnitTest> pUnitTest = MakeShared<UnitTest>(unitTestFunc, "UnitTest");
+	SharedPtr<UnitTest> pUnitTest = MakeShared<UnitTest>(unitTestFunc, title);
 
 	return Assert(StaticPtrCast<IUnitTest>(pUnitTest), parameters, expected, testRange);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn, typename TParameters>
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
+	TReturn const& expected, IndexRange const testRange)
+{
+	return Assert(unitTestFunc, parameters, expected, "", testRange);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -249,7 +308,10 @@ inline void TestHandler::Print(StringView message)
 template<typename TReturn, typename TParameters>
 inline void TestHandler::OutputPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange const& testRange)
 {
-	Print(Fmt::Format("Unit test {}", pUnitTest->GetTitle()));
+	Print(Fmt::Format("Assert {}", 1 + m_currentProgramStats.GetNumAsserts()));
+
+	if (!pUnitTest->GetTitle().empty())
+		Print(Fmt::Format(": {}", pUnitTest->GetTitle()));
 
 	if (1 < testRange.m_numIterations)
 	{
@@ -304,7 +366,7 @@ inline void TestHandler::OutputSummary(size_t const nPassed, IndexRange const& t
 template<typename TReturn, typename TParameters>
 inline void TestHandler::PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue)
 {
-	Print(Fmt::Format("{0:>4}: Assert ", iteration));
+	Print(Fmt::Format("{0:>4}: ", iteration));
 
 	PrintEvaluation(parameters, expectedValue);
 

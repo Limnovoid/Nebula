@@ -131,10 +131,26 @@ void UiAddOptions(UiMenu & uiMenu)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename TArg, typename TRet>
+class TestVoidArg
+{
+public:
+	using Func = std::function<TRet(TArg)>;
+
+	Func	m_func;
+};
+
 void AddTests(TestHandler & testHandler)
 {
 	testHandler.Register(MakeShared<TestProgramCharToType<int>>());
 	testHandler.Register(MakeShared<TestProgramExceptions>());
+
+	std::function<bool(void)> func = []() -> bool { return true; };
+
+	std::cout << "func -> " << (func() ? "true" : "false") << std::endl;
+
+	std::cout << "Fmt::Format with Result: " << Fmt::Format("{}", Result(RESULT_CODE_SUCCESS)) << std::endl;
+	std::cout << "Fmt::Format with String: " << Fmt::Format("{}", String("Hello")) << std::endl;
 
 	//const int dummyExpectedValue = 0;
 	//testHandler.Assert<int, char>(pUnitTestCharToInt, &ascii0, &dummyExpectedValue,

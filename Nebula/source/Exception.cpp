@@ -5,8 +5,8 @@
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-Exception::Exception(ResultCode resultCode, StringView message) :
-	m_resultCode(),
+Exception::Exception(Result result, StringView message) :
+	m_result(result),
 	m_message(message)
 {
 }
@@ -14,8 +14,8 @@ Exception::Exception(ResultCode resultCode, StringView message) :
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-AssertionException::AssertionException(ResultCode resultCode, StringView message, std::source_location location) :
-	Exception(resultCode, CreateExceptionMessage(location, message))
+AssertionException::AssertionException(Result result, StringView message, std::source_location location) :
+	Exception(result, CreateExceptionMessage(location, message))
 {
 }
 

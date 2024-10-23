@@ -23,23 +23,40 @@ Result TestHandler::Register(SharedPtr<ITestProgram> pTestProgram)
 
 	SharedPtr<UiOption> pTestProgramUiOption = MakeShared<UiOption>(pTestProgram->GetTitle(), [=](UiIo const& uiIo)
 	{
-		if (RESULT_CODE_SUCCESS == uiIo.GetConfirmation("Run test"))
+		if (RESULT_CODE_SUCCESS == uiIo.GetConfirmation("Run program"))
 		{
-			assert(!m_sharedLogFile.IsOpen());
-
-			m_sharedLogFile.Open(File::OpenMode::WRITE | File::OpenMode::APPEND);
 			m_pTemporaryUiIo = &uiIo;
 
-			pTestProgram->Run(*this);
+			Run(pTestProgram);
 
 			m_pTemporaryUiIo = nullptr;
-			m_sharedLogFile.Close();
 		}
 	});
 
 	m_pTestProgramMenu->AddOption(pTestProgramUiOption);
 
 	return RESULT_CODE_SUCCESS;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void TestHandler::Run(SharedPtr<ITestProgram> pTestProgram)
+{
+	assert(!m_sharedLogFile.IsOpen());
+
+	m_sharedLogFile.Open(File::OpenMode::WRITE | File::OpenMode::APPEND);
+
+	m_currentProgramStats.Reset();
+
+	Print(Fmt::Format("\nProgram: {}\n", pTestProgram->GetTitle()));
+
+	pTestProgram->Run(*this);
+
+	Print(Fmt::Format("Asserts passed / total (failed) = {} / {} ({})\n",
+		m_currentProgramStats.GetNumAssertsPassed(), m_currentProgramStats.GetNumAsserts(),
+		m_currentProgramStats.GetNumAsserts() - m_currentProgramStats.GetNumAssertsPassed()));
+
+	m_sharedLogFile.Close();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

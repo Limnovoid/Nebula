@@ -49,28 +49,43 @@ class Result
 {
 public:
 	Result() = delete;
-	Result(ResultCode resultCode);
+	constexpr Result(Result const& rhs);
+	constexpr Result(ResultCode resultCode);
 
-	ResultCode GetCode() const;
+	constexpr ResultCode GetCode() const;
 
-	char const* GetString() const;
+	constexpr char const* GetString() const;
 
-	bool operator==(ResultCode const rhs) const;
+	constexpr bool operator==(ResultCode const rhs) const;
 
 private:
-	ResultCode		m_resultCode;
+	ResultCode	m_resultCode;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ResultCode Result::GetCode() const
+inline constexpr Result::Result(Result const& rhs) :
+	m_resultCode(rhs.m_resultCode)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr Result::Result(ResultCode resultCode) :
+	m_resultCode(resultCode)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr ResultCode Result::GetCode() const
 {
 	return m_resultCode;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline char const* Result::GetString() const
+inline constexpr char const* Result::GetString() const
 {
 	switch (m_resultCode)
 	{
@@ -84,7 +99,7 @@ inline char const* Result::GetString() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline bool Result::operator==(ResultCode const rhs) const
+inline constexpr bool Result::operator==(ResultCode const rhs) const
 {
 	return m_resultCode == rhs;
 }
@@ -92,14 +107,14 @@ inline bool Result::operator==(ResultCode const rhs) const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline bool operator==(ResultCode const resultCode, Result const result)
+inline constexpr bool operator==(ResultCode const resultCode, Result const result)
 {
 	return (result == resultCode);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline bool operator==(Result const lhs, Result const rhs)
+inline constexpr bool operator==(Result const lhs, Result const rhs)
 {
 	return (lhs.GetCode() == rhs.GetCode());
 }
@@ -112,6 +127,29 @@ inline String ToString(Result const& result)
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
+
+template<>
+struct std::formatter<Nebula::Result> : std::formatter<uint8_t>
+{
+	auto format(Nebula::Result const& result, std::format_context & ctx) const
+	{
+		return std::format_to(ctx.out(), "{}", result.GetString());
+	}
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+struct std::formatter<Nebula::ResultCode> : std::formatter<uint8_t>
+{
+	auto format(Nebula::ResultCode const resultCode, std::format_context & ctx) const
+	{
+		return std::format_to(ctx.out(), "{}", Nebula::Result(resultCode).GetString());
+	}
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
 
 #undef RESULT_CODE_LIST
 #undef RESULT_CODE_GET_ENUMS

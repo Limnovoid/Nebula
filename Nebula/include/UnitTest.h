@@ -12,7 +12,7 @@ class UnitTest : public IUnitTest<TReturn, TParameters>
 public:
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
 
-	UnitTest(std::function<TReturn(TParameters)> func, StringView title);
+	UnitTest(std::function<TReturn(TParameters)> func, StringView title = "");
 	virtual ~UnitTest() override;
 
 	virtual Result Invoke(TParameters const& parameters, TReturn & returned) override;
@@ -50,11 +50,11 @@ Result UnitTest<TReturn, TParameters>::Invoke(TParameters const& parameters, TRe
 	}
 	catch (AssertionException const& e)
 	{
-		return e.GetResultCode();
+		return e.GetResult();
 	}
 	catch (Exception const& e)
 	{
-		return e.GetResultCode();
+		return e.GetResult();
 	}
 
 	return RESULT_CODE_SUCCESS;

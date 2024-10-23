@@ -17,7 +17,7 @@ UiApplication::UiApplication(Settings const& settings) :
 
 void UiApplication::Run()
 {
-	m_io << GetTextArt18();
+	m_io << GetTextArt20();
 
 	m_rootMenu.Execute(m_io);
 }

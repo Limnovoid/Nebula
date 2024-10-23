@@ -11,23 +11,23 @@ namespace Nebula // ------------------------------------------------------------
 class Exception : std::exception
 {
 public:
-	Exception(ResultCode resultCode, StringView message);
+	Exception(Result result, StringView message);
 
-	ResultCode GetResultCode() const;
+	Result GetResult() const;
 	StringView GetMessage() const;
 
 	String ToString() const;
 
 private:
-	ResultCode	m_resultCode;
+	Result		m_result;
 	String		m_message;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ResultCode Exception::GetResultCode() const
+inline Result Exception::GetResult() const
 {
-	return m_resultCode;
+	return m_result;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ inline StringView Exception::GetMessage() const
 
 inline String Exception::ToString() const
 {
-	return Fmt::Format("Exception: {} - {}", Nebula::ToString(m_resultCode).c_str(), m_message.c_str());
+	return Fmt::Format("Exception: {} - {}", m_result.GetString(), m_message);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ inline String Exception::ToString() const
 class AssertionException : public Exception
 {
 public:
-	AssertionException(ResultCode resultCode = RESULT_CODE_FAILURE, StringView message = "", std::source_location location = std::source_location::current());
+	AssertionException(Result result = RESULT_CODE_FAILURE, StringView message = "", std::source_location location = std::source_location::current());
 
 private:
 	static String CreateExceptionMessage(std::source_location const& location, StringView message = "");
