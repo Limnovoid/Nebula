@@ -13,21 +13,56 @@ using namespace Nebula;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename TValue = uint8_t>
+class BlockSize
+{
+public:
+	using Type = TValue;
+
+	constexpr BlockSize();
+
+	constexpr BlockSize(size_t count);
+
+	/// <returns> Size of block in bytes. </returns>
+	constexpr size_t Get() const;
+
+	size_t	m_count;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TValue>
+inline constexpr BlockSize<TValue>::BlockSize() :
+	m_count(0)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TValue>
+inline constexpr BlockSize<TValue>::BlockSize(size_t count) :
+	m_count(count)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TValue>
+inline constexpr size_t BlockSize<TValue>::Get() const
+{
+	return sizeof(TValue) * m_count;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
 class HeapBlock
 {
 public:
-	template<typename TValue>
-	struct Settings
-	{
-		using Type = TValue;
-
-		size_t	m_count;
-	};
-
 	HeapBlock();
 
 	template<typename TValue = byte_t>
-	HeapBlock(Settings<TValue> settings);
+	HeapBlock(BlockSize<TValue> const& size);
 
 	~HeapBlock();
 
@@ -90,6 +125,15 @@ private:
 	size_t		m_size;
 	byte_t *	m_pBlock;
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TValue>
+inline HeapBlock::HeapBlock(BlockSize<TValue> const& blockSize) :
+	m_size(blockSize.Get()),
+	m_pBlock(AllocateBlock<TValue>(blockSize.m_count))
+{
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
@@ -192,6 +236,18 @@ inline byte_t * HeapBlock::operator[](size_t index)
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class BlockSizeTestProgram : public ITestProgram
+{
+public:
+	BlockSizeTestProgram();
+	virtual ~BlockSizeTestProgram();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
+
 // --------------------------------------------------------------------------------------------------------------------------------
 
 class HeapBlockTestProgram : public ITestProgram

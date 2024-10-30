@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="include\BinaryTree.h" />
     <ClInclude Include="include\HeapBlock.h" />
+    <ClInclude Include="include\HeapBlockList.h" />
     <ClInclude Include="include\Nova.h" />
     <ClInclude Include="include\RedBlackTree.h" />
   </ItemGroup>

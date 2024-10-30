@@ -160,9 +160,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Bitset.h" />
+    <ClInclude Include="include\ConstString.h" />
     <ClInclude Include="include\Exception.h" />
     <ClInclude Include="include\File.h" />
     <ClInclude Include="include\Format.h" />
+    <ClInclude Include="include\Typename.h" />
     <ClInclude Include="include\UnitTest.h" />
     <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\IOption.h" />

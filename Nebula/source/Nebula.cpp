@@ -2,6 +2,7 @@
 
 // Include all project headers for library building.
 #include "Bitset.h"
+#include "ConstString.h"
 #include "Exception.h"
 #include "File.h"
 #include "Format.h"
@@ -20,6 +21,7 @@
 #include "TextArt.h"
 #include "ToString.h"
 #include "ToType.h"
+#include "Typename.h"
 #include "UiApplication.h"
 #include "UiIo.h"
 #include "UiMenu.h"
@@ -145,12 +147,33 @@ void AddTests(TestHandler & testHandler)
 	testHandler.Register(MakeShared<TestProgramCharToType<int>>());
 	testHandler.Register(MakeShared<TestProgramExceptions>());
 
-	std::function<bool(void)> func = []() -> bool { return true; };
+	constexpr ConstString constString = "cstr1";
+	std::cout << constString << std::endl;
 
-	std::cout << "func -> " << (func() ? "true" : "false") << std::endl;
+	constexpr char c1 = constString[0];
+	constexpr char c2 = constString[1];
+	std::cout << "c1 = " << c1 << std::endl;
+	std::cout << "c2 = " << c2 << std::endl;
 
-	std::cout << "Fmt::Format with Result: " << Fmt::Format("{}", Result(RESULT_CODE_SUCCESS)) << std::endl;
-	std::cout << "Fmt::Format with String: " << Fmt::Format("{}", String("Hello")) << std::endl;
+	std::cout << "int -> " << Typename<int>::Get() << std::endl;
+	std::cout << "float -> " << Typename<float>::Get() << std::endl;
+	std::cout << "double -> " << Typename<double>::Get() << std::endl;
+	std::cout << "long double -> " << Typename<long double>::Get() << std::endl;
+
+	constexpr ConstString constCat1 = ConstCat("str1", " + ", "str2");
+	std::cout << "constCat1 = \"" << constCat1 << '"' << std::endl;
+
+	constexpr ConstString constString1 = ConstString("str1") + ConstString(" + ") + ConstString("str2");
+	constexpr ConstString constString2 = ConstString("str1") + " + " + "str2";
+	constexpr ConstString constString3 = "str1" + ConstString(" + ") + "str2";
+
+	std::cout << "CS + CS = \"" << constString1 << '"' << std::endl;
+	std::cout << "CS + SL = \"" << constString2 << '"' << std::endl;
+	std::cout << "SL + CS = \"" << constString3 << '"' << std::endl;
+
+	//std::cout << '"' << ConstCat("literal", "+", ConstString("constString")) << '"' << std::endl;
+
+	std::cout << std::endl;
 
 	//const int dummyExpectedValue = 0;
 	//testHandler.Assert<int, char>(pUnitTestCharToInt, &ascii0, &dummyExpectedValue,

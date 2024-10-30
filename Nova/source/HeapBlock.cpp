@@ -13,15 +13,6 @@ HeapBlock::HeapBlock() :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TValue>
-HeapBlock::HeapBlock(Settings<TValue> settings) :
-	m_size(sizeof(TValue) * settings.m_count),
-	m_pBlock(AllocateBlock<TValue>(settings.m_count))
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
 HeapBlock::~HeapBlock()
 {
 	if (IsInitialized())
@@ -37,6 +28,30 @@ void HeapBlock::Release()
 	FreeBlock(m_pBlock);
 
 	m_pBlock = nullptr;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+BlockSizeTestProgram::BlockSizeTestProgram() :
+	ITestProgram("BlockSize")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+BlockSizeTestProgram::~BlockSizeTestProgram()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void BlockSizeTestProgram::RunImpl(TestHandler & testHandler)
+{
+	testHandler.Assert<size_t, int>([](int) -> size_t { return BlockSize().Get(); }, 0, 0, "BlockSize().Get()");
+	testHandler.Assert<size_t, int>([](int) -> size_t { return BlockSize(8).Get(); }, 0, 8, "BlockSize(8).Get()");
+	testHandler.Assert<size_t, int>([](int) -> size_t { return BlockSize<uint16_t>(8).Get(); }, 0, sizeof(uint16_t) * 8, "BlockSize<uint16_t>(8).Get()");
+	testHandler.Assert<size_t, int>([](int) -> size_t { return BlockSize<uint64_t>(32).Get(); }, 0, sizeof(uint64_t) * 32, "BlockSize<uint64_t>(32).Get()");
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +98,7 @@ void HeapBlockTestProgram::RunImpl(TestHandler & testHandler)
 	testHandler.Assert<bool, int>([&](int) -> bool { return heapBlock2.IsInitialized(); }, 0, true);
 	testHandler.Assert<size_t, int>([&](int) -> size_t { return heapBlock2.Size(); }, 0, TEST_SIZE * sizeof(uint8_t));
 
-	HeapBlock heapBlock3(HeapBlock::Settings<uint64_t>{ TEST_SIZE });
+	HeapBlock heapBlock3(BlockSize<uint64_t>{ TEST_SIZE });
 	testHandler.Assert<bool, int>([&](int) -> bool { return heapBlock3.IsInitialized(); }, 0, true);
 	testHandler.Assert<size_t, int>([&](int) -> size_t { return heapBlock3.Size(); }, 0, TEST_SIZE * sizeof(uint64_t));
 

@@ -17,5 +17,6 @@
 #include <exception>
 #include <source_location>
 #include <memory>
+#include <array>
 
 #endif//NEBULA_STABLE_H

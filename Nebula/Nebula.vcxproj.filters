@@ -131,5 +131,11 @@
     <ClInclude Include="include\UnitTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ConstString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Typename.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
