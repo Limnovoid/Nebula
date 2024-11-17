@@ -21,7 +21,7 @@ namespace Nebula // ------------------------------------------------------------
 {
 
 #ifdef  _DEBUG
-#define ASSERT(expression) assert(expression);
+#define ASSERT(expression) assert(expression)
 #elif
 #define ASSERT(expression)
 #endif//_DEBUG
@@ -31,6 +31,12 @@ namespace Nebula // ------------------------------------------------------------
 #else
 #define EXCEPTION_ASSERT(expression, resultCode, message) { if (!(expression)) { throw AssertionException(resultCode, message, std::source_location::current()); } }
 #endif//_DEBUG
+
+#ifdef _DEBUG
+#define DEBUG_ONLY(expression) expression
+#else
+#define DEBUG_ONLY(expression)
+#endif
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

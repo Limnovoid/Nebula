@@ -15,6 +15,7 @@
 #include "Metadata.h"
 #include "NebulaString.h"
 #include "NebulaTypes.h"
+#include "Random.h"
 #include "Result.h"
 #include "Stable.h"
 #include "TestHandler.h"
@@ -142,6 +143,18 @@ public:
 	Func	m_func;
 };
 
+template<typename T> requires IsFormattable<T>
+String GetFormatted(T const& t)
+{
+	return Fmt::Format("Formatted = {}", t);
+}
+
+template<typename T>
+String GetFormatted(T const& t)
+{
+	return Fmt::Format("Formatted = N/A");
+}
+
 void AddTests(TestHandler & testHandler)
 {
 	testHandler.Register(MakeShared<TestProgramCharToType<int>>());
@@ -202,9 +215,6 @@ void AddTests(TestHandler & testHandler)
 
 	for (int i = -50; i < 50; ++i)
 		assert(myIntVector[50 + i] == i);*/
-
-	//String formattedString = Fmt::Format("{}", 0);
-	//std::cerr << formattedString << std::endl;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

@@ -142,13 +142,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Footprint.cpp" />
     <ClCompile Include="source\HeapBlock.cpp" />
+    <ClCompile Include="source\HeapBlockList.cpp" />
     <ClCompile Include="source\Nova.cpp" />
+    <ClCompile Include="source\AnchoredList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BinaryTree.h" />
+    <ClInclude Include="include\Footprint.h" />
     <ClInclude Include="include\HeapBlock.h" />
     <ClInclude Include="include\HeapBlockList.h" />
+    <ClInclude Include="include\AnchoredList.h" />
     <ClInclude Include="include\Nova.h" />
     <ClInclude Include="include\RedBlackTree.h" />
   </ItemGroup>

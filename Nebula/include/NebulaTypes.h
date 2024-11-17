@@ -50,16 +50,20 @@ concept IsReadable = requires (std::istream & inputStream, T const& value)
 };
 
 template<typename T>
-concept IsReadWriteable = requires (std::iostream & inputOutputStream, T const& value)
-{
-	{ inputOutputStream << value };
-	{ inputOutputStream >> value };
-};
+concept IsReadWriteable = IsWriteable<T> && IsReadable<T>;
 
 template<typename T>
 concept IsStringType = requires (T t)
 {
 	{ String(t) };
+};
+
+template<typename T>
+concept IsFormattable = requires (std::formatter<T> formatter, std::format_parse_context & parseCtx,
+	std::format_context & formatCtx, T const& t)
+{
+	{ formatter.parse(parseCtx) };
+	{ formatter.format(t, formatCtx) };
 };
 
 template<typename T>
@@ -70,6 +74,9 @@ concept IsVoid = std::is_void_v<T>;
 
 template<typename T>
 using SharedPtr = std::shared_ptr<T>;
+
+template<typename T>
+using UniquePtr = std::unique_ptr<T>;
 
 template<typename T>
 using WeakPtr = std::weak_ptr<T>;
@@ -84,10 +91,29 @@ inline SharedPtr<T> MakeShared(TArgs... args)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename T, typename... TArgs>
+inline UniquePtr<T> MakeUnique(TArgs... args)
+{
+	return std::make_unique<T>(std::forward<TArgs>(args)...);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T, typename U>
 inline SharedPtr<T> StaticPtrCast(SharedPtr<U> pT)
 {
 	return std::static_pointer_cast<T, U>(pT);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline bool operator==(WeakPtr<T> lhs, WeakPtr<T> rhs)
+{
+	assert(!lhs.expired());
+	assert(!rhs.expired());
+
+	return lhs.lock() == rhs.lock();
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

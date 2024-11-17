@@ -18,5 +18,8 @@
 #include <source_location>
 #include <memory>
 #include <array>
+#include <memory_resource>
+#include <random>
+#include <numeric>
 
 #endif//NEBULA_STABLE_H

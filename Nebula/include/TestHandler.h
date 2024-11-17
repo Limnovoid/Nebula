@@ -41,28 +41,43 @@ public:
 		size_t ComputeNumIterations() const;
 	};
 
+	struct FRangeIndex
+	{
+		size_t operator()(size_t index) { return index; }
+	};
+
+	struct FRangeZero
+	{
+		size_t operator()(size_t index) { return 0; }
+	};
+
 	TestHandler(Settings settings);
 
 	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
 		requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-		TFuncGetExpected funcGetExpected, IndexRange testRange = IndexRange());
+		TFuncGetExpected funcGetExpected, IndexRange const& testRange = IndexRange());
 
 	template<typename TReturn, typename TParameters>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters, TReturn const* pExpected,
-		IndexRange const testRange = IndexRange());
+		IndexRange const& testRange = IndexRange());
 
 	template<typename TReturn, typename TParameters>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters, TReturn const& expected,
-		IndexRange const testRange = IndexRange());
+		IndexRange const& testRange = IndexRange());
+
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
+		requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+		TFuncGetExpected funcGetExpected, StringView title, IndexRange const& testRange = IndexRange());
 
 	template<typename TReturn, typename TParameters>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
-		StringView title, IndexRange const testRange = IndexRange());
+		StringView title, IndexRange const& testRange = IndexRange());
 
 	template<typename TReturn, typename TParameters>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
-		IndexRange const testRange = IndexRange());
+		IndexRange const& testRange = IndexRange());
 
 	Result Register(SharedPtr<ITestProgram> pTestProgram);
 
@@ -86,15 +101,10 @@ private:
 			m_numAssertsPassed = 0;
 		}
 
-		void AddFail()
+		void Update(size_t numPasses, IndexRange const& indexRange)
 		{
-			++m_numAsserts;
-		}
-
-		void AddPass()
-		{
-			++m_numAsserts;
-			++m_numAssertsPassed;
+			m_numAssertsPassed += numPasses;
+			m_numAsserts += indexRange.m_numIterations;
 		}
 
 		size_t GetNumAsserts() const
@@ -129,19 +139,19 @@ private:
 	void PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue);
 
 	template<typename TReturn, typename TParameters>
-		requires (IsWriteable<TParameters> && IsWriteable<TReturn>)
+		requires (IsFormattable<TParameters> && IsFormattable<TReturn>)
 	void PrintEvaluation(TParameters const& parameters, TReturn const& value);
 
 	template<typename TReturn, typename TParameters>
-		requires (IsWriteable<TParameters> && !IsWriteable<TReturn>)
+		requires (IsFormattable<TParameters> && !IsFormattable<TReturn>)
 	void PrintEvaluation(TParameters const& parameters, TReturn const& value);
 
 	template<typename TReturn, typename TParameters>
-		requires (!IsWriteable<TParameters> && IsWriteable<TReturn>)
+		requires (!IsFormattable<TParameters> && IsFormattable<TReturn>)
 	void PrintEvaluation(TParameters const& parameters, TReturn const& value);
 
 	template<typename TReturn, typename TParameters>
-		requires (!IsWriteable<TParameters> && !IsWriteable<TReturn>)
+		requires (!IsFormattable<TParameters> && !IsFormattable<TReturn>)
 	void PrintEvaluation(TParameters const& parameters, TReturn const& value);
 
 	using TestProgramList = std::vector<SharedPtr<ITestProgram>>;
@@ -165,12 +175,14 @@ private:
 template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
 	requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-	TFuncGetExpected funcGetExpected, IndexRange testRange)
+	TFuncGetExpected funcGetExpected, IndexRange const& testRange)
 {
 	OutputPreamble(pUnitTest, testRange);
 
 	Result result = RESULT_CODE_NOT_INITIALIZED;
-	TReturn returnValue;
+	TReturn returnValue(funcGetExpected(testRange.m_first));
+
+	size_t nPasses = 0;
 
 	for (size_t i = testRange.m_first; i <= testRange.m_last; i += testRange.m_stepSize)
 	{
@@ -179,27 +191,27 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 		if ((RESULT_CODE_SUCCESS != result) || (funcGetExpected(i) != returnValue))
 		{
 			OutputFailed(i, funcGetParameters(i), funcGetExpected(i), returnValue, result);
-
-			m_currentProgramStats.AddFail();
 		}
 		else
 		{
 			OutputPassed(i, funcGetParameters(i), funcGetExpected(i));
 
-			m_currentProgramStats.AddPass();
+			++nPasses;
 		}
 	}
 
-	OutputSummary(m_currentProgramStats.GetNumAssertsPassed(), testRange);
+	OutputSummary(nPasses, testRange);
 
-	return ((testRange.m_numIterations == m_currentProgramStats.GetNumAssertsPassed()) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
+	m_currentProgramStats.Update(nPasses, testRange);
+
+	return ((testRange.m_numIterations == nPasses) ? RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters,
-	TReturn const* pExpected, IndexRange const testRange)
+	TReturn const* pExpected, IndexRange const& testRange)
 {
 	struct FuncGetParameters
 	{
@@ -228,7 +240,7 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 template<typename TReturn, typename TParameters>
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters,
-	TReturn const& expected, IndexRange const testRange)
+	TReturn const& expected, IndexRange const& testRange)
 {
 	struct FuncGetParameters
 	{
@@ -255,9 +267,24 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
+	requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+	TFuncGetExpected funcGetExpected, StringView title, IndexRange const& testRange)
+{
+	using UnitTest = UnitTest<TReturn, TParameters>;
+	using IUnitTest = IUnitTest<TReturn, TParameters>;
+
+	SharedPtr<UnitTest> pUnitTest = MakeShared<UnitTest>(unitTestFunc, title);
+
+	return Assert(StaticPtrCast<IUnitTest>(pUnitTest), funcGetParameters, funcGetExpected, testRange);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 template<typename TReturn, typename TParameters>
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
-	TReturn const& expected, StringView title, IndexRange const testRange)
+	TReturn const& expected, StringView title, IndexRange const& testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
@@ -271,7 +298,7 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 
 template<typename TReturn, typename TParameters>
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
-	TReturn const& expected, IndexRange const testRange)
+	TReturn const& expected, IndexRange const& testRange)
 {
 	return Assert(unitTestFunc, parameters, expected, "", testRange);
 }
@@ -376,7 +403,7 @@ inline void TestHandler::PrintAssertion(size_t const iteration, TParameters cons
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
-	requires (IsWriteable<TParameters> && IsWriteable<TReturn>)
+	requires (IsFormattable<TParameters> && IsFormattable<TReturn>)
 inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn const& value)
 {
 	Print(Fmt::Format("f({}) -> {}", parameters, value));
@@ -385,7 +412,7 @@ inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
-	requires (IsWriteable<TParameters> && !IsWriteable<TReturn>)
+	requires (IsFormattable<TParameters> && !IsFormattable<TReturn>)
 inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn const& value)
 {
 	Print(Fmt::Format("f({}) -> !", parameters));
@@ -394,7 +421,7 @@ inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
-	requires (!IsWriteable<TParameters> && IsWriteable<TReturn>)
+	requires (!IsFormattable<TParameters> && IsFormattable<TReturn>)
 inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn const& value)
 {
 	Print(Fmt::Format("f(!) -> {}", value));
@@ -403,7 +430,7 @@ inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
-	requires (!IsWriteable<TParameters> && !IsWriteable<TReturn>)
+	requires (!IsFormattable<TParameters> && !IsFormattable<TReturn>)
 inline void TestHandler::PrintEvaluation(TParameters const& parameters, TReturn const& value)
 {
 	Print(Fmt::Format("f(!) -> !", parameters, value));
