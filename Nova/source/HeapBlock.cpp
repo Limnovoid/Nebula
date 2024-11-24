@@ -23,7 +23,7 @@ HeapBlock::~HeapBlock()
 
 void HeapBlock::Release()
 {
-	EXCEPTION_ASSERT(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
+	ASSERT_THROW(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
 
 	FreeBlock(m_pBlock);
 

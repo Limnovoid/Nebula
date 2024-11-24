@@ -51,6 +51,15 @@ public:
 		size_t operator()(size_t index) { return 0; }
 	};
 
+	struct FRangeConstant
+	{
+		FRangeConstant(size_t constant) : m_constant(constant) {}
+
+		size_t operator()(size_t index) { return m_constant; }
+
+		size_t const	m_constant;
+	};
+
 	TestHandler(Settings settings);
 
 	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
@@ -131,6 +140,9 @@ private:
 	void OutputFailed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, TReturn const& computedValue, Result const& result);
 
 	template<typename TReturn, typename TParameters>
+	void OutputFailedWithException(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, StringView exceptionString);
+
+	template<typename TReturn, typename TParameters>
 	void OutputPassed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue);
 
 	void OutputSummary(size_t const nPassed, IndexRange const& testRange);
@@ -186,17 +198,28 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 	for (size_t i = testRange.m_first; i <= testRange.m_last; i += testRange.m_stepSize)
 	{
-		result = pUnitTest->Invoke(funcGetParameters(i), returnValue);
-
-		if ((RESULT_CODE_SUCCESS != result) || (funcGetExpected(i) != returnValue))
+		try
 		{
-			OutputFailed(i, funcGetParameters(i), funcGetExpected(i), returnValue, result);
+			result = pUnitTest->Invoke(funcGetParameters(i), returnValue);
+
+			if ((RESULT_CODE_SUCCESS != result) || (funcGetExpected(i) != returnValue))
+			{
+				OutputFailed(i, funcGetParameters(i), funcGetExpected(i), returnValue, result);
+			}
+			else
+			{
+				OutputPassed(i, funcGetParameters(i), funcGetExpected(i));
+
+				++nPasses;
+			}
 		}
-		else
+		catch (AssertionException const& exception)
 		{
-			OutputPassed(i, funcGetParameters(i), funcGetExpected(i));
-
-			++nPasses;
+			OutputFailedWithException(i, funcGetParameters(i), funcGetExpected(i), exception.ToString());
+		}
+		catch (Exception const& exception)
+		{
+			OutputFailedWithException(i, funcGetParameters(i), funcGetExpected(i), exception.ToString());
 		}
 	}
 
@@ -359,6 +382,18 @@ inline void TestHandler::OutputFailed(size_t const iteration, TParameters const&
 	Print(Fmt::Format("failed, code {}, computed ", result.GetString()));
 
 	PrintEvaluation(parameters, computedValue);
+
+	Print("\n");
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn, typename TParameters>
+inline void TestHandler::OutputFailedWithException(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, StringView exceptionString)
+{
+	PrintAssertion(iteration, parameters, expectedValue);
+
+	Print(Fmt::Format("failed with exception, {}", exceptionString));
 
 	Print("\n");
 }

@@ -1,5 +1,7 @@
 #include "TestHandler.h"
 
+#include "Macros.h"
+
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
@@ -68,8 +70,8 @@ TestHandler::IndexRange::IndexRange(size_t start, size_t end, size_t stepsize) :
 	m_stepSize(stepsize),
 	m_numIterations(ComputeNumIterations())
 {
-	if (end < start)
-		throw std::exception(); // TODO : custom exception with message
+	ASSERT_THROW(start <= end, RESULT_CODE_INVALID_PARAMETER,
+		Fmt::Format("Invalid range definition: [{},{}]; end index must be greater than or equal to start index.", start, end));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

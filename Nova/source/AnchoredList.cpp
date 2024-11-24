@@ -23,7 +23,7 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 	using List = AnchoredList<String>;
 	AnchoredList<String> anchoredList;
 
-	testHandler.Assert<size_t, int>([&](int) -> size_t { return anchoredList.m_length; }, 0, 1, "Default length");
+	testHandler.Assert<size_t, int>([&](int) -> size_t { return anchoredList.Size(); }, 0, 1, "Default size");
 
 	testHandler.Assert<List::Iterator, int>([&](int) -> List::Iterator { return anchoredList.begin(); }, 0, anchoredList.end(),
 		"Default begin() = end()");
@@ -34,16 +34,38 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 	testHandler.Assert<uintptr_t, int>([&](int) -> size_t { return reinterpret_cast<uintptr_t>(anchoredList.m_pTail); },
 		0, reinterpret_cast<uintptr_t>(&anchoredList.m_head), "Default tail points to head");
 
-	for (size_t iTest = 0; iTest < 10; ++iTest)
 	{
+		static const size_t N_TEST = 10;
+
 		AnchoredList<size_t> integers;
 
-		size_t const nAdd = Random::Integer(1, 10);
+		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
+		{
+			for (size_t iAdd = 0; iAdd < iTest; ++iAdd)
+				integers.EmplaceBack(1 + iAdd);
 
-		for (size_t iAdd = 0; iAdd < nAdd; ++iAdd)
-			integers.EmplaceBack(1 + iAdd);
+			integers.Reset();
 
-		testHandler.Assert
+			return integers.Size();
+
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeConstant(1), "Size after Reset()", TestHandler::IndexRange(1, N_TEST));
+
+		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
+		{
+			integers.Reset();
+
+			for (size_t iAdd = 0; iAdd < iTest; ++iAdd)
+				integers.EmplaceBack(1 + iAdd);
+
+			return integers.Size() - 1; // Number of nodes added = final total minus the head.
+
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Size after EmplaceBack(n)", TestHandler::IndexRange(1, N_TEST));
+
+		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
+		{
+			return *integers.At(iTest);
+
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value stored at At(n)", TestHandler::IndexRange(0, N_TEST));
 	}
 }
 

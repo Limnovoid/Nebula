@@ -27,9 +27,9 @@ namespace Nebula // ------------------------------------------------------------
 #endif//_DEBUG
 
 #if defined(_DEBUG) && defined(EXCEPTION_ASSERT_BREAK_ON_FAIL)
-#define EXCEPTION_ASSERT(expression, resultCode, message) { assert(expression); if (!expression) { throw AssertionException(std::source_location::current(), resultCode, message); } }
+#define ASSERT_THROW(expression, resultCode, message) { assert(expression); if (!expression) { throw AssertionException(std::source_location::current(), resultCode, message); } }
 #else
-#define EXCEPTION_ASSERT(expression, resultCode, message) { if (!(expression)) { throw AssertionException(resultCode, message, std::source_location::current()); } }
+#define ASSERT_THROW(expression, resultCode, message) { if (!(expression)) { throw AssertionException(resultCode, message, std::source_location::current()); } }
 #endif//_DEBUG
 
 #ifdef _DEBUG

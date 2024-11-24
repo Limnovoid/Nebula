@@ -41,7 +41,7 @@ inline StringView Exception::GetMessage() const
 
 inline String Exception::ToString() const
 {
-	return Fmt::Format("Exception: {} - {}", m_result.GetString(), m_message);
+	return Fmt::Format("{} - {}", m_result.GetString(), m_message);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -54,6 +54,15 @@ public:
 
 private:
 	static String CreateExceptionMessage(std::source_location const& location, StringView message = "");
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class ApiException : public AssertionException
+{
+public:
+	ApiException(Result result = RESULT_CODE_FAILURE, StringView message = "", std::source_location location = std::source_location::current());
 };
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

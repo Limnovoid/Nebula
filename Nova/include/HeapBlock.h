@@ -93,8 +93,8 @@ inline HeapBlock::HeapBlock(Footprint const& footprint) :
 template<typename T>
 inline T const* HeapBlock::Get(size_t index) const
 {
-	EXCEPTION_ASSERT(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
-	EXCEPTION_ASSERT(0 == (reinterpret_cast<uintptr_t>(m_pBlock) % alignof(T)), RESULT_CODE_INVALID_PARAMETER, "");
+	ASSERT_THROW(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
+	ASSERT_THROW(0 == (reinterpret_cast<uintptr_t>(m_pBlock) % alignof(T)), RESULT_CODE_INVALID_PARAMETER, "");
 
 	return reinterpret_cast<T const*>(m_pBlock) + index;
 }
@@ -104,8 +104,8 @@ inline T const* HeapBlock::Get(size_t index) const
 template<typename T>
 inline T * HeapBlock::Get(size_t index)
 {
-	EXCEPTION_ASSERT(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
-	EXCEPTION_ASSERT(0 == (reinterpret_cast<uintptr_t>(m_pBlock) % alignof(T)), RESULT_CODE_INVALID_PARAMETER, "");
+	ASSERT_THROW(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
+	ASSERT_THROW(0 == (reinterpret_cast<uintptr_t>(m_pBlock) % alignof(T)), RESULT_CODE_INVALID_PARAMETER, "");
 
 	return reinterpret_cast<T *>(m_pBlock) + index;
 }
@@ -115,7 +115,7 @@ inline T * HeapBlock::Get(size_t index)
 template<typename T>
 inline T * HeapBlock::Initialize(Footprint footprint)
 {
-	EXCEPTION_ASSERT(!IsInitialized(), RESULT_CODE_ALREADY_INITIALIZED, "");
+	ASSERT_THROW(!IsInitialized(), RESULT_CODE_ALREADY_INITIALIZED, "");
 
 	m_pBlock = AllocateBlock(footprint);
 	m_footprint = footprint;
@@ -128,7 +128,7 @@ inline T * HeapBlock::Initialize(Footprint footprint)
 template<typename T>
 inline T * HeapBlock::Resize(Footprint footprint)
 {
-	EXCEPTION_ASSERT(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
+	ASSERT_THROW(IsInitialized(), RESULT_CODE_NOT_INITIALIZED, "");
 
 	FreeBlock(m_pBlock);
 

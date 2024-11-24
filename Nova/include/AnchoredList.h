@@ -3,6 +3,7 @@
 
 #include "NebulaTypes.h"
 #include "TestHandler.h"
+#include "Macros.h"
 
 namespace Nova // -----------------------------------------------------------------------------------------------------------------
 {
@@ -13,7 +14,7 @@ using namespace Nebula;
 
 /// <summary>
 /// A container class implemented as a linked list in which the head of the list is a class member;
-/// i.e., the length of the list is always at least 1.
+/// i.e., the lifetime of the head is tied to that of the container, and the length of the list is always at least 1.
 /// </summary>
 /// <typeparam name="T"> The type stored by the list. </typeparam>
 template<typename T>
@@ -32,7 +33,7 @@ public:
 		Node(TArgs... valueArgs);
 
 	private:
-		SharedPtr<Node>		m_pNext;				// Pointer to the next node in the list.
+		UniquePtr<Node>		m_pNext;				// Pointer to the next node in the list.
 
 		T					m_value;				// The node value.
 	};
@@ -100,8 +101,18 @@ public:
 	ConstIterator cbegin() const;
 	ConstIterator cend() const;
 
+	size_t Size() const;
+
 	template<typename... TArgs>
 	Iterator EmplaceBack(TArgs... valueArgs);
+
+	void Reset();
+
+	/// <exception cref="AssertionException"> Out Of Range = index out of range. </exception>
+	Iterator At(size_t index);
+
+	/// <exception cref="AssertionException"> Out Of Range = index out of range. </exception>
+	ConstIterator At(size_t index) const;
 
 private:
 	Node			m_head;				// The heap block list Node.
@@ -150,15 +161,62 @@ template<typename T>inline AnchoredList<T>::ConstIterator AnchoredList<T>::cend
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename T>inline size_t AnchoredList<T>::Size() const
+{
+	return m_length;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T>
 template<typename... TArgs>
 inline AnchoredList<T>::Iterator AnchoredList<T>::EmplaceBack(TArgs... valueArgs)
 {
-	assert(!m_pTail->m_pNext);
+	ASSERT(!m_pTail->m_pNext);
 
-	m_pTail->m_pNext = MakeShared<Node>(std::forward<TArgs>(valueArgs)...);
+	m_pTail->m_pNext = MakeUnique<Node>(std::forward<TArgs>(valueArgs)...);
 
-	m_pTail = m_pTail->m_pNext;
+	m_pTail = m_pTail->m_pNext.get();
+
+	return Iterator(m_pTail);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+void AnchoredList<T>::Reset()
+{
+	m_head.m_pNext.reset();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+AnchoredList<T>::Iterator AnchoredList<T>::At(size_t index)
+{
+	ASSERT_THROW(index < m_length, RESULT_CODE_OUT_OF_RANGE, Fmt::Format("Index {} out of range [{},{})", index, 0, m_length));
+
+	Node * pNode = &m_head;
+
+	for (size_t i = 0; i != index; ++i)
+		pNode = pNode->m_pNext.get();
+
+	return Iterator(pNode);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+AnchoredList<T>::ConstIterator AnchoredList<T>::At(size_t index) const
+{
+	ASSERT_THROW(index < m_length, RESULT_CODE_OUT_OF_RANGE, Fmt::Format("Index {} out of range [{},{})", index, 0, m_length));
+
+	Node * pNode = &m_head;
+
+	for (size_t i = 0; i != index; ++i)
+		pNode = pNode->m_pNext.get();
+
+	return ConstIterator(pNode);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
