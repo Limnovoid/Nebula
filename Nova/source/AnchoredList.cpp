@@ -37,7 +37,15 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 	{
 		static const size_t N_TEST = 10;
 
-		AnchoredList<size_t> integers;
+		using MyAnchoredList = AnchoredList<LifetimeTracker<size_t>>;
+
+		MyAnchoredList integers;
+
+		testHandler.Assert<size_t, int>([&](int) -> size_t
+		{
+			return LifetimeTracker<size_t>::GetNumInstances();
+
+		}, 0, 1, "Num. value constructions");
 
 		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
 		{
@@ -63,9 +71,32 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 
 		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
 		{
-			return *integers.At(iTest);
+			return (*integers.At(iTest)).m_value;
 
 		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value stored at At(n)", TestHandler::IndexRange(0, N_TEST));
+
+		testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iLast) -> MyAnchoredList::Iterator
+		{
+			return integers.At(iLast);
+
+		}, N_TEST, integers.end(), "Iterator returned by At(nMax) is end()");
+
+		testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iTest) -> MyAnchoredList::Iterator
+		{
+			MyAnchoredList::Iterator iterator = integers.begin();
+
+			for (size_t i = 0; i < iTest; ++i)
+				++iterator;
+
+			return iterator;
+
+		}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i); }, "Iterator pre-increment", TestHandler::IndexRange(0, N_TEST));
+
+		//testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iTest) -> MyAnchoredList::Iterator
+		//{
+		//	integers.Resize()
+		//
+		//}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i); }, "Iterator pre-increment", TestHandler::IndexRange(0, N_TEST));
 	}
 }
 

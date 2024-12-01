@@ -165,6 +165,7 @@
     <ClInclude Include="include\Exception.h" />
     <ClInclude Include="include\File.h" />
     <ClInclude Include="include\Format.h" />
+    <ClInclude Include="include\TestTypes.h" />
     <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Typename.h" />
     <ClInclude Include="include\UnitTest.h" />
