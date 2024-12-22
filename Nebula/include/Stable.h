@@ -21,5 +21,6 @@
 #include <memory_resource>
 #include <random>
 #include <numeric>
+#include <deque>
 
 #endif//NEBULA_STABLE_H

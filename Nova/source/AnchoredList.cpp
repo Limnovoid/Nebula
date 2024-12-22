@@ -25,11 +25,11 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 
 	testHandler.Assert<size_t, int>([&](int) -> size_t { return anchoredList.Size(); }, 0, 1, "Default size");
 
-	testHandler.Assert<List::Iterator, int>([&](int) -> List::Iterator { return anchoredList.begin(); }, 0, anchoredList.end(),
-		"Default begin() = end()");
+	testHandler.Assert<uintptr_t, int>([&](int) -> uintptr_t { return reinterpret_cast<uintptr_t>(anchoredList.begin().operator->()); },
+		0, reinterpret_cast<uintptr_t>(anchoredList.end().operator->()), "Default begin() = end()");
 
-	testHandler.Assert<List::ConstIterator, int>([&](int) -> List::ConstIterator { return anchoredList.cbegin(); }, 0, anchoredList.cend(),
-		"Default cbegin() = cend()");
+	testHandler.Assert<uintptr_t, int>([&](int) -> uintptr_t { return reinterpret_cast<uintptr_t>(anchoredList.cbegin().operator->()); },
+		0, reinterpret_cast<uintptr_t>(anchoredList.cend().operator->()), "Default cbegin() = cend()");
 
 	testHandler.Assert<uintptr_t, int>([&](int) -> size_t { return reinterpret_cast<uintptr_t>(anchoredList.m_pTail); },
 		0, reinterpret_cast<uintptr_t>(&anchoredList.m_head), "Default tail points to head");
@@ -51,6 +51,12 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 		{
 			for (size_t iAdd = 0; iAdd < iTest; ++iAdd)
 				integers.EmplaceBack(1 + iAdd);
+
+			testHandler.Assert<size_t, int>([&](int) -> size_t
+			{
+				return LifetimeTracker<size_t>::GetNumInstances();
+
+			}, 0, 1 + iTest, "Num. value constructions");
 
 			integers.Reset();
 
@@ -75,22 +81,22 @@ void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
 
 		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value stored at At(n)", TestHandler::IndexRange(0, N_TEST));
 
-		testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iLast) -> MyAnchoredList::Iterator
+		testHandler.Assert<size_t, size_t>([&](size_t iLast) -> size_t
 		{
-			return integers.At(iLast);
+			return integers.At(iLast)->m_value;
 
-		}, N_TEST, integers.end(), "Iterator returned by At(nMax) is end()");
+		}, N_TEST, integers.end()->m_value, "Iterator returned by At(nMax) is end()");
 
-		testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iTest) -> MyAnchoredList::Iterator
+		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
 		{
 			MyAnchoredList::Iterator iterator = integers.begin();
 
 			for (size_t i = 0; i < iTest; ++i)
 				++iterator;
 
-			return iterator;
+			return iterator->m_value;
 
-		}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i); }, "Iterator pre-increment", TestHandler::IndexRange(0, N_TEST));
+		}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i)->m_value; }, "Iterator pre-increment", TestHandler::IndexRange(0, N_TEST));
 
 		//testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iTest) -> MyAnchoredList::Iterator
 		//{

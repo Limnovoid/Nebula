@@ -159,6 +159,7 @@ void AddTests(TestHandler & testHandler)
 {
 	testHandler.Register(MakeShared<TestProgramCharToType<int>>());
 	testHandler.Register(MakeShared<TestProgramExceptions>());
+	testHandler.Register(MakeShared<TestHandlerTestProgram>());
 
 	constexpr ConstString constString = "cstr1";
 	std::cout << constString << std::endl;
