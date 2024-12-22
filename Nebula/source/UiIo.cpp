@@ -1,5 +1,7 @@
 #include "UiIo.h"
 
+#include "Macros.h"
+
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
@@ -25,8 +27,13 @@ Result UiIo::GetConfirmation(StringView prompt, bool const defaultPositive) cons
 
 	Result result = Get(confirmationChar, Fmt::Format("{}?", prompt), true);
 
-	return ((RESULT_CODE_SUCCESS == result) && (String::ToUpper(confirmationChar) == 'Y')) ?
-		RESULT_CODE_SUCCESS : RESULT_CODE_FAILURE;
+	IF_OR_RESULT_CODE(SUCCESS, UNCHANGED, == , result)
+	{
+		if ('Y' == String::ToUpper(confirmationChar))
+			return RESULT_CODE_SUCCESS;
+	}
+
+	return RESULT_CODE_FAILURE;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

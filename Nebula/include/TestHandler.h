@@ -4,7 +4,7 @@
 #include "Exception.h"
 #include "File.h"
 #include "Format.h"
-#include "ITestProgram.h"
+#include "ITestScript.h"
 #include "IUnitTest.h"
 #include "NebulaTypes.h"
 #include "Result.h"
@@ -88,17 +88,17 @@ public:
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		IndexRange const& testRange = IndexRange());
 
-	Result Register(SharedPtr<ITestProgram> pTestProgram);
+	Result Register(SharedPtr<ITestScript> pTestScript);
 
-	void Run(SharedPtr<ITestProgram> pTestProgram);
+	void Run(SharedPtr<ITestScript> pTestScript);
 
 	SharedPtr<UiMenu> GetMenu();
 
 private:
-	class ProgramStats
+	class ScriptStats
 	{
 	public:
-		ProgramStats() :
+		ScriptStats() :
 			m_numAsserts(0),
 			m_numAssertsPassed(0)
 		{
@@ -278,20 +278,20 @@ private:
 		requires (!IsFormattable<TParameters> && !IsFormattable<TReturn>)
 	String GetEvaluationString(TParameters const& parameters, TReturn const& value);
 
-	using TestProgramList = std::vector<SharedPtr<ITestProgram>>;
+	using TestScriptList = std::vector<SharedPtr<ITestScript>>;
 
-	TestProgramList				m_testPrograms;
+	TestScriptList				m_testScripts;
 	SharedPtr<UiMenu>			m_pMenu;
-	SharedPtr<UiMenu>			m_pTestProgramMenu;
+	SharedPtr<UiMenu>			m_pTestScriptMenu;
 
 	File						m_sharedLogFile;
 	UiIo const*					m_pTemporaryUiIo;
 
 	bool						m_shouldOutputToSharedFile;
-	bool						m_shouldOutputToProgramFile;
+	bool						m_shouldOutputToScriptFile;
 	bool						m_shouldOutputToUi;
 
-	ProgramStats				m_currentProgramStats;
+	ScriptStats					m_currentScriptStats;
 
 	std::vector<AssertResult>	m_assertResults;
 	size_t						m_assertIndex = 0;
@@ -548,7 +548,7 @@ inline TestHandler::AssertResult TestHandler::AssertSingle(SharedPtr<IUnitTest<T
 
 inline void TestHandler::Print(StringView message)
 {
-	if (m_shouldOutputToProgramFile)
+	if (m_shouldOutputToScriptFile)
 	{
 	}
 
@@ -705,11 +705,11 @@ inline String TestHandler::GetEvaluationString(TParameters const& parameters, TR
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class TestHandlerTestProgram : public ITestProgram
+class TestHandlerTestScript : public ITestScript
 {
 public:
-	TestHandlerTestProgram();
-	virtual ~TestHandlerTestProgram();
+	TestHandlerTestScript();
+	virtual ~TestHandlerTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

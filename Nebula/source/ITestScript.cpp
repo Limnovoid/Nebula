@@ -1,37 +1,26 @@
-#ifndef NEBULA_I_TEST_PROGRAM_H
-#define NEBULA_I_TEST_PROGRAM_H
+#include "ITestScript.h"
+
+#include "TestHandler.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-class TestHandler;
+ITestScript::ITestScript(StringView title)
+{
+	m_title = title;
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class ITestProgram
+ITestScript::~ITestScript()
 {
-public:
-	ITestProgram(StringView title);
-
-	virtual ~ITestProgram();
-
-	void Run(TestHandler & testHandler);
-
-	StringView GetTitle() const;
-
-protected:
-	virtual void RunImpl(TestHandler & testHandler) = 0;
-
-	String		m_title;
-};
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView ITestProgram::GetTitle() const
+void ITestScript::Run(TestHandler & testHandler)
 {
-	return MakeStringView(m_title);
+	RunImpl(testHandler);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
-
-#endif//NEBULA_I_TEST_PROGRAM_H

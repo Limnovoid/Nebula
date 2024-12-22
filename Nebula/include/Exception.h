@@ -3,7 +3,7 @@
 
 #include "Result.h"
 #include "Format.h"
-#include "ITestProgram.h"
+#include "ITestScript.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {

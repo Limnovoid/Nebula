@@ -15,10 +15,10 @@ void AddTests(Nebula::TestHandler & testHandler)
 {
 	using namespace Nebula;
 
-	testHandler.Register(MakeShared<FootprintTestProgram>());
-	testHandler.Register(MakeShared<HeapBlockTestProgram>());
-	testHandler.Register(MakeShared<HeapBlockListTestProgram>());
-	testHandler.Register(MakeShared<AnchoredListTestProgram>());
+	testHandler.Register(MakeShared<FootprintTestScript>());
+	testHandler.Register(MakeShared<HeapBlockTestScript>());
+	testHandler.Register(MakeShared<HeapBlockListTestScript>());
+	testHandler.Register(MakeShared<AnchoredListTestScript>());
 }
 
 } // namespace Nova ---------------------------------------------------------------------------------------------------------------

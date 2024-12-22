@@ -89,20 +89,20 @@ HeapBlockList::Node::Node(Footprint const& footprint, SharedPtr<Node> pNext) :
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-HeapBlockListTestProgram::HeapBlockListTestProgram() :
-	ITestProgram("HeapBlockList")
+HeapBlockListTestScript::HeapBlockListTestScript() :
+	ITestScript("HeapBlockList")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-HeapBlockListTestProgram::~HeapBlockListTestProgram()
+HeapBlockListTestScript::~HeapBlockListTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void HeapBlockListTestProgram::RunImpl(TestHandler & testHandler)
+void HeapBlockListTestScript::RunImpl(TestHandler & testHandler)
 {
 	using Node = HeapBlockList::Node;
 

@@ -3,20 +3,20 @@
 namespace Nova // -----------------------------------------------------------------------------------------------------------------
 {
 
-FootprintTestProgram::FootprintTestProgram() :
-	ITestProgram("Footprint")
+FootprintTestScript::FootprintTestScript() :
+	ITestScript("Footprint")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-FootprintTestProgram::~FootprintTestProgram()
+FootprintTestScript::~FootprintTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void FootprintTestProgram::RunImpl(TestHandler & testHandler)
+void FootprintTestScript::RunImpl(TestHandler & testHandler)
 {
 	constexpr Footprint footprint1;
 	constexpr Footprint footprint2 = Footprint::Make<uint8_t>(8);

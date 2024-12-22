@@ -45,7 +45,7 @@
     <ClCompile Include="source\UiIo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ITestProgram.cpp">
+    <ClCompile Include="source\ITestScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\File.cpp">
@@ -113,7 +113,7 @@
     <ClInclude Include="include\IUnitTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ITestProgram.h">
+    <ClInclude Include="include\ITestScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\File.h">

@@ -147,7 +147,7 @@
     <ClCompile Include="source\Exception.cpp" />
     <ClCompile Include="source\Nebula.cpp" />
     <ClCompile Include="source\File.cpp" />
-    <ClCompile Include="source\ITestProgram.cpp" />
+    <ClCompile Include="source\ITestScript.cpp" />
     <ClCompile Include="source\NebulaString.cpp" />
     <ClCompile Include="source\Random.cpp" />
     <ClCompile Include="source\Result.cpp" />
@@ -171,7 +171,7 @@
     <ClInclude Include="include\UnitTest.h" />
     <ClInclude Include="include\GetTypenameHelper.h" />
     <ClInclude Include="include\IOption.h" />
-    <ClInclude Include="include\ITestProgram.h" />
+    <ClInclude Include="include\ITestScript.h" />
     <ClInclude Include="include\IUnitTest.h" />
     <ClInclude Include="include\Macros.h" />
     <ClInclude Include="include\Maths.h" />

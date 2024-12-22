@@ -9,7 +9,7 @@ namespace Nova // --------------------------------------------------------------
 
 class HeapBlockList
 {
-	friend class HeapBlockListTestProgram;
+	friend class HeapBlockListTestScript;
 
 public:
 	class Node : public HeapBlock
@@ -303,11 +303,11 @@ inline HeapBlockList::Node const* HeapBlockList::ConstIterator::operator->() con
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class HeapBlockListTestProgram : public ITestProgram
+class HeapBlockListTestScript : public ITestScript
 {
 public:
-	HeapBlockListTestProgram();
-	virtual ~HeapBlockListTestProgram();
+	HeapBlockListTestScript();
+	virtual ~HeapBlockListTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

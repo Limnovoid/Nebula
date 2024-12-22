@@ -189,11 +189,11 @@ inline byte_t * HeapBlock::operator[](size_t index)
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class HeapBlockTestProgram : public ITestProgram
+class HeapBlockTestScript : public ITestScript
 {
 public:
-	HeapBlockTestProgram();
-	virtual ~HeapBlockTestProgram();
+	HeapBlockTestScript();
+	virtual ~HeapBlockTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

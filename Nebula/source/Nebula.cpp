@@ -8,7 +8,7 @@
 #include "Format.h"
 #include "GetTypenameHelper.h"
 #include "IOption.h"
-#include "ITestProgram.h"
+#include "ITestScript.h"
 #include "IUnitTest.h"
 #include "Macros.h"
 #include "Maths.h"
@@ -33,12 +33,12 @@ namespace Nebula // ------------------------------------------------------------
 {
 
 template<typename TTo> requires IsInt<TTo>
-class TestProgramCharToType : public ITestProgram
+class TestScriptCharToType : public ITestScript
 {
 public:
-	TestProgramCharToType() : ITestProgram(Fmt::Format("ToType<{}>(char)", GetTypenameHelper<TTo>::Get())) {}
+	TestScriptCharToType() : ITestScript(Fmt::Format("ToType<{}>(char)", GetTypenameHelper<TTo>::Get())) {}
 
-	virtual ~TestProgramCharToType() {}
+	virtual ~TestScriptCharToType() {}
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override
@@ -66,12 +66,12 @@ protected:
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-class TestProgramExceptions : public ITestProgram
+class TestScriptExceptions : public ITestScript
 {
 public:
-	TestProgramExceptions() : ITestProgram("Exceptions") {}
+	TestScriptExceptions() : ITestScript("Exceptions") {}
 
-	virtual ~TestProgramExceptions() {}
+	virtual ~TestScriptExceptions() {}
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override
@@ -157,9 +157,9 @@ String GetFormatted(T const& t)
 
 void AddTests(TestHandler & testHandler)
 {
-	testHandler.Register(MakeShared<TestProgramCharToType<int>>());
-	testHandler.Register(MakeShared<TestProgramExceptions>());
-	testHandler.Register(MakeShared<TestHandlerTestProgram>());
+	testHandler.Register(MakeShared<TestScriptCharToType<int>>());
+	testHandler.Register(MakeShared<TestScriptExceptions>());
+	testHandler.Register(MakeShared<TestHandlerTestScript>());
 
 	constexpr ConstString constString = "cstr1";
 	std::cout << constString << std::endl;

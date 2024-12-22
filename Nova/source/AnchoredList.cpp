@@ -5,20 +5,20 @@
 namespace Nova // -----------------------------------------------------------------------------------------------------------------
 {
 
-AnchoredListTestProgram::AnchoredListTestProgram() :
-	ITestProgram("AnchoredList")
+AnchoredListTestScript::AnchoredListTestScript() :
+	ITestScript("AnchoredList")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-AnchoredListTestProgram::~AnchoredListTestProgram()
+AnchoredListTestScript::~AnchoredListTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void AnchoredListTestProgram::RunImpl(TestHandler & testHandler)
+void AnchoredListTestScript::RunImpl(TestHandler & testHandler)
 {
 	using List = AnchoredList<String>;
 	AnchoredList<String> anchoredList;

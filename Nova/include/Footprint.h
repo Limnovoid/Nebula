@@ -121,11 +121,11 @@ constexpr Footprint::operator bool() const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class FootprintTestProgram : public ITestProgram
+class FootprintTestScript : public ITestScript
 {
 public:
-	FootprintTestProgram();
-	virtual ~FootprintTestProgram();
+	FootprintTestScript();
+	virtual ~FootprintTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

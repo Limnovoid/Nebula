@@ -5,7 +5,7 @@
 #include "Result.h"
 
 #include "IUnitTest.h"
-#include "ITestProgram.h"
+#include "ITestScript.h"
 #include "Format.h"
 #include "GetTypenameHelper.h"
 

@@ -38,6 +38,9 @@ namespace Nebula // ------------------------------------------------------------
 #define DEBUG_ONLY(expression)
 #endif
 
+#define IF_RESULT_CODE(name, op, expression) if (RESULT_CODE_##name op (expression))
+#define IF_OR_RESULT_CODE(name1, name2, op, expression) if ((RESULT_CODE_##name1 op (expression)) || (RESULT_CODE_##name2 op (expression)))
+
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 
 #endif//NEBULA_MACROS_H

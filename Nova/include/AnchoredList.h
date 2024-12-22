@@ -21,13 +21,13 @@ using namespace Nebula;
 template<typename T>
 class AnchoredList
 {
-	friend class AnchoredListTestProgram;
+	friend class AnchoredListTestScript;
 
 public:
 	class Node
 	{
 		friend class AnchoredList;
-		friend class AnchoredListTestProgram;
+		friend class AnchoredListTestScript;
 
 	public:
 		template<typename... TArgs>
@@ -427,11 +427,11 @@ inline T const* AnchoredList<T>::ConstIterator::operator->() const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class AnchoredListTestProgram : public ITestProgram
+class AnchoredListTestScript : public ITestScript
 {
 public:
-	AnchoredListTestProgram();
-	virtual ~AnchoredListTestProgram();
+	AnchoredListTestScript();
+	virtual ~AnchoredListTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

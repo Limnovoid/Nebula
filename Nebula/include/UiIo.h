@@ -49,7 +49,7 @@ inline Result UiIo::Get(T & t, StringView prompt, bool hasDefault) const
 		m_outputStream << '<' << t;
 
 	m_outputStream << "> ";
-	
+
 	String inputString;
 	do
 	{

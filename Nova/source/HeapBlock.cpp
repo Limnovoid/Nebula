@@ -33,20 +33,20 @@ void HeapBlock::Release()
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-HeapBlockTestProgram::HeapBlockTestProgram() :
-	ITestProgram("HeapBlock")
+HeapBlockTestScript::HeapBlockTestScript() :
+	ITestScript("HeapBlock")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-HeapBlockTestProgram::~HeapBlockTestProgram()
+HeapBlockTestScript::~HeapBlockTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void HeapBlockTestProgram::RunImpl(TestHandler & testHandler)
+void HeapBlockTestScript::RunImpl(TestHandler & testHandler)
 {
 	HeapBlock heapBlock;
 

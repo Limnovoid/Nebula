@@ -7,59 +7,59 @@ namespace Nebula // ------------------------------------------------------------
 
 TestHandler::TestHandler(Settings settings) :
 	m_pMenu(new UiMenu("Test handler")),
-	m_pTestProgramMenu(new UiMenu("Test programs")),
+	m_pTestScriptMenu(new UiMenu("Test scripts")),
 	m_sharedLogFile(settings.m_sharedLogFilePath),
 	m_pTemporaryUiIo(nullptr),
 	m_shouldOutputToSharedFile(true),
-	m_shouldOutputToProgramFile(true),
+	m_shouldOutputToScriptFile(true),
 	m_shouldOutputToUi(true),
 	m_assertResults(1)
 {
-	m_pMenu->AddOption(SharedPtr<UiMenu>(m_pTestProgramMenu));
+	m_pMenu->AddOption(SharedPtr<UiMenu>(m_pTestScriptMenu));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result TestHandler::Register(SharedPtr<ITestProgram> pTestProgram)
+Result TestHandler::Register(SharedPtr<ITestScript> pTestScript)
 {
-	m_testPrograms.push_back(pTestProgram);
+	m_testScripts.push_back(pTestScript);
 
-	SharedPtr<UiOption> pTestProgramUiOption = MakeShared<UiOption>(pTestProgram->GetTitle(), [=](UiIo const& uiIo)
+	SharedPtr<UiOption> pTestScriptUiOption = MakeShared<UiOption>(pTestScript->GetTitle(), [=](UiIo const& uiIo)
 	{
-		if (RESULT_CODE_SUCCESS == uiIo.GetConfirmation("Run program"))
+		if (RESULT_CODE_SUCCESS == uiIo.GetConfirmation(Fmt::Format("Run script \"{}\"", pTestScript->GetTitle()), true))
 		{
 			m_pTemporaryUiIo = &uiIo;
 
-			Run(pTestProgram);
+			Run(pTestScript);
 
 			m_pTemporaryUiIo = nullptr;
 		}
 	});
 
-	m_pTestProgramMenu->AddOption(pTestProgramUiOption);
+	m_pTestScriptMenu->AddOption(pTestScriptUiOption);
 
 	return RESULT_CODE_SUCCESS;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void TestHandler::Run(SharedPtr<ITestProgram> pTestProgram)
+void TestHandler::Run(SharedPtr<ITestScript> pTestScript)
 {
 	assert(!m_sharedLogFile.IsOpen());
 
 	m_sharedLogFile.Open(File::OpenMode::WRITE | File::OpenMode::APPEND);
 
-	m_currentProgramStats.Reset();
+	m_currentScriptStats.Reset();
 
-	Print(Fmt::Format("\nProgram: {}\n", pTestProgram->GetTitle()));
+	Print(Fmt::Format("\nScript: {}\n", pTestScript->GetTitle()));
 
-	pTestProgram->Run(*this);
+	pTestScript->Run(*this);
 
 	Print(Fmt::Format("Asserts passed = {} / {}",
-		m_currentProgramStats.GetNumAssertsPassed(), m_currentProgramStats.GetNumAsserts()));
+		m_currentScriptStats.GetNumAssertsPassed(), m_currentScriptStats.GetNumAsserts()));
 
-	if (m_currentProgramStats.GetNumAssertsPassed() != m_currentProgramStats.GetNumAsserts())
-		Print(Fmt::Format(" ({} FAILED)", m_currentProgramStats.GetNumAsserts() - m_currentProgramStats.GetNumAssertsPassed()));
+	if (m_currentScriptStats.GetNumAssertsPassed() != m_currentScriptStats.GetNumAsserts())
+		Print(Fmt::Format(" ({} FAILED)", m_currentScriptStats.GetNumAsserts() - m_currentScriptStats.GetNumAssertsPassed()));
 
 	Print("\n");
 
@@ -92,20 +92,20 @@ size_t TestHandler::IndexRange::ComputeNumIterations() const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-TestHandlerTestProgram::TestHandlerTestProgram() :
-	ITestProgram("TestHandler")
+TestHandlerTestScript::TestHandlerTestScript() :
+	ITestScript("TestHandler")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-TestHandlerTestProgram::~TestHandlerTestProgram()
+TestHandlerTestScript::~TestHandlerTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void TestHandlerTestProgram::RunImpl(TestHandler & testHandler)
+void TestHandlerTestScript::RunImpl(TestHandler & testHandler)
 {
 	// 1
 	testHandler.Assert<size_t, size_t>([](size_t index) { return index; },
