@@ -53,7 +53,7 @@ public:
 	AssertionException(Result result = RESULT_CODE_FAILURE, StringView message = "", std::source_location location = std::source_location::current());
 
 private:
-	static String CreateExceptionMessage(std::source_location const& location, StringView message = "");
+	static String CreateExceptionMessage(Result result, std::source_location const& location, StringView message = "");
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------

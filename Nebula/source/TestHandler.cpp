@@ -1,6 +1,7 @@
 #include "TestHandler.h"
 
 #include "Macros.h"
+#include "Maths.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
@@ -46,20 +47,22 @@ Result TestHandler::Register(SharedPtr<ITestScript> pTestScript)
 void TestHandler::Run(SharedPtr<ITestScript> pTestScript)
 {
 	assert(!m_sharedLogFile.IsOpen());
+	assert(0 == m_assertIndex);
 
 	m_sharedLogFile.Open(File::OpenMode::WRITE | File::OpenMode::APPEND);
 
-	m_currentScriptStats.Reset();
+	m_assertResults.front().Reset();
 
 	Print(Fmt::Format("\nScript: {}\n", pTestScript->GetTitle()));
 
 	pTestScript->Run(*this);
 
-	Print(Fmt::Format("Asserts passed = {} / {}",
-		m_currentScriptStats.GetNumAssertsPassed(), m_currentScriptStats.GetNumAsserts()));
+	AssertResult & scriptResults = m_assertResults.front(); // Note : must come after calling Run - calls to Assert resizing m_assertResults will invalidate existing references.
 
-	if (m_currentScriptStats.GetNumAssertsPassed() != m_currentScriptStats.GetNumAsserts())
-		Print(Fmt::Format(" ({} FAILED)", m_currentScriptStats.GetNumAsserts() - m_currentScriptStats.GetNumAssertsPassed()));
+	Print(Fmt::Format("Asserts passed = {} / {}", scriptResults.nPasses, scriptResults.nAsserts));
+
+	if (scriptResults.nPasses != scriptResults.nAsserts)
+		Print(Fmt::Format(" ({} FAILED)", scriptResults.nAsserts - scriptResults.nPasses));
 
 	Print("\n");
 
@@ -69,7 +72,7 @@ void TestHandler::Run(SharedPtr<ITestScript> pTestScript)
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-TestHandler::IndexRange::IndexRange(size_t start, size_t end, size_t stepsize) :
+TestHandler::IndexRange::IndexRange(size_t start, size_t end, int stepsize) :
 	m_first(start),
 	m_last(end),
 	m_stepSize(stepsize),
@@ -83,10 +86,60 @@ size_t TestHandler::IndexRange::ComputeNumIterations() const
 {
 	size_t numIterations = 1;
 
-	if (m_first != m_last)
-		numIterations += ((m_last - m_first) / m_stepSize);
+	ASSERT(0 != m_stepSize);
+
+	if (m_first < m_last)
+	{
+		ASSERT(0 < m_stepSize);
+
+		numIterations += ((m_last - m_first) / static_cast<size_t>(m_stepSize));
+	}
+	else if (m_last < m_first)
+	{
+		ASSERT(m_stepSize < 0);
+
+		numIterations += ((m_first - m_last) / static_cast<size_t>(Maths::Abs(m_stepSize)));
+	}
 
 	return numIterations;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+std::vector<size_t> TestHandler::IndexRange::GetIndexSequence(IndexRange const& indexRange)
+{
+	std::vector<size_t> sequence(indexRange.m_numIterations);
+
+	for (size_t i = 0; i < indexRange.m_numIterations; ++i)
+	{
+		size_t testIndex = indexRange.m_first;
+
+		if (0 < indexRange.m_stepSize)
+			testIndex += i * static_cast<size_t>(indexRange.m_stepSize);
+		else
+			testIndex -= i * static_cast<size_t>(Maths::Abs(indexRange.m_stepSize));
+
+		sequence[i] = testIndex;
+	}
+
+	return sequence;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+size_t TestHandler::IndexRange::GetIndexPosition(IndexRange const& indexRange, size_t index)
+{
+	if (indexRange.m_first == index)
+		return 0;
+
+	size_t sequenceIndex;
+
+	if (0 < indexRange.m_stepSize)
+		sequenceIndex = (index - indexRange.m_first) / static_cast<size_t>(indexRange.m_stepSize);
+	else
+		sequenceIndex = (indexRange.m_first - index) / static_cast<size_t>(Maths::Abs(indexRange.m_stepSize));
+
+	return sequenceIndex;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -184,6 +237,22 @@ void TestHandlerTestScript::RunImpl(TestHandler & testHandler)
 		return index;
 
 	}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Test Exception handling", { 1, 1 });
+
+	// Random index sequence
+	TestHandler::IndexRange indexRange = { 0, 10 };
+	std::vector<size_t> const indexSequence = TestHandler::IndexRange::GetIndexSequence(indexRange);
+	std::set<size_t> previousIndices;
+
+	testHandler.Assert<bool, size_t>([&](size_t index)
+	{
+		bool const isInSequence = (indexSequence.cend() != std::find(indexSequence.cbegin(), indexSequence.cend(), index));
+		bool const isNewIndex = (previousIndices.end() == previousIndices.find(index));
+
+		previousIndices.insert(index);
+
+		return (isInSequence && isNewIndex);
+
+	}, TestHandler::FRangeRandomOrder({ 0, 10 }), [](size_t){ return true; }, "Test FRangeRandomOrder", { 0, 10 });
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

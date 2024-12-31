@@ -1,12 +1,13 @@
 #include "Nova.h"
 
 // Include all project headers for library building.
+#include "AnchoredList.h"
 #include "BinaryTree.h"
 #include "Footprint.h"
-#include "RedBlackTree.h"
 #include "HeapBlock.h"
 #include "HeapBlockList.h"
-#include "AnchoredList.h"
+#include "PriorityQueue.h"
+#include "RedBlackTree.h"
 
 namespace Nova // -----------------------------------------------------------------------------------------------------------------
 {
@@ -19,6 +20,7 @@ void AddTests(Nebula::TestHandler & testHandler)
 	testHandler.Register(MakeShared<HeapBlockTestScript>());
 	testHandler.Register(MakeShared<HeapBlockListTestScript>());
 	testHandler.Register(MakeShared<AnchoredListTestScript>());
+	testHandler.Register(MakeShared<PriorityQueueTestScript>());
 }
 
 } // namespace Nova ---------------------------------------------------------------------------------------------------------------

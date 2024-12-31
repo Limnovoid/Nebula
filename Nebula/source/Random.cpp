@@ -1,20 +1,23 @@
 #include "Random.h"
 
+#include "Macros.h"
+
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-static std::random_device	g_randomDevice;
-static std::mt19937			g_generator(g_randomDevice());
+std::random_device	Random::g_randomDevice;
+std::mt19937		Random::g_generator(g_randomDevice());
 
 // --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
 
-std::vector<size_t> GetRandomSequence(size_t const minIndex, size_t const maxIndex)
+std::vector<size_t> Random::GetRandomSequence(size_t const min, size_t const max)
 {
-	assert(minIndex < maxIndex);
+	ASSERT(min < max);
 
-	std::vector<size_t> sequence(maxIndex - minIndex);
-	std::iota(sequence.begin(), sequence.end(), minIndex);
+	std::vector<size_t> sequence(max - min);
+
+	std::iota(sequence.begin(), sequence.end(), min);
+
 	std::shuffle(sequence.begin(), sequence.end(), g_generator);
 
 	return sequence;
@@ -23,7 +26,7 @@ std::vector<size_t> GetRandomSequence(size_t const minIndex, size_t const maxInd
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<IsInt T>
-T Integer(T min, T max)
+T Random::Integer(T min, T max)
 {
 	std::uniform_int_distribution<T> distribution(min, max);
 

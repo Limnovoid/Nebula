@@ -4,24 +4,40 @@
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-namespace Random // ---------------------------------------------------------------------------------------------------------------
+class Random
 {
+public:
+	template<typename T>
+	static void Shuffle(std::vector<T> & vector);
 
-std::vector<size_t> GetRandomSequence(size_t const minIndex, size_t const maxIndex);
+	/// <returns> A vector populated with the integers [min, max] in a random order. </returns>
+	static std::vector<size_t> GetRandomSequence(size_t const min, size_t const max);
+
+	/// <returns> A vector populated with the integers [0, max] in a random order. </returns>
+	static std::vector<size_t> GetRandomSequence(size_t const max);
+
+	template<IsInt T = size_t>
+	T Integer(T min, T max);
+
+private:
+	static std::random_device	g_randomDevice;
+	static std::mt19937			g_generator;
+};
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline std::vector<size_t> GetRandomSequence(size_t const maxIndex)
+template<typename T>
+inline void Random::Shuffle(std::vector<T> & vector)
 {
-	return GetRandomSequence(0, maxIndex);
+	std::shuffle(vector.begin(), vector.end(), g_generator);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T = size_t>
-T Integer(T min, T max);
-
-} // namespace Random -------------------------------------------------------------------------------------------------------------
+inline std::vector<size_t> Random::GetRandomSequence(size_t const max)
+{
+	return GetRandomSequence(0, max);
+}
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

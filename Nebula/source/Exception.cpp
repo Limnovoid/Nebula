@@ -15,18 +15,20 @@ Exception::Exception(Result result, StringView message) :
 // --------------------------------------------------------------------------------------------------------------------------------
 
 AssertionException::AssertionException(Result result, StringView message, std::source_location location) :
-	Exception(result, CreateExceptionMessage(location, message))
+	Exception(result, CreateExceptionMessage(result, location, message))
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-String AssertionException::CreateExceptionMessage(std::source_location const& location, StringView message)
+String AssertionException::CreateExceptionMessage(Result result, std::source_location const& location, StringView message)
 {
-	String exceptionMessage = Fmt::Format("Assertion failed in {} ({}, line {})", location.function_name(), location.file_name(), location.line());
+	String exceptionMessage = Fmt::Format("Assertion failed in {}, code {}", location.function_name(), result);
 
 	if (!message.empty())
-		(exceptionMessage += " - ") += message;
+		exceptionMessage += Fmt::Format(" - {}", message);
+
+	exceptionMessage += Fmt::Format(" ({}, line {})", location.file_name(), location.line());
 
 	return exceptionMessage;
 }

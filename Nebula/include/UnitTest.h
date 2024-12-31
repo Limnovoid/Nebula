@@ -44,18 +44,7 @@ UnitTest<TReturn, TParameters>::~UnitTest()
 template<typename TReturn, typename TParameters>
 Result UnitTest<TReturn, TParameters>::Invoke(TParameters const& parameters, TReturn & returned)
 {
-	try
-	{
-		returned = m_func(parameters);
-	}
-	catch (AssertionException const& e)
-	{
-		return e.GetResult();
-	}
-	catch (Exception const& e)
-	{
-		return e.GetResult();
-	}
+	returned = m_func(parameters); // Leave exception handling to the TestHandler.
 
 	return RESULT_CODE_SUCCESS;
 }

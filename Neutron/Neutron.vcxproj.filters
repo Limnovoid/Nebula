@@ -26,5 +26,8 @@
     <ClCompile Include="source\Neutron.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\PhysicsEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -155,13 +155,22 @@ String GetFormatted(T const& t)
 	return Fmt::Format("Formatted = N/A");
 }
 
+template<typename T>
+struct CompareLess
+{
+	bool operator()(T const& lhs, T const& rhs)
+	{
+		return lhs < rhs;
+	}
+};
+
 void AddTests(TestHandler & testHandler)
 {
 	testHandler.Register(MakeShared<TestScriptCharToType<int>>());
 	testHandler.Register(MakeShared<TestScriptExceptions>());
 	testHandler.Register(MakeShared<TestHandlerTestScript>());
 
-	constexpr ConstString constString = "cstr1";
+	/*constexpr ConstString constString = "cstr1";
 	std::cout << constString << std::endl;
 
 	constexpr char c1 = constString[0];
@@ -183,11 +192,11 @@ void AddTests(TestHandler & testHandler)
 
 	std::cout << "CS + CS = \"" << constString1 << '"' << std::endl;
 	std::cout << "CS + SL = \"" << constString2 << '"' << std::endl;
-	std::cout << "SL + CS = \"" << constString3 << '"' << std::endl;
+	std::cout << "SL + CS = \"" << constString3 << '"' << std::endl;*/
 
 	//std::cout << '"' << ConstCat("literal", "+", ConstString("constString")) << '"' << std::endl;
 
-	std::cout << std::endl;
+	//std::cout << std::endl;
 
 	//const int dummyExpectedValue = 0;
 	//testHandler.Assert<int, char>(pUnitTestCharToInt, &ascii0, &dummyExpectedValue,

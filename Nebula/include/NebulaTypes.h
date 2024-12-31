@@ -69,6 +69,9 @@ concept IsFormattable = requires (std::formatter<T> formatter, std::format_parse
 template<typename T>
 concept IsVoid = std::is_void_v<T>;
 
+template<typename T, typename TOperand>
+concept IsCompareFunctor = std::is_invocable_r_v<bool, T, TOperand, TOperand>;
+
 // Smart pointers -----------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 

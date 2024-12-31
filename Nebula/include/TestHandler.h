@@ -11,6 +11,7 @@
 #include "UiIo.h"
 #include "UiMenu.h"
 #include "UnitTest.h"
+#include "Random.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
@@ -26,15 +27,21 @@ public:
 	class IndexRange
 	{
 	public:
+		/// <returns> The sequence of indices defined by the given index range. </returns>
+		static std::vector<size_t> GetIndexSequence(IndexRange const& indexRange);
+
+		/// <returns> The position of the given index in the sequence defined by this range of indices. </returns>
+		static size_t GetIndexPosition(IndexRange const& indexRange, size_t index);
+
 		/// <param name="first">Index of first test iteration to execute.</param>
 		/// <param name="last">Index of last test iteration to execute.</param>
-		/// <param name="stepsize">Number by which index is incremented between executed test iterations.</param>
+		/// <param name="stepsize">Number by which index is incremented between executed test iterations. Use a negative for decrementing.</param>
 		/// <exception cref="std::exception">Range is ill-defined.</exception>
-		IndexRange(size_t first = 0, size_t last = 0, size_t stepsize = 1);
+		IndexRange(size_t first = 0, size_t last = 0, int stepsize = 1);
 
 		size_t const	m_first;
 		size_t const	m_last;
-		size_t const	m_stepSize;
+		int const		m_stepSize;
 		size_t const	m_numIterations;
 
 	private:
@@ -57,7 +64,36 @@ public:
 
 		size_t operator()(size_t index) { return m_constant; }
 
-		size_t const	m_constant;
+		size_t const		m_constant;
+	};
+
+	struct FRangeRandomOrder
+	{
+		/// <param name="indexRange"> The index range passed into TestHandler::Assert. </param>
+		FRangeRandomOrder(IndexRange const& indexRange) :
+			m_indexRange(indexRange),
+			m_indexSequence(IndexRange::GetIndexSequence(indexRange))
+		{
+			Random::Shuffle(m_indexSequence);
+		}
+
+		size_t operator()(size_t index)
+		{
+			return m_indexSequence[IndexRange::GetIndexPosition(m_indexRange, index)];
+		}
+
+		IndexRange const	m_indexRange;
+		std::vector<size_t>	m_indexSequence;
+	};
+
+	template<typename T>
+	struct FConstant
+	{
+		FConstant(T const& constant) : m_constant(constant) {}
+
+		T const& operator()(size_t index) { return m_constant; }
+
+		T const				m_constant;
 	};
 
 	TestHandler(Settings settings);
@@ -95,42 +131,6 @@ public:
 	SharedPtr<UiMenu> GetMenu();
 
 private:
-	class ScriptStats
-	{
-	public:
-		ScriptStats() :
-			m_numAsserts(0),
-			m_numAssertsPassed(0)
-		{
-		}
-
-		void Reset()
-		{
-			m_numAsserts = 0;
-			m_numAssertsPassed = 0;
-		}
-
-		void Update(size_t numPasses, IndexRange const& indexRange)
-		{
-			m_numAssertsPassed += numPasses;
-			m_numAsserts += indexRange.m_numIterations;
-		}
-
-		size_t GetNumAsserts() const
-		{
-			return m_numAsserts;
-		}
-
-		size_t GetNumAssertsPassed() const
-		{
-			return m_numAssertsPassed;
-		}
-
-	private:
-		size_t	m_numAsserts;
-		size_t	m_numAssertsPassed;
-	};
-
 	struct AssertResult
 	{
 		size_t		nPasses		= 0;
@@ -291,8 +291,6 @@ private:
 	bool						m_shouldOutputToScriptFile;
 	bool						m_shouldOutputToUi;
 
-	ScriptStats					m_currentScriptStats;
-
 	std::vector<AssertResult>	m_assertResults;
 	size_t						m_assertIndex = 0;
 };
@@ -304,11 +302,27 @@ template<typename TReturn, typename TParameters, typename TFuncGetParameters, ty
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
 	TFuncGetExpected funcGetExpected, IndexRange const& testRange)
 {
+	// Print the IDs up to and including assertIndex.
 	auto fPrintAssertId = [&](size_t assertIndex)
 	{
-		for (size_t i = 0; i < assertIndex; ++i)
+		for (size_t i = 0; i < assertIndex + 1; ++i)
 			Print(Fmt::Format("{}.", m_assertResults[i].nAsserts));
 		Print(" ");
+	};
+
+	// Print the result of the assert with ID assertIndex.
+	auto fPrintResult = [&](size_t assertIndex, StringView resultMessage, bool const isSubAssert)
+	{
+		if (0 < m_assertResults[assertIndex + 1].nAsserts) // Had sub-assert(s)
+		{
+			Print("\n");
+			fPrintAssertId(assertIndex);
+		}
+
+		Print(resultMessage);
+
+		if (!isSubAssert)
+			Print("\n");
 	};
 
 	Result result = RESULT_CODE_FAILURE;
@@ -318,6 +332,8 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 	if (isSubAssert)
 		Print("\n");
 
+	fPrintAssertId(m_assertIndex);
+
 	// Assert ID increment...
 	++m_assertIndex;
 
@@ -326,8 +342,6 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 	assert(0 == m_assertResults[m_assertIndex].nAsserts);
 	// /Assert ID increment
-
-	fPrintAssertId(m_assertIndex);
 
 	// Title
 	if (!pUnitTest->GetTitle().empty())
@@ -340,11 +354,7 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 	{
 		AssertResult assertResult = AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, testRange.m_first, resultMessage);
 
-		if (isSubAssert)
-			fPrintAssertId(m_assertIndex);
-
-		Print(resultMessage);
-		Print("\n");
+		fPrintResult(m_assertIndex - 1, resultMessage, isSubAssert);
 
 		if (assertResult.IsPass())
 			result = RESULT_CODE_SUCCESS;
@@ -360,16 +370,22 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 			m_assertResults.emplace_back();
 		// /Assert ID increment
 
-		AssertResult & seriesResult = m_assertResults[m_assertIndex - 1];
-
-		for (size_t i = testRange.m_first; i <= testRange.m_last; i += testRange.m_stepSize)
+		for (size_t i = 0; i < testRange.m_numIterations; ++i)
 		{
-			fPrintAssertId(m_assertIndex);
+			size_t testIndex = testRange.m_first;
 
-			seriesResult += AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, i, resultMessage);
+			if (0 < testRange.m_stepSize)
+				testIndex += i * static_cast<size_t>(testRange.m_stepSize);
+			else
+				testIndex -= i * static_cast<size_t>(Maths::Abs(testRange.m_stepSize));
 
-			Print(resultMessage);
-			Print("\n");
+			fPrintAssertId(m_assertIndex - 1);
+
+			AssertResult assertResult = AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, testIndex, resultMessage);
+
+			fPrintResult(m_assertIndex - 1, resultMessage, isSubAssert);
+
+			m_assertResults[m_assertIndex - 1] += assertResult;
 
 			// Assert ID complete...
 			m_assertResults[m_assertIndex].Reset();
@@ -378,7 +394,9 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 		--m_assertIndex;
 
-		fPrintAssertId(m_assertIndex);
+		fPrintAssertId(m_assertIndex - 1);
+
+		AssertResult & seriesResult = m_assertResults[m_assertIndex]; // Note : must come after the loop in case sub-asserts cause the vector to be reallocated.
 
 		resultMessage = Fmt::Format("Series passed = {} / {}{}", seriesResult.nPasses, seriesResult.nAsserts,
 			(seriesResult.IsPass() ? "" : Fmt::Format(" ({} failed)", seriesResult.nAsserts - seriesResult.nPasses)));
@@ -389,9 +407,6 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 		if (seriesResult.IsPass())
 			result = RESULT_CODE_SUCCESS;
 	}
-
-	if (isSubAssert)
-		fPrintAssertId(m_assertIndex - 1);
 
 	// Assert ID complete...
 	m_assertResults[m_assertIndex].Reset();
@@ -516,11 +531,11 @@ inline TestHandler::AssertResult TestHandler::AssertSingle(SharedPtr<IUnitTest<T
 
 	TReturn returnValue(funcGetExpected(testIndex));
 
-	resultMessage = GetEvaluationString(funcGetExpected(testIndex), returnValue);
-
 	try
 	{
 		Result result = pUnitTest->Invoke(funcGetParameters(testIndex), returnValue);
+
+		resultMessage = GetEvaluationString(funcGetParameters(testIndex), returnValue);
 
 		if ((RESULT_CODE_SUCCESS == result) && (funcGetExpected(testIndex) == returnValue))
 		{
@@ -563,89 +578,6 @@ inline void TestHandler::Print(StringView message)
 			m_pTemporaryUiIo->Print(message);
 	}
 }
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-//template<typename TReturn, typename TParameters>
-//inline void TestHandler::OutputPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange const& testRange)
-//{
-//	if (nullptr != m_pAssertStackNodeTop->m_pPrev)
-//		Print("\n");
-//
-//	Print(Fmt::Format("{}", m_pAssertStackNodeTop->m_assertId));
-//
-//	if (!pUnitTest->GetTitle().empty())
-//		Print(Fmt::Format(", \"{}\"", pUnitTest->GetTitle()));
-//
-//	if (1 < testRange.m_numIterations)
-//	{
-//		Print(Fmt::Format(", range [{}, {}] (step size {})",
-//			testRange.m_first, testRange.m_last, testRange.m_stepSize));
-//	}
-//}
-//
-//// --------------------------------------------------------------------------------------------------------------------------------
-//
-//template<typename TReturn, typename TParameters>
-//inline void TestHandler::OutputFailed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue,
-//	TReturn const& computedValue, Result const& result, bool isSeries)
-//{
-//	if (isSeries)
-//		Print(Fmt::Format("\n{0:>4}", iteration));
-//
-//	Print(": ");
-//
-//	PrintAssertion(iteration, parameters, expectedValue);
-//
-//	Print(Fmt::Format("failed, code {}, computed ", result.GetString()));
-//
-//	PrintEvaluation(parameters, computedValue);
-//}
-//
-//// --------------------------------------------------------------------------------------------------------------------------------
-//
-//template<typename TReturn, typename TParameters>
-//inline void TestHandler::OutputFailedWithException(size_t const iteration, TParameters const& parameters,
-//	TReturn const& expectedValue, StringView exceptionString, bool isSeries)
-//{
-//	if (isSeries)
-//		Print(Fmt::Format("\n{0:>4}", iteration));
-//
-//	Print(": ");
-//
-//	PrintAssertion(iteration, parameters, expectedValue);
-//
-//	Print(Fmt::Format("failed with exception, {}", exceptionString));
-//}
-//
-//// --------------------------------------------------------------------------------------------------------------------------------
-//
-//template<typename TReturn, typename TParameters>
-//inline void TestHandler::OutputPassed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue,
-//	bool isSeries)
-//{
-//	if (isSeries)
-//		Print(Fmt::Format("\n{0:>4}", iteration));
-//
-//	Print(": ");
-//
-//	PrintAssertion(iteration, parameters, expectedValue);
-//
-//	Print("passed");
-//}
-//
-//// --------------------------------------------------------------------------------------------------------------------------------
-//
-//inline void TestHandler::OutputSummary(size_t const nPassed, IndexRange const& testRange)
-//{
-//	if (1 < testRange.m_numIterations)
-//	{
-//		Print(Fmt::Format("\nSummary: passed {} / {} (failed {})",
-//			nPassed, testRange.m_numIterations, (testRange.m_numIterations - nPassed)));
-//	}
-//
-//	Print("\n");
-//}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 

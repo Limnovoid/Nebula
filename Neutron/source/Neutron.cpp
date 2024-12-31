@@ -11,6 +11,9 @@ void AddTests(Nebula::TestHandler & testHandler)
 {
 	using namespace Nebula;
 
+	testHandler.Register(MakeShared<PhysicsEngineTestScript>());
+
+	// Pool exploration.
 	std::pmr::pool_options poolOptions;
 	poolOptions.largest_required_pool_block;
 	poolOptions.max_blocks_per_chunk;

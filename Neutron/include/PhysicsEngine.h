@@ -1,7 +1,7 @@
 #ifndef NEUTRON_PHYSICS_ENGINE_H
 #define NEUTRON_PHYSICS_ENGINE_H
 
-#include "RedBlackTree.h"
+#include "TestHandler.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -49,7 +49,7 @@ private:
 	public:
 		float m_parameterizedRadius;
 
-		std::list<Body *>	m_bodies;
+		std::list<SharedPtr<Body>>	m_bodies;
 	};
 
 	class Body
@@ -65,7 +65,23 @@ private:
 	{
 		std::list<ScaledSpace>	m_scaledSpaces; // Linked list of scaling spaces ordered by radius, highest to lowest.
 	};
+
+	// Sorted list of bodies to update (earliest update first) implemented as a priority queue.
+	PriorityQueue<SharedPtr<Body>>	m_updateQueue;
 	*/
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class PhysicsEngineTestScript : public ITestScript
+{
+public:
+	PhysicsEngineTestScript();
+	virtual ~PhysicsEngineTestScript();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
 };
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------
