@@ -11,6 +11,8 @@ public:
 	constexpr ConstString(char c = '\0');
 	constexpr ConstString(char const(& string)[NSize]);
 
+	constexpr char const* Get() const;
+
 	constexpr char & operator[](size_t index);
 	constexpr char const& operator[](size_t index) const;
 
@@ -42,6 +44,14 @@ inline constexpr ConstString<NSize>::ConstString(char const(& string)[NSize])
 {
 	for (size_t i = 0; i < NSize; ++i)
 		m_cstr[i] = string[i];
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<size_t NSize>
+constexpr char const* ConstString<NSize>::Get() const
+{
+	return m_cstr.data();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

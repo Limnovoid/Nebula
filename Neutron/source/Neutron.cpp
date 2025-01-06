@@ -2,7 +2,9 @@
 
 // Include all project headers for library building.
 #include "PhysicsEngine.h"
-#include "NebulaTypes.h"
+#include "Vector3.h"
+
+#include "NebulaTypes.h" // For pool testing.
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -12,8 +14,9 @@ void AddTests(Nebula::TestHandler & testHandler)
 	using namespace Nebula;
 
 	testHandler.Register(MakeShared<PhysicsEngineTestScript>());
+	testHandler.Register(MakeShared<Vector3TestScript>());
 
-	// Pool exploration.
+	// Pool testing.
 	std::pmr::pool_options poolOptions;
 	poolOptions.largest_required_pool_block;
 	poolOptions.max_blocks_per_chunk;

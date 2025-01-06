@@ -19,6 +19,7 @@ int main(int argc, int** argv)
 	UiAddOptions(uiApplication.GetRootMenu());
 	AddTests(uiApplication.GetTestHandler());
 	Nova::AddTests(uiApplication.GetTestHandler());
+	Neutron::AddTests(uiApplication.GetTestHandler());
 
 	uiApplication.Run();
 }

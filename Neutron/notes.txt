@@ -1,0 +1,9 @@
+2024-03-01
+1. Data type for representing orbit periods.
+Orbit of pluto is 248 years so we will use 250 years as a benchmark - must be able to represent at least 250 years.
+Seconds per year = 31536000.
+Max seconds representable with a uint32, in years, is (2^32 - 1)/31536000 = 136 years (rounded down).
+Max seconds representable with a uint64, in years, is (2^64 - 1)/31536000 = 5.8e11 years (rounded down).
+Max seconds representable with an int64, in years, is (2^63 - 1)/31536000 = 2.9e11 years (rounded down).
+Max milliseconds representable with an int64, in years, is (2^63 - 1)/(1e3 * 31536000) = 2.9e8 years (rounded down).
+Max microseconds representable with an int64, in years, is (2^63 - 1)/(1e6 * 31536000) = 2.9e5 years (rounded down).

@@ -2,24 +2,27 @@
 #define NEUTRON_PHYSICS_ENGINE_H
 
 #include "TestHandler.h"
+#include "PriorityQueue.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
 using namespace Nebula;
+using namespace Nova;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 class PhysicsEngine
 {
 public:
+	PhysicsEngine();
+
 	void Tick(double dT)
 	{
 	}
 
-	/*
 private:
-	class Orbit
+	class OrbitalMotion
 	{
 	public:
 		class Parameters
@@ -33,15 +36,18 @@ private:
 		{
 		public:
 			Parameters	m_parameters;
+			double		m_trueAnomalyEntry;
+			double		m_trueAnomalyExit;
 		};
 
 		class Path
 		{
 		public:
-			std::list<Section>	m_sections;
+			std::deque<Section>	m_sections;
 		};
 	};
 
+	/*
 	class Body;
 
 	class ScaledSpace

@@ -49,7 +49,7 @@ inline constexpr bool IsPowerOf2(uint64_t n)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T> requires IsUInt<T>
-constexpr size_t NumDigits(T value)
+inline constexpr size_t NumDigits(T value)
 {
 	return NumDigitsIntImpl(value, 1);
 }
@@ -57,7 +57,7 @@ constexpr size_t NumDigits(T value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T> requires IsSInt<T>
-constexpr size_t NumDigits(T value)
+inline constexpr size_t NumDigits(T value)
 {
 	return NumDigitsIntImpl(Abs(value), 1);
 }
@@ -65,7 +65,7 @@ constexpr size_t NumDigits(T value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T> requires IsFloatingPoint<T>
-constexpr size_t NumDigits(T value)
+inline constexpr size_t NumDigits(T value)
 {
 	/*T const absValue = Abs(value);
 
@@ -90,7 +90,7 @@ constexpr size_t NumDigits(T value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T> requires IsFloatingPoint<T>
-T Ceiling(T value)
+inline T Ceiling(T value)
 {
 	return std::ceil(value);
 }
@@ -98,9 +98,41 @@ T Ceiling(T value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T> requires IsFloatingPoint<T>
-T Floor(T value)
+inline T Floor(T value)
 {
 	return std::floor(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline T Sqrt(T value)
+{
+	static_assert(false);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline float Sqrt<>(float value)
+{
+	return sqrtf(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline double Sqrt<>(double value)
+{
+	return sqrt(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline long double Sqrt<>(long double value)
+{
+	return sqrtl(value);
 }
 
 } // namespace Maths --------------------------------------------------------------------------------------------------------------
