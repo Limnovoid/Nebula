@@ -25,10 +25,41 @@ private:
 	class OrbitalMotion
 	{
 	public:
+		enum class OrbitType
+		{
+			Circle,
+			Ellipse,
+			Hyperbola
+		};
+
 		class Parameters
 		{
-			double	m_massParameter;
-			double	m_eccentricity;
+			double	m_massParameter;				/// Orbital specific angular momentum
+			double	m_eccentricity;					/// Eccentricity
+
+			double	m_vK = 0.f;						/// Constant factor of orbital velocity:             mu / h
+			double	m_mK = 0.f;						/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
+
+			OrbitType Type = OrbitType::Circle;		/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
+
+			/* Dimensions */
+			float m_semiMajor = 0.f;
+			float m_semiMinor = 0.f;
+			float m_c = 0.f;						/// Signed distance from occupied focus to centre, measured along perifocal frame's x-axis
+			double m_t = 0.0;						/// Orbit period, measured in seconds
+			float m_p = 0.f;						/// Orbit parameter, or semi-latus rectum:   h^2 / mu
+
+			/* Orientation */
+			float I = 0.f;							/// Inclination
+			Vector3 N = { 0.f };					/// Direction of ascending node
+			float Omega = 0.f;						/// Right ascension of ascending node
+			float ArgPeriapsis = 0.f;				/// Argument of periapsis
+
+			/* Perifocal frame */
+			Vector3 PerifocalX = { 0.f };
+			Vector3 PerifocalY = { 0.f };
+			Vector3 PerifocalNormal = { 0.f };
+			//Quaternion PerifocalOrientation;					/// Orientation of the perifocal frame relative to the reference frame
 			// etc ...
 		};
 
