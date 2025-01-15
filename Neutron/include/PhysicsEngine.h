@@ -3,6 +3,7 @@
 
 #include "TestHandler.h"
 #include "PriorityQueue.h"
+#include "Vector3.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -22,10 +23,10 @@ public:
 	}
 
 private:
-	class OrbitalMotion
+	class Orbit
 	{
 	public:
-		enum class OrbitType
+		enum class Type
 		{
 			Circle,
 			Ellipse,
@@ -34,13 +35,16 @@ private:
 
 		class Parameters
 		{
+		public:
+			Result Compute();
+
 			double	m_massParameter;				/// Orbital specific angular momentum
 			double	m_eccentricity;					/// Eccentricity
 
 			double	m_vK = 0.f;						/// Constant factor of orbital velocity:             mu / h
 			double	m_mK = 0.f;						/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
 
-			OrbitType Type = OrbitType::Circle;		/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
+			Type m_type = Type::Circle;		/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
 
 			/* Dimensions */
 			float m_semiMajor = 0.f;

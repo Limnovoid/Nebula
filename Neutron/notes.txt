@@ -1,4 +1,4 @@
-2024-03-01
+2024-01-03
 1. Data type for representing orbit periods.
 Orbit of pluto is 248 years so we will use 250 years as a benchmark - must be able to represent at least 250 years.
 Seconds per year = 31536000.
@@ -7,3 +7,43 @@ Max seconds representable with a uint64, in years, is (2^64 - 1)/31536000 = 5.8e
 Max seconds representable with an int64, in years, is (2^63 - 1)/31536000 = 2.9e11 years (rounded down).
 Max milliseconds representable with an int64, in years, is (2^63 - 1)/(1e3 * 31536000) = 2.9e8 years (rounded down).
 Max microseconds representable with an int64, in years, is (2^63 - 1)/(1e6 * 31536000) = 2.9e5 years (rounded down).
+
+2025-01-11
+1. Precision in linear integration of orbital motion:
+
+Velocity Verlet:
+p1 = p0 + (v0 * dT) + (0.5 * a0 * dT^2)
+a1 = (-rDirection * G * M / r^2) + dynamicAcceleration
+v1 = v0 + 0.5 * (a0 + a1) * dT
+
+Position precision = epsP, velocity precision = epsV, acceleration precision = epsA.
+Requirements:
+1. epsP < (v0 * dT)
+2. epsP < (0.5 * a0 * dT^2)
+3. epsA < -rDirection * G * M / r^2
+4. epsV < 0.5 * (a0 + a1) * dT
+
+1 & 2, position delta due to velocity and acceleration:
+At the end of previous iteration, choose dT such that:
+1. epsP / v0 <= dT
+2. sqrt(2 * epsP / a0) <= dT
+Use this dT (or that chosen by requirement 4, whichever is greater) as a countdown to next iteration.
+
+3, acceleration due to gravity:
+Smallest when r = maximum local space radius * local meters per radius = true maximum local space radius = rTrueMax.
+G = 6.67430e-11.
+Can guarantee by restricting simulation configuration such that epsA < G * M / rTrueMax is true for all influencing spaces.
+
+4, velocity delta due to acceleration:
+Choose dT such that: 2 * epsV / |a0 + a1| <= dT.
+Use this dT (or that chosen by requirements 1 & 2, whichever is greater) as countdown to next iteration.
+
+Orbit of pluto is 7.3 billion kilometers, 7.3e12m.
+Epsilon (on this machine) of data types in a local space with true radius = 8e12m:
+1. float = 1.192092896e-7 * 8e12 = 953,674.3168m ~= 9.6e5m
+2. double = 2.2204460492503131e-16 * 8e12 = 0.00177635683940025048m ~= 1.8e-3m
+
+Mass of sun ~= 1e30kg.
+Acceleration due to gravity at distance 8e12m = 1e30 * 6.67430e-11 / (8e12^2) = 0.000001042859375 ~= 1e-6m/s/s.
+Satisfying constraint 2 with different data types:
+1. float: sqrt(2 * 9.6e5 / 1e-6) ~=

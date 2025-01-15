@@ -34,6 +34,15 @@ public:
 	/// <returns> (0, 0, 1) </returns>
 	static constexpr TVector3 Z1();
 
+	/// <returns> The cross product. </returns>
+
+	/// <summary>
+	/// Compute the vector cross product.
+	/// Optimise for precision when operating on the components of two vectors with very different magnitudes, assuming each vector's components have similar magnitudes.
+	/// </summary>
+	/// <returns> The cross product = lhs x rhs. </returns>
+	static TVector3 PreciseCross(TVector3 const& lhs, TVector3 const& rhs);
+
 	/// <returns> The X-component. </returns>
 	T X() const;
 
@@ -136,7 +145,7 @@ inline constexpr TVector3<T>::TVector3(TVector3<U> const& rhs) :
 template<typename T>
 inline constexpr TVector3<T> TVector3<T>:: Zero()
 {
-	return { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
+	return { 0, 0, 0 };
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -161,6 +170,30 @@ template<typename T>
 inline constexpr TVector3<T> TVector3<T>:: Z1()
 {
 	return { 0, 0, 1 };
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs)
+{
+	T lhsMagnitude = Maths::Sqrt<T>(lhs.SqareMagnitude());
+	T rhsMagnitude = Maths::Sqrt<T>(rhs.SqareMagnitude());
+
+	TVector3 lhsNormalized = lhs / lhsMagnitude;
+	TVector3 rhsNormalized = rhs / rhsMagnitude;
+
+	TVector3 crossDirection = lhsNormalized.Cross(rhsNormalized);
+
+	T magnitudeProduct = lhsMagnitude * rhsMagnitude;
+
+	T cosAngle = ((lhs.m_x * rhs.m_x) + (lhs.m_y * rhs.m_y) + (lhs.m_z * rhs.m_z)) / magnitudeProduct;
+
+	T sinAngle = Maths::Sqrt<T>(static_cast<T>(1) - (cosAngle * cosAngle)); // Trig. ident. 1 = sin^2(a) + cos^2(a)
+
+	T crossMagnitude = lhsMagnitude * rhsMagnitude * sinAngle;
+
+	return crossDirection * crossMagnitude;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -242,10 +275,10 @@ template<typename T>
 inline TVector3<T>& TVector3<T>::Normalize()
 {
 	T sqrMag = this->SqareMagnitude();
+
 	if (sqrMag == 0)
-	{
 		return *this;
-	}
+
 	return (*this) /= sqrt(sqrMag);
 }
 
