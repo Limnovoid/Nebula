@@ -8,6 +8,8 @@ Max seconds representable with an int64, in years, is (2^63 - 1)/31536000 = 2.9e
 Max milliseconds representable with an int64, in years, is (2^63 - 1)/(1e3 * 31536000) = 2.9e8 years (rounded down).
 Max microseconds representable with an int64, in years, is (2^63 - 1)/(1e6 * 31536000) = 2.9e5 years (rounded down).
 
+--------------------------------------------------------------------------------------------------------------------------------
+
 2025-01-11
 1. Precision in linear integration of orbital motion:
 
@@ -20,7 +22,7 @@ Position precision = epsP, velocity precision = epsV, acceleration precision = e
 Requirements:
 1. epsP < (v0 * dT)
 2. epsP < (0.5 * a0 * dT^2)
-3. epsA < -rDirection * G * M / r^2
+3. epsA < G * M / r^2
 4. epsV < 0.5 * (a0 + a1) * dT
 
 1 & 2, position delta due to velocity and acceleration:
@@ -45,5 +47,55 @@ Epsilon (on this machine) of data types in a local space with true radius = 8e12
 
 Mass of sun ~= 1e30kg.
 Acceleration due to gravity at distance 8e12m = 1e30 * 6.67430e-11 / (8e12^2) = 0.000001042859375 ~= 1e-6m/s/s.
-Satisfying constraint 2 with different data types:
-1. float: sqrt(2 * 9.6e5 / 1e-6) ~=
+Satisfying constraint 2 with different data types, sqrt(2 * epsP / a0) <= dT:
+1. float: sqrt(2 * 9.6e5 / 1e-6) ~= 1.4e6s ~= 388:53:20 <= dT
+2. double: sqrt(2 * 1.8e-3 / 1e-6) ~= 60s <= dT
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+2025-01-16
+1. Using secondary variables to store sub-epsilon deltas.
+
+dP = (v0 * dT) + (0.5 * a0 * dT^2)
+p1 = p0 + dP
+dP = dP - (p1 - p0)
+
+Full linear integration:
+dP = (v0 * dT) + (0.5 * a0 * dT^2)
+p1 = p0 + dP
+dP = dP - (p1 - p0)
+a1 = (-rDirection * G * M / r^2) + dynamicAcceleration
+v1 = v0 + 0.5 * (a0 + a1) * dT
+
+Epsilon^2, smallest measurable delta for secondary variable in local space with true radius 8e12:
+1. float = 1.192092896e-7^2 * 8e12 = 0.11368683781549335 ~= 1.14e-1m
+2. double = 2.2204460492503131e-16^2 * 8e12 = 3.944304526105059e-19 ~= 3.95e-19m
+
+Satisfying constraint 2:
+1. float^2: sqrt(2 * 1.14e-1 / 1e-6) = 4.77493455452266144815e2 ~= 480s = 8 minutes
+2. double^2: sqrt(2 * 3.95e-19 / 1e-6) = 8.88819441731558941263533333334e-5 ~= 89 microseconds
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+2025-01-21
+1. Distance at which the gravity of our Sun applies acceleration of 10m/s/s: aG = G * M / r^2 --> sqrt(G * M / 10).
+
+sqrt(1e30 * 6.67430e-11 / 10)) = 2.583466663225983839e9 ~= 2.6e9m = 2,600,000km
+
+Earth orbit distance = 149,600,000km.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+2025-01-22
+1. Acceleration due to gravity at orbit radius of Pluto, normalized by that radius: meters/sec/sec / meters/radii = radii/sec/sec.
+
+1e-6 / 8e12 ~= 1.25e-19 r/s/s
+
+Smallest distances representable with floating point data types, normalized by local space with true radius 8e12m.
+1. float = 1.175494351e-38
+2. double = 2.2250738585072014e-308
+
+2. Dynamic-precision data type for storing distances parameterized by local space radii.
+
+Possible fixed-point implementation as maximum value is ~1.
+
