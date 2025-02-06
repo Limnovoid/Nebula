@@ -144,11 +144,13 @@
   <ItemGroup>
     <ClInclude Include="include\Neutron.h" />
     <ClInclude Include="include\PhysicsEngine.h" />
+    <ClInclude Include="include\NeutronTime.h" />
     <ClInclude Include="include\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp" />
     <ClCompile Include="source\PhysicsEngine.cpp" />
+    <ClCompile Include="source\NeutronTime.cpp" />
     <ClCompile Include="source\Vector3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

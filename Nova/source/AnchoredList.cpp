@@ -62,7 +62,7 @@ void AnchoredListTestScript::RunImpl(TestHandler & testHandler)
 
 			return integers.Size();
 
-		}, TestHandler::FRangeIndex(), TestHandler::FRangeConstant(1), "Size after Reset()", TestHandler::IndexRange(1, N_TEST));
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeConstant<size_t>(1), "Size after Reset()", TestHandler::IndexRange<size_t>(1, N_TEST));
 
 		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
 		{
@@ -73,13 +73,13 @@ void AnchoredListTestScript::RunImpl(TestHandler & testHandler)
 
 			return integers.Size() - 1; // Number of nodes added = final total minus the head.
 
-		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Size after EmplaceBack(n)", TestHandler::IndexRange(1, N_TEST));
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Size after EmplaceBack(n)", TestHandler::IndexRange<size_t>(1, N_TEST));
 
 		testHandler.Assert<size_t, size_t>([&](size_t iTest) -> size_t
 		{
 			return (*integers.At(iTest)).m_value;
 
-		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value stored at At(n)", TestHandler::IndexRange(0, N_TEST));
+		}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value stored at At(n)", TestHandler::IndexRange<size_t>(0, N_TEST));
 
 		testHandler.Assert<size_t, size_t>([&](size_t iLast) -> size_t
 		{
@@ -96,7 +96,7 @@ void AnchoredListTestScript::RunImpl(TestHandler & testHandler)
 
 			return iterator->m_value;
 
-		}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i)->m_value; }, "Iterator pre-increment", TestHandler::IndexRange(0, N_TEST));
+		}, TestHandler::FRangeIndex(), [&](size_t i) { return integers.At(i)->m_value; }, "Iterator pre-increment", TestHandler::IndexRange<size_t>(0, N_TEST));
 
 		//testHandler.Assert<MyAnchoredList::Iterator, size_t>([&](size_t iTest) -> MyAnchoredList::Iterator
 		//{

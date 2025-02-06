@@ -20,8 +20,8 @@ namespace Nebula // ------------------------------------------------------------
 	d(RESULT_CODE_NOT_OPEN, "Not Open")														\
 	d(RESULT_CODE_ALREADY_OPEN, "Already Open")												\
 	d(RESULT_CODE_NOT_IMPLEMENTED, "Not Implemented")										\
-	d(RESULT_CODE_EMPTY, "Empty")
-
+	d(RESULT_CODE_EMPTY, "Empty")															\
+	d(RESULT_CODE_INVALID_CAST, "Invalid Cast")
 
 #define RESULT_CODE_GET_ENUMS(resultCode, resultCodeString) resultCode,
 #define RESULT_CODE_GET_SWITCH_CASES(resultCode, resultCodeString) case resultCode: return resultCodeString;

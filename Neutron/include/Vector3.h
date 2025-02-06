@@ -34,12 +34,7 @@ public:
 	/// <returns> (0, 0, 1) </returns>
 	static constexpr TVector3 Z1();
 
-	/// <returns> The cross product. </returns>
-
-	/// <summary>
-	/// Compute the vector cross product.
-	/// Optimise for precision when operating on the components of two vectors with very different magnitudes, assuming each vector's components have similar magnitudes.
-	/// </summary>
+	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <returns> The cross product = lhs x rhs. </returns>
 	static TVector3 PreciseCross(TVector3 const& lhs, TVector3 const& rhs);
 
@@ -66,6 +61,10 @@ public:
 
 	/// <returns> The cross product of this vector (the left-hand side) and another (the right-hand side) = lhs x rhs. </returns>
 	TVector3 Cross(TVector3 const& rhs) const;
+
+	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
+	/// <returns> The cross product = lhs x rhs. </returns>
+	TVector3 PreciseCross(TVector3 const& rhs);
 
 	/// <summary> Normalize this vector. </summary>
 	/// <returns> A reference to this (normalized) vector. </returns>
@@ -267,6 +266,14 @@ inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
 		(m_z * rhs.m_x) - (m_x * rhs.m_z),
 		(m_x * rhs.m_y) - (m_y * rhs.m_x)
 	};
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& rhs)
+{
+	return PreciseCross(*this, rhs);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

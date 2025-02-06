@@ -4,6 +4,7 @@
 #include "TestHandler.h"
 #include "PriorityQueue.h"
 #include "Vector3.h"
+#include "NeutronTime.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -18,11 +19,13 @@ class PhysicsEngine
 public:
 	PhysicsEngine();
 
-	void Tick(double dT)
-	{
-	}
+	void Tick(Time::Microseconds dT);
 
 private:
+	/* Forward declarations. */
+	class Body;
+	class LocalSpace;
+
 	class Orbit
 	{
 	public:
@@ -33,44 +36,44 @@ private:
 			Hyperbola
 		};
 
-		class Parameters
+		class Elements
 		{
 		public:
-			Result Compute();
+			Result Compute(LocalSpace const& localSpace, Vector3 const& localPosition, Vector3 const& localVelocity);
 
-			double	m_massParameter;				/// Orbital specific angular momentum
+			double	m_angularMomentum;				/// Orbital specific angular momentum
 			double	m_eccentricity;					/// Eccentricity
 
-			double	m_vK = 0.f;						/// Constant factor of orbital velocity:             mu / h
-			double	m_mK = 0.f;						/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
+			double	m_velocityK = 0.f;				/// Constant factor of orbital velocity:             mu / h
+			double	m_massK = 0.f;					/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
 
-			Type m_type = Type::Circle;		/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
+			Type m_type = Type::Circle;				/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
 
 			/* Dimensions */
 			float m_semiMajor = 0.f;
 			float m_semiMinor = 0.f;
-			float m_c = 0.f;						/// Signed distance from occupied focus to centre, measured along perifocal frame's x-axis
-			double m_t = 0.0;						/// Orbit period, measured in seconds
-			float m_p = 0.f;						/// Orbit parameter, or semi-latus rectum:   h^2 / mu
+			float m_centreOffset = 0.f;				/// Signed distance from occupied focus to centre, measured along perifocal frame's x-axis.
+			Time::Microseconds m_period = 0;		/// Orbit period, measured in microseconds.
+			float m_parameter = 0.f;				/// Orbit parameter, or semi-latus rectum:   h^2 / mu
 
 			/* Orientation */
-			float I = 0.f;							/// Inclination
-			Vector3 N = { 0.f };					/// Direction of ascending node
-			float Omega = 0.f;						/// Right ascension of ascending node
-			float ArgPeriapsis = 0.f;				/// Argument of periapsis
+			float m_inclination = 0.f;				/// Inclination.
+			Vector3 m_ascendingNode = { 0.f };		/// Direction of ascending node.
+			float m_rightAscension = 0.f;			/// Right ascension of ascending node.
+			float m_argumentPeriapsis = 0.f;		/// Argument of periapsis.
 
 			/* Perifocal frame */
 			Vector3 PerifocalX = { 0.f };
 			Vector3 PerifocalY = { 0.f };
-			Vector3 PerifocalNormal = { 0.f };
-			//Quaternion PerifocalOrientation;					/// Orientation of the perifocal frame relative to the reference frame
+			Vector3 PerifocalZ = { 0.f };
+			//Quaternion PerifocalOrientation;		/// Orientation of the perifocal frame relative to the reference frame
 			// etc ...
 		};
 
 		class Section
 		{
 		public:
-			Parameters	m_parameters;
+			Elements	m_elements;
 			double		m_trueAnomalyEntry;
 			double		m_trueAnomalyExit;
 		};
@@ -82,14 +85,21 @@ private:
 		};
 	};
 
-	/*
-	class Body;
-
-	class ScaledSpace
+	class LocalSpace
 	{
 	public:
-		float m_parameterizedRadius;
+		/// <returns> The position of the local primary relative to this local space. Distances are parameterized to this local space. </returns>
+		Vector3 GetLocalPrimaryPosition() const;
 
+		/// <returns> The velocity of the local primary relative to this local space. Distances are parameterized to this local space. </returns>
+		Vector3 GetLocalPrimaryVelocity() const;
+
+	private:
+		int64_t	m_trueRadius;			// Radius in meters.
+		float	m_radius;				// Radius relative to parent space.
+		double	m_gravityParameter;		// Gravitational parameter = M * G | G = gravitational constant, M = mass of locally influencing body.
+
+		SharedPtr<Body>				m_pHost;
 		std::list<SharedPtr<Body>>	m_bodies;
 	};
 
@@ -97,18 +107,23 @@ private:
 	{
 	public:
 		// Physical attributes...
-		double	m_mass;
-		Vec3	m_parameterizedPosition;
-		Vec3	m_parameterizedVelocity;
+		double			m_mass;
+		Vector3			m_localPosition;
+		Vector3			m_localVelocity;
+
+		Orbit::Elements	m_elements;
 	};
 
+	/*
 	class Primary : public Body
 	{
-		std::list<ScaledSpace>	m_scaledSpaces; // Linked list of scaling spaces ordered by radius, highest to lowest.
+		std::list<LocalSpace>	m_scaledSpaces; // Linked list of scaling spaces ordered by radius, highest to lowest.
 	};
 
 	// Sorted list of bodies to update (earliest update first) implemented as a priority queue.
 	PriorityQueue<SharedPtr<Body>>	m_updateQueue;
+
+	std::list<LocalSpace>	m_rootSpaces;
 	*/
 };
 

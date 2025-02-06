@@ -12,6 +12,7 @@
 #include "UiMenu.h"
 #include "UnitTest.h"
 #include "Random.h"
+#include "Macros.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
@@ -24,23 +25,30 @@ public:
 		String	m_sharedLogFilePath;
 	};
 
+	template<IsInt T = size_t>
 	class IndexRange
 	{
 	public:
 		/// <returns> The sequence of indices defined by the given index range. </returns>
-		static std::vector<size_t> GetIndexSequence(IndexRange const& indexRange);
+		static std::vector<T> GetIndexSequence(IndexRange const& indexRange);
 
 		/// <returns> The position of the given index in the sequence defined by this range of indices. </returns>
-		static size_t GetIndexPosition(IndexRange const& indexRange, size_t index);
+		static size_t GetIndexPosition(IndexRange const& indexRange, T index);
 
 		/// <param name="first">Index of first test iteration to execute.</param>
 		/// <param name="last">Index of last test iteration to execute.</param>
 		/// <param name="stepsize">Number by which index is incremented between executed test iterations. Use a negative for decrementing.</param>
 		/// <exception cref="std::exception">Range is ill-defined.</exception>
-		IndexRange(size_t first = 0, size_t last = 0, int stepsize = 1);
+		IndexRange(T first = 0, T last = 0, int stepsize = 1);
 
-		size_t const	m_first;
-		size_t const	m_last;
+		/// <returns> The sequence of indices defined by the given index range. </returns>
+		std::vector<T> GetIndexSequence() const;
+
+		/// <returns> The position of the given index in the sequence defined by this range of indices. </returns>
+		size_t GetIndexPosition(T index) const;
+
+		T const	m_first;
+		T const	m_last;
 		int const		m_stepSize;
 		size_t const	m_numIterations;
 
@@ -48,81 +56,86 @@ public:
 		size_t ComputeNumIterations() const;
 	};
 
+	template<typename T = size_t>
 	struct FRangeIndex
 	{
-		size_t operator()(size_t index) { return index; }
+		T operator()(T index)
+		{
+			return index;
+		}
 	};
 
+	template<typename TIndex = size_t, typename TReturn = TIndex>
 	struct FRangeZero
 	{
-		size_t operator()(size_t index) { return 0; }
+		TReturn operator()(TIndex) { return 0; }
 	};
 
+	template<typename T = size_t>
 	struct FRangeConstant
 	{
-		FRangeConstant(size_t constant) : m_constant(constant) {}
+		FRangeConstant(T constant) : m_constant(constant) {}
 
-		size_t operator()(size_t index) { return m_constant; }
+		T operator()(T) { return m_constant; }
 
-		size_t const		m_constant;
+		T const		m_constant;
 	};
 
+	template<typename T = size_t>
 	struct FRangeRandomOrder
 	{
 		/// <param name="indexRange"> The index range passed into TestHandler::Assert. </param>
-		FRangeRandomOrder(IndexRange const& indexRange) :
+		FRangeRandomOrder(IndexRange<T> const& indexRange) :
 			m_indexRange(indexRange),
-			m_indexSequence(IndexRange::GetIndexSequence(indexRange))
+			m_indexSequence(IndexRange<T>::GetIndexSequence(indexRange))
 		{
 			Random::Shuffle(m_indexSequence);
 		}
 
-		size_t operator()(size_t index)
+		T operator()(T index)
 		{
-			return m_indexSequence[IndexRange::GetIndexPosition(m_indexRange, index)];
+			return m_indexSequence[IndexRange<T>::GetIndexPosition(m_indexRange, index)];
 		}
 
-		IndexRange const	m_indexRange;
-		std::vector<size_t>	m_indexSequence;
-	};
-
-	template<typename T>
-	struct FConstant
-	{
-		FConstant(T const& constant) : m_constant(constant) {}
-
-		T const& operator()(size_t index) { return m_constant; }
-
-		T const				m_constant;
+		IndexRange<T> const		m_indexRange;
+		std::vector<T>			m_indexSequence;
 	};
 
 	TestHandler(Settings settings);
 
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-		requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-		TFuncGetExpected funcGetExpected, IndexRange const& testRange = IndexRange());
+		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters>
+	//
+	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters, TReturn const* pExpected,
-		IndexRange const& testRange = IndexRange());
+		IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters>
+	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters, TReturn const& expected,
-		IndexRange const& testRange = IndexRange());
+		IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-		requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+	//
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
-		TFuncGetExpected funcGetExpected, StringView title, IndexRange const& testRange = IndexRange());
+		TFuncGetExpected funcGetExpected, StringView title, IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters>
-	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
-		StringView title, IndexRange const& testRange = IndexRange());
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
+	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters>
+	//
+	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
-		IndexRange const& testRange = IndexRange());
+		StringView title, IndexRange<TIndex> const& testRange = {});
+
+	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
+	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
+		IndexRange<TIndex> const& testRange = {});
 
 	Result Register(SharedPtr<ITestScript> pTestScript);
 
@@ -234,15 +247,15 @@ private:
 		std::deque<Node>	m_nodes;
 	};
 
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-		requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
+		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	AssertResult AssertSingle(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-		TFuncGetExpected funcGetExpected, size_t testIndex, String & resultMessage);
+		TFuncGetExpected funcGetExpected, TIndex testIndex, String & resultMessage);
 
 	void Print(StringView message);
 
-	template<typename TReturn, typename TParameters>
-	void OutputPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange const& testRange);
+	template<typename TReturn, typename TParameters, IsInt TIndex>
+	void OutputPreamble(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, IndexRange<TIndex> const& testRange);
 
 	template<typename TReturn, typename TParameters>
 	void OutputFailed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, TReturn const& computedValue, Result const& result, bool isSeries = false);
@@ -250,13 +263,11 @@ private:
 	template<typename TReturn, typename TParameters>
 	void OutputFailedWithException(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, StringView exceptionString, bool isSeries = false);
 
-	template<typename TReturn, typename TParameters>
+	template<typename TReturn, typename TParameters, IsInt TIndex>
 	void OutputPassed(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, bool isSeries = false);
 
-	void OutputSummary(size_t const nPassed, IndexRange const& testRange);
-
-	template<typename TReturn, typename TParameters>
-	void PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue, TReturn const& returnValue);
+	template<IsInt TIndex>
+	void OutputSummary(size_t const nPassed, IndexRange<TIndex> const& testRange);
 
 	template<typename TReturn, typename TParameters>
 		requires (IsFormattable<TParameters> && IsFormattable<TReturn>)
@@ -297,10 +308,10 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-	requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
+	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-	TFuncGetExpected funcGetExpected, IndexRange const& testRange)
+	TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange)
 {
 	// Print the IDs up to and including assertIndex.
 	auto fPrintAssertId = [&](size_t assertIndex)
@@ -370,18 +381,20 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 			m_assertResults.emplace_back();
 		// /Assert ID increment
 
-		for (size_t i = 0; i < testRange.m_numIterations; ++i)
+		//for (size_t i = 0; i < testRange.m_numIterations; ++i)
+		auto indexSequence = testRange.GetIndexSequence();
+		for (TIndex index : indexSequence)
 		{
-			size_t testIndex = testRange.m_first;
+			/*size_t testIndex = testRange.m_first;
 
 			if (0 < testRange.m_stepSize)
 				testIndex += i * static_cast<size_t>(testRange.m_stepSize);
 			else
-				testIndex -= i * static_cast<size_t>(Maths::Abs(testRange.m_stepSize));
+				testIndex -= i * static_cast<size_t>(Maths::Abs(testRange.m_stepSize));*/
 
 			fPrintAssertId(m_assertIndex - 1);
 
-			AssertResult assertResult = AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, testIndex, resultMessage);
+			AssertResult assertResult = AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, index, resultMessage);
 
 			fPrintResult(m_assertIndex - 1, resultMessage, isSubAssert);
 
@@ -419,13 +432,13 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters>
+template<typename TReturn, typename TParameters, IsInt TIndex>
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters,
-	TReturn const* pExpected, IndexRange const& testRange)
+	TReturn const* pExpected, IndexRange<TIndex> const& testRange)
 {
 	struct FuncGetParameters
 	{
-		TParameters const& operator()(size_t index)
+		TParameters const& operator()(TIndex index)
 		{
 			return m_pParameters[index];
 		}
@@ -435,7 +448,7 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 	struct FuncGetExpected
 	{
-		TReturn const& operator()(size_t index)
+		TReturn const& operator()(TIndex index)
 		{
 			return m_pExpected[index];
 		}
@@ -448,13 +461,13 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters>
+template<typename TReturn, typename TParameters, IsInt TIndex>
 inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters,
-	TReturn const& expected, IndexRange const& testRange)
+	TReturn const& expected, IndexRange<TIndex> const& testRange)
 {
 	struct FuncGetParameters
 	{
-		TParameters const& operator()(size_t index)
+		TParameters const& operator()(TIndex index)
 		{
 			return m_parameters;
 		}
@@ -464,7 +477,7 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 	struct FuncGetExpected
 	{
-		TReturn const& operator()(size_t index)
+		TReturn const& operator()(TIndex index)
 		{
 			return m_expected;
 		}
@@ -477,10 +490,10 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-	requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
+	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
-	TFuncGetExpected funcGetExpected, StringView title, IndexRange const& testRange)
+	TFuncGetExpected funcGetExpected, StringView title, IndexRange<TIndex> const& testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
@@ -492,9 +505,19 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters>
+template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
+	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+	TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange)
+{
+	return Assert(unitTestFunc, funcGetParameters, funcGetExpected, "", testRange);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn, typename TParameters, IsInt TIndex>
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
-	TReturn const& expected, StringView title, IndexRange const& testRange)
+	TReturn const& expected, StringView title, IndexRange<TIndex> const& testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
@@ -506,9 +529,9 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters>
+template<typename TReturn, typename TParameters, IsInt TIndex>
 inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
-	TReturn const& expected, IndexRange const& testRange)
+	TReturn const& expected, IndexRange<TIndex> const& testRange)
 {
 	return Assert(unitTestFunc, parameters, expected, "", testRange);
 }
@@ -522,29 +545,32 @@ inline SharedPtr<UiMenu> TestHandler::GetMenu()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected>
-	requires (IsInvocable<TFuncGetParameters, size_t> && IsInvocable<TFuncGetExpected, size_t>)
+template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
+	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 inline TestHandler::AssertResult TestHandler::AssertSingle(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
-	TFuncGetExpected funcGetExpected, size_t testIndex, String & resultMessage)
+	TFuncGetExpected funcGetExpected, TIndex testIndex, String & resultMessage)
 {
 	AssertResult assertResult = AssertResult::SingleFail();
 
-	TReturn returnValue(funcGetExpected(testIndex));
-
 	try
 	{
-		Result result = pUnitTest->Invoke(funcGetParameters(testIndex), returnValue);
+		TParameters const& parameters = funcGetParameters(testIndex);
+		TReturn const& expected = funcGetExpected(testIndex);
 
-		resultMessage = GetEvaluationString(funcGetParameters(testIndex), returnValue);
+		TReturn returnValue(expected);
 
-		if ((RESULT_CODE_SUCCESS == result) && (funcGetExpected(testIndex) == returnValue))
+		Result result = pUnitTest->Invoke(parameters, returnValue);
+
+		resultMessage = GetEvaluationString(parameters, returnValue);
+
+		if ((RESULT_CODE_SUCCESS == result) && (expected == returnValue))
 		{
 			assertResult = AssertResult::SinglePass();
 			resultMessage += " - Pass";
 		}
 		else
 		{
-			resultMessage += Fmt::Format(" - FAIL with code {} - expected {}", result, funcGetExpected(testIndex));
+			resultMessage += Fmt::Format(" - FAIL with code {} - expected {}", result, expected);
 		}
 	}
 	catch (AssertionException const& exception)
@@ -577,16 +603,6 @@ inline void TestHandler::Print(StringView message)
 		if (nullptr != m_pTemporaryUiIo)
 			m_pTemporaryUiIo->Print(message);
 	}
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TReturn, typename TParameters>
-inline void TestHandler::PrintAssertion(size_t const iteration, TParameters const& parameters, TReturn const& expectedValue,
-	TReturn const& returnValue)
-{
-	PrintEvaluation(parameters, returnValue);
-
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -632,6 +648,100 @@ template<typename TReturn, typename TParameters>
 inline String TestHandler::GetEvaluationString(TParameters const& parameters, TReturn const& value)
 {
 	return Fmt::Format("f(!) -> !", parameters, value);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+inline TestHandler::IndexRange<T>::IndexRange(T start, T end, int stepsize) :
+	m_first(start),
+	m_last(end),
+	m_stepSize(stepsize),
+	m_numIterations(ComputeNumIterations())
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+inline size_t TestHandler::IndexRange<T>::ComputeNumIterations() const
+{
+	size_t numIterations = 1;
+
+	ASSERT(0 != m_stepSize);
+
+	if (m_first < m_last)
+	{
+		ASSERT(0 < m_stepSize);
+
+		numIterations += ((m_last - m_first) / static_cast<size_t>(m_stepSize));
+	}
+	else if (m_last < m_first)
+	{
+		ASSERT(m_stepSize < 0);
+
+		numIterations += ((m_first - m_last) / static_cast<size_t>(Maths::Abs(m_stepSize)));
+	}
+
+	return numIterations;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+inline std::vector<T> TestHandler::IndexRange<T>::GetIndexSequence(IndexRange const& indexRange)
+{
+	std::vector<T> sequence(indexRange.m_numIterations);
+
+	size_t sequenceIndex = 0;
+
+	if (0 < indexRange.m_stepSize)
+	{
+		for (T i = indexRange.m_first; i <= indexRange.m_last; i += static_cast<T>(indexRange.m_stepSize))
+			sequence[sequenceIndex++] = i;
+	}
+	else
+	{
+		for (T i = indexRange.m_first; indexRange.m_last <= i; i -= static_cast<T>(Maths::Abs(indexRange.m_stepSize)))
+			sequence[sequenceIndex++] = i;
+	}
+
+	return sequence;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+inline size_t TestHandler::IndexRange<T>::GetIndexPosition(IndexRange const& indexRange, T index)
+{
+	if (indexRange.m_first == index)
+		return 0;
+
+	size_t sequenceIndex;
+
+	if (0 < indexRange.m_stepSize)
+		sequenceIndex = (index - indexRange.m_first) / static_cast<size_t>(indexRange.m_stepSize);
+	else
+		sequenceIndex = (indexRange.m_first - index) / static_cast<size_t>(Maths::Abs(indexRange.m_stepSize));
+
+	return sequenceIndex;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+std::vector<T> TestHandler::IndexRange<T>::GetIndexSequence() const
+{
+	return GetIndexSequence(*this);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<IsInt T>
+size_t TestHandler::IndexRange<T>::GetIndexPosition(T index) const
+{
+	return GetIndexPosition(*this, index);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

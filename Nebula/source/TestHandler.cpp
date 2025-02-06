@@ -1,6 +1,5 @@
 #include "TestHandler.h"
 
-#include "Macros.h"
 #include "Maths.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
@@ -67,79 +66,6 @@ void TestHandler::Run(SharedPtr<ITestScript> pTestScript)
 	Print("\n");
 
 	m_sharedLogFile.Close();
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-TestHandler::IndexRange::IndexRange(size_t start, size_t end, int stepsize) :
-	m_first(start),
-	m_last(end),
-	m_stepSize(stepsize),
-	m_numIterations(ComputeNumIterations())
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-size_t TestHandler::IndexRange::ComputeNumIterations() const
-{
-	size_t numIterations = 1;
-
-	ASSERT(0 != m_stepSize);
-
-	if (m_first < m_last)
-	{
-		ASSERT(0 < m_stepSize);
-
-		numIterations += ((m_last - m_first) / static_cast<size_t>(m_stepSize));
-	}
-	else if (m_last < m_first)
-	{
-		ASSERT(m_stepSize < 0);
-
-		numIterations += ((m_first - m_last) / static_cast<size_t>(Maths::Abs(m_stepSize)));
-	}
-
-	return numIterations;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-std::vector<size_t> TestHandler::IndexRange::GetIndexSequence(IndexRange const& indexRange)
-{
-	std::vector<size_t> sequence(indexRange.m_numIterations);
-
-	for (size_t i = 0; i < indexRange.m_numIterations; ++i)
-	{
-		size_t testIndex = indexRange.m_first;
-
-		if (0 < indexRange.m_stepSize)
-			testIndex += i * static_cast<size_t>(indexRange.m_stepSize);
-		else
-			testIndex -= i * static_cast<size_t>(Maths::Abs(indexRange.m_stepSize));
-
-		sequence[i] = testIndex;
-	}
-
-	return sequence;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-size_t TestHandler::IndexRange::GetIndexPosition(IndexRange const& indexRange, size_t index)
-{
-	if (indexRange.m_first == index)
-		return 0;
-
-	size_t sequenceIndex;
-
-	if (0 < indexRange.m_stepSize)
-		sequenceIndex = (index - indexRange.m_first) / static_cast<size_t>(indexRange.m_stepSize);
-	else
-		sequenceIndex = (indexRange.m_first - index) / static_cast<size_t>(Maths::Abs(indexRange.m_stepSize));
-
-	return sequenceIndex;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -239,8 +165,8 @@ void TestHandlerTestScript::RunImpl(TestHandler & testHandler)
 	}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Test Exception handling", { 1, 1 });
 
 	// Random index sequence
-	TestHandler::IndexRange indexRange = { 0, 10 };
-	std::vector<size_t> const indexSequence = TestHandler::IndexRange::GetIndexSequence(indexRange);
+	TestHandler::IndexRange<size_t> indexRange = { 0, 10 };
+	std::vector<size_t> const indexSequence = TestHandler::IndexRange<>::GetIndexSequence(indexRange);
 	std::set<size_t> previousIndices;
 
 	testHandler.Assert<bool, size_t>([&](size_t index)
@@ -253,6 +179,13 @@ void TestHandlerTestScript::RunImpl(TestHandler & testHandler)
 		return (isInSequence && isNewIndex);
 
 	}, TestHandler::FRangeRandomOrder({ 0, 10 }), [](size_t){ return true; }, "Test FRangeRandomOrder", { 0, 10 });
+
+	// Negative indexes.
+	std::array<int, 5> expectedIndices = { -10, -5, 0, 5, 10 };
+	size_t iteration = 0;
+	testHandler.Assert<int, int>([&](int index) { return index; },TestHandler::FRangeIndex<int>(),
+		[&](int) { return expectedIndices[iteration++]; },"Negative indices increasing", TestHandler::IndexRange<int>(-10, 10, 5));
+	//testHandler.Assert<int, int>([](int index){ return index; }, 0, [&](int index) { return expectedIndices[iteration++]; }, "Negative indices increasing", {-10, 10, 5});
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

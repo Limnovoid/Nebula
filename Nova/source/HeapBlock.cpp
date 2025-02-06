@@ -86,7 +86,7 @@ void HeapBlockTestScript::RunImpl(TestHandler & testHandler)
 
 	Footprint footprint1 = Footprint::Make<uint16_t>(TEST_SIZE);
 	HeapBlock heapBlock4(footprint1);
-	testHandler.Assert<size_t, size_t, TestHandler::FRangeIndex, TestHandler::FRangeZero>([&](size_t index) -> size_t
+	testHandler.Assert<size_t, size_t>([&](size_t index) -> size_t
 	{
 		return reinterpret_cast<uintptr_t>(heapBlock4.Get<uint16_t>(index)) % footprint1.Alignment();
 	}, TestHandler::FRangeIndex(), TestHandler::FRangeZero(), "HeapBlock.Get(i) alignment", { 0, TEST_SIZE - 1 });

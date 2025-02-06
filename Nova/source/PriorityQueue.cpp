@@ -54,10 +54,10 @@ void PriorityQueueTestScript::RunImpl(TestHandler & testHandler)
 
 		return myPriorityQueue.Front().m_value;
 
-	}, TestHandler::FRangeIndex(), TestHandler::FRangeZero(), "Value of Front after Inserting incrementing values", TestHandler::IndexRange(0, N_TEST - 1));
+	}, TestHandler::FRangeIndex(), TestHandler::FRangeZero(), "Value of Front after Inserting incrementing values", TestHandler::IndexRange<size_t>(0, N_TEST - 1));
 
 	testHandler.Assert<size_t, size_t>(fPopRangeTest, TestHandler::FRangeIndex(), [&](size_t i) { return i + 1; },
-		"Value of Front after popping N times", TestHandler::IndexRange(0, N_TEST - 2));
+		"Value of Front after popping N times", TestHandler::IndexRange<size_t>(0, N_TEST - 2));
 
 	myPriorityQueue.Pop();
 
@@ -74,10 +74,10 @@ void PriorityQueueTestScript::RunImpl(TestHandler & testHandler)
 
 		return myPriorityQueue.Front().m_value;
 
-	}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value of Front after Inserting decrementing values", TestHandler::IndexRange(N_TEST - 1, 0, -1));
+	}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Value of Front after Inserting decrementing values", TestHandler::IndexRange<size_t>(N_TEST - 1, 0, -1));
 
 	testHandler.Assert<size_t, size_t>(fPopRangeTest, TestHandler::FRangeIndex(), [&](size_t i) { return i + 1; },
-		"Value of Front after popping N times", TestHandler::IndexRange(0, N_TEST - 2));
+		"Value of Front after popping N times", TestHandler::IndexRange<size_t>(0, N_TEST - 2));
 
 	myPriorityQueue.Pop();
 
@@ -98,7 +98,7 @@ void PriorityQueueTestScript::RunImpl(TestHandler & testHandler)
 	}, TestHandler::FRangeRandomOrder({ 1, N_TEST - 1 }), TestHandler::FRangeZero(), "Value of Front after Inserting values in random order", { 1, N_TEST - 1 });
 
 	testHandler.Assert<size_t, size_t>(fPopRangeTest, TestHandler::FRangeIndex(), [&](size_t i) { return i + 1; },
-		"Value of Front after popping N times", TestHandler::IndexRange(0, N_TEST - 2));
+		"Value of Front after popping N times", TestHandler::IndexRange<size_t>(0, N_TEST - 2));
 
 	myPriorityQueue.Pop();
 

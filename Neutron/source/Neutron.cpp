@@ -3,6 +3,7 @@
 // Include all project headers for library building.
 #include "PhysicsEngine.h"
 #include "Vector3.h"
+#include "NeutronTime.h"
 
 #include "NebulaTypes.h" // For pool testing.
 
@@ -15,6 +16,7 @@ void AddTests(Nebula::TestHandler & testHandler)
 
 	testHandler.Register(MakeShared<PhysicsEngineTestScript>());
 	testHandler.Register(MakeShared<Vector3TestScript>());
+	testHandler.Register(MakeShared<TimeTestScript>());
 
 	// Pool testing.
 	std::pmr::pool_options poolOptions;

@@ -12,7 +12,7 @@ using StringView = std::string_view;
 class String : public std::string
 {
 public:
-	/// <returns>True if the character is printable whitespace; false otherwise.</returns>
+	/// <returns> True if the character is printable whitespace; false otherwise. </returns>
 	static bool IsWhitespace(char const c);
 
 	/// <summary> Get a view of the first word - unbroken sequence of non-whitespace characters - in the string. </summary>
