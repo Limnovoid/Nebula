@@ -25,30 +25,30 @@ public:
 		String	m_sharedLogFilePath;
 	};
 
-	template<IsInt T = size_t>
+	template<IsInt TIndex = int64_t>
 	class IndexRange
 	{
 	public:
 		/// <returns> The sequence of indices defined by the given index range. </returns>
-		static std::vector<T> GetIndexSequence(IndexRange const& indexRange);
+		static std::vector<TIndex> GetIndexSequence(IndexRange const& indexRange);
 
 		/// <returns> The position of the given index in the sequence defined by this range of indices. </returns>
-		static size_t GetIndexPosition(IndexRange const& indexRange, T index);
+		static size_t GetIndexPosition(IndexRange const& indexRange, TIndex index);
 
 		/// <param name="first">Index of first test iteration to execute.</param>
 		/// <param name="last">Index of last test iteration to execute.</param>
 		/// <param name="stepsize">Number by which index is incremented between executed test iterations. Use a negative for decrementing.</param>
 		/// <exception cref="std::exception">Range is ill-defined.</exception>
-		IndexRange(T first = 0, T last = 0, int stepsize = 1);
+		IndexRange(TIndex first = 0, TIndex last = 0, int stepsize = 1);
 
 		/// <returns> The sequence of indices defined by the given index range. </returns>
-		std::vector<T> GetIndexSequence() const;
+		std::vector<TIndex> GetIndexSequence() const;
 
 		/// <returns> The position of the given index in the sequence defined by this range of indices. </returns>
-		size_t GetIndexPosition(T index) const;
+		size_t GetIndexPosition(TIndex index) const;
 
-		T const	m_first;
-		T const	m_last;
+		TIndex const	m_first;
+		TIndex const	m_last;
 		int const		m_stepSize;
 		size_t const	m_numIterations;
 
@@ -56,84 +56,84 @@ public:
 		size_t ComputeNumIterations() const;
 	};
 
-	template<typename T = size_t>
+	template<typename TIndex = int64_t>
 	struct FRangeIndex
 	{
-		T operator()(T index)
+		TIndex operator()(TIndex index)
 		{
 			return index;
 		}
 	};
 
-	template<typename TIndex = size_t, typename TReturn = TIndex>
+	template<typename TIndex = int64_t, typename TReturn = TIndex>
 	struct FRangeZero
 	{
 		TReturn operator()(TIndex) { return 0; }
 	};
 
-	template<typename T = size_t>
+	template<typename TIndex = int64_t>
 	struct FRangeConstant
 	{
-		FRangeConstant(T constant) : m_constant(constant) {}
+		FRangeConstant(TIndex constant) : m_constant(constant) {}
 
-		T operator()(T) { return m_constant; }
+		TIndex operator()(TIndex) { return m_constant; }
 
-		T const		m_constant;
+		TIndex const		m_constant;
 	};
 
-	template<typename T = size_t>
+	template<typename TIndex = int64_t>
 	struct FRangeRandomOrder
 	{
 		/// <param name="indexRange"> The index range passed into TestHandler::Assert. </param>
-		FRangeRandomOrder(IndexRange<T> const& indexRange) :
+		FRangeRandomOrder(IndexRange<TIndex> const& indexRange) :
 			m_indexRange(indexRange),
-			m_indexSequence(IndexRange<T>::GetIndexSequence(indexRange))
+			m_indexSequence(IndexRange<TIndex>::GetIndexSequence(indexRange))
 		{
 			Random::Shuffle(m_indexSequence);
 		}
 
-		T operator()(T index)
+		TIndex operator()(TIndex index)
 		{
-			return m_indexSequence[IndexRange<T>::GetIndexPosition(m_indexRange, index)];
+			return m_indexSequence[IndexRange<TIndex>::GetIndexPosition(m_indexRange, index)];
 		}
 
-		IndexRange<T> const		m_indexRange;
-		std::vector<T>			m_indexSequence;
+		IndexRange<TIndex> const		m_indexRange;
+		std::vector<TIndex>			m_indexSequence;
 	};
 
 	TestHandler(Settings settings);
 
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
 	//
-	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters, TReturn const* pExpected,
 		IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters, TReturn const& expected,
 		IndexRange<TIndex> const& testRange = {});
 
 	//
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, StringView title, IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
 	//
-	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		StringView title, IndexRange<TIndex> const& testRange = {});
 
-	template<typename TReturn, typename TParameters, IsInt TIndex = size_t>
+	template<typename TReturn, typename TParameters, IsInt TIndex= int64_t>
 	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		IndexRange<TIndex> const& testRange = {});
 
@@ -653,8 +653,8 @@ inline String TestHandler::GetEvaluationString(TParameters const& parameters, TR
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-inline TestHandler::IndexRange<T>::IndexRange(T start, T end, int stepsize) :
+template<IsInt TIndex>
+inline TestHandler::IndexRange<TIndex>::IndexRange(TIndex start, TIndex end, int stepsize) :
 	m_first(start),
 	m_last(end),
 	m_stepSize(stepsize),
@@ -664,8 +664,8 @@ inline TestHandler::IndexRange<T>::IndexRange(T start, T end, int stepsize) :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-inline size_t TestHandler::IndexRange<T>::ComputeNumIterations() const
+template<IsInt TIndex>
+inline size_t TestHandler::IndexRange<TIndex>::ComputeNumIterations() const
 {
 	size_t numIterations = 1;
 
@@ -689,21 +689,21 @@ inline size_t TestHandler::IndexRange<T>::ComputeNumIterations() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-inline std::vector<T> TestHandler::IndexRange<T>::GetIndexSequence(IndexRange const& indexRange)
+template<IsInt TIndex>
+inline std::vector<TIndex> TestHandler::IndexRange<TIndex>::GetIndexSequence(IndexRange const& indexRange)
 {
-	std::vector<T> sequence(indexRange.m_numIterations);
+	std::vector<TIndex> sequence(indexRange.m_numIterations);
 
 	size_t sequenceIndex = 0;
 
 	if (0 < indexRange.m_stepSize)
 	{
-		for (T i = indexRange.m_first; i <= indexRange.m_last; i += static_cast<T>(indexRange.m_stepSize))
+		for (TIndex i = indexRange.m_first; i <= indexRange.m_last; i += static_cast<TIndex>(indexRange.m_stepSize))
 			sequence[sequenceIndex++] = i;
 	}
 	else
 	{
-		for (T i = indexRange.m_first; indexRange.m_last <= i; i -= static_cast<T>(Maths::Abs(indexRange.m_stepSize)))
+		for (TIndex i = indexRange.m_first; indexRange.m_last <= i; i -= static_cast<TIndex>(Maths::Abs(indexRange.m_stepSize)))
 			sequence[sequenceIndex++] = i;
 	}
 
@@ -712,8 +712,8 @@ inline std::vector<T> TestHandler::IndexRange<T>::GetIndexSequence(IndexRange co
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-inline size_t TestHandler::IndexRange<T>::GetIndexPosition(IndexRange const& indexRange, T index)
+template<IsInt TIndex>
+inline size_t TestHandler::IndexRange<TIndex>::GetIndexPosition(IndexRange const& indexRange, TIndex index)
 {
 	if (indexRange.m_first == index)
 		return 0;
@@ -730,16 +730,16 @@ inline size_t TestHandler::IndexRange<T>::GetIndexPosition(IndexRange const& ind
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-std::vector<T> TestHandler::IndexRange<T>::GetIndexSequence() const
+template<IsInt TIndex>
+std::vector<TIndex> TestHandler::IndexRange<TIndex>::GetIndexSequence() const
 {
 	return GetIndexSequence(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
-size_t TestHandler::IndexRange<T>::GetIndexPosition(T index) const
+template<IsInt TIndex>
+size_t TestHandler::IndexRange<TIndex>::GetIndexPosition(TIndex index) const
 {
 	return GetIndexPosition(*this, index);
 }

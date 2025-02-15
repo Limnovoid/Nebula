@@ -19,12 +19,32 @@ void PhysicsEngine::Tick(Time::Microseconds dT)
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
+
+ResultCode PhysicsEngine::CreateBody(Body::Attributes const& attributes, SharedPtr<LocalSpace> pHostSpace)
+{
+	SharedPtr<Body> pNewBody = MakeShared<Body>(attributes, pHostSpace);
+
+	assert(false); // TODO ...
+
+	return RESULT_CODE_NOT_IMPLEMENTED;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+PhysicsEngine::Orbit::Elements::Elements(LocalSpace const& localSpace, Vector3 const& localPosition, Vector3 const& localVelocity)
+{
+	ASSERT_THROW_RESULT(SUCCESS, !=, Compute(localSpace, localPosition, localVelocity),
+		Fmt::Format("Failed to construct elements from arguments: LocalSpace {}, position {}, velocity {}",
+			localSpace.m_uuid, localPosition, localVelocity));
+}
+
 // --------------------------------------------------------------------------------------------------------------------------------
 
 Result PhysicsEngine::Orbit::Elements::Compute(LocalSpace const& localSpace, Vector3 const& localPosition, Vector3 const& localVelocity)
 {
-	Vector3 positionFromPrimary = localPosition - localSpace.GetLocalPrimaryPosition();
-	Vector3 velocityFromPrimary = localVelocity - localSpace.GetLocalPrimaryVelocity();
+	Vector3 positionFromPrimary = localPosition - localSpace.m_primaryAttributes.m_localPosition;
+	Vector3 velocityFromPrimary = localVelocity - localSpace.m_primaryAttributes.m_localVelocity;
 
 	Vector3 angularMomentumVector = positionFromPrimary.PreciseCross(velocityFromPrimary);
 
@@ -34,20 +54,72 @@ Result PhysicsEngine::Orbit::Elements::Compute(LocalSpace const& localSpace, Vec
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Vector3 PhysicsEngine::LocalSpace::GetLocalPrimaryPosition() const
+PhysicsEngine::Node::Node(Uuid const uuid) :
+	m_uuid(uuid)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+bool PhysicsEngine::LocalSpace::IsInfluencing() const
 {
 	assert(false); // TODO ...
 
-	return {};
+	return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Vector3 PhysicsEngine::LocalSpace::GetLocalPrimaryVelocity() const
+Result PhysicsEngine::LocalSpace::OnHostTick()
 {
-	assert(false); // TODO ...
+	(void) ComputeLocalPrimaryKinetics();
 
-	return {};
+	assert(false); // TODO ...
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+PhysicsEngine::LocalSpace::PrimaryAttributes const& PhysicsEngine::LocalSpace::ComputeLocalPrimaryKinetics()
+{
+	m_primaryAttributes.m_localPosition = 0.f;
+	m_primaryAttributes.m_localVelocity = 0.f;
+
+	LocalSpace * pHostSpace = this;
+	float scaling = 1.f;
+
+	while ((nullptr != pHostSpace) && !pHostSpace->IsInfluencing())
+	{
+		scaling /= pHostSpace->m_radius;
+
+		SharedPtr<Body> pHost = pHostSpace->m_pHost;
+
+		m_primaryAttributes.m_localPosition -= pHost->m_attributes.m_localPosition * scaling;
+		m_primaryAttributes.m_localVelocity -= pHost->m_attributes.m_localVelocity * scaling;
+
+		pHostSpace = pHost->m_pHostSpace.get();
+	}
+
+	return m_primaryAttributes;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+PhysicsEngine::Body::Body(Attributes const& attributes, SharedPtr<LocalSpace> pHostSpace) :
+	m_attributes(attributes),
+	m_elements(*pHostSpace, attributes.m_localPosition, attributes.m_localVelocity),
+	m_pHostSpace(pHostSpace)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+PhysicsEngine::System::System(float hostMass, float hostSpaceTrueRadius) :
+	m_hostMass(hostMass),
+	m_pHostSpace(MakeShared<LocalSpace>(hostMass, hostSpaceTrueRadius))
+{
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -114,6 +186,7 @@ void PhysicsEngineTestScript::RunImpl(TestHandler & testHandler)
 		return a - ((a + b) - b);
 
 	}, 0, FLT_EPSILON * 0.1f, "a - ((a + b) - b) | a = epsilon + (epsilon * 0.1f), b = 1.f");
+
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

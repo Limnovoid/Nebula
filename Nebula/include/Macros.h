@@ -26,20 +26,29 @@ namespace Nebula // ------------------------------------------------------------
 #define ASSERT(expression)
 #endif//_DEBUG
 
-#if defined(_DEBUG) && defined(EXCEPTION_ASSERT_BREAK_ON_FAIL)
-#define ASSERT_THROW(expression, resultCode, message) { assert(expression); if (!expression) { throw AssertionException(std::source_location::current(), resultCode, message); } }
-#else
-#define ASSERT_THROW(expression, resultCode, message) { if (!(expression)) { throw AssertionException(resultCode, message, std::source_location::current()); } }
-#endif//_DEBUG
-
 #ifdef _DEBUG
 #define DEBUG_ONLY(expression) expression
 #else
 #define DEBUG_ONLY(expression)
 #endif
 
-#define IF_RESULT_CODE(name, op, expression) if (RESULT_CODE_##name op (expression))
+#define RESULT_CODE(name) RESULT_CODE_##name
+
+#define IF_RESULT_CODE(name, op, expression) if (RESULT_CODE(name) op (expression))
 #define IF_OR_RESULT_CODE(name1, name2, op, expression) if ((RESULT_CODE_##name1 op (expression)) || (RESULT_CODE_##name2 op (expression)))
+
+#if defined(_DEBUG)
+#define ASSERT_THROW(expression, resultCode, message) { if (!(expression)) { throw AssertionException(resultCode, message, std::source_location::current()); } }
+
+#define ASSERT_THROW_RESULT(name, op, expression, message) { Result const result = (expression);\
+	IF_RESULT_CODE(name, op, result) { throw AssertionException(result, message, std::source_location::current()); } }
+#endif//_DEBUG
+
+#if defined(_DEBUG)
+#define DEBUG_ONLY(expression) expression
+#else
+#define DEBUG_ONLY(expression)
+#endif
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

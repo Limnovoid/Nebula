@@ -158,6 +158,7 @@
     <ClCompile Include="source\UiIo.cpp" />
     <ClCompile Include="source\UiMenu.cpp" />
     <ClCompile Include="source\UiOption.cpp" />
+    <ClCompile Include="source\Uuid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Bitset.h" />
@@ -189,6 +190,7 @@
     <ClInclude Include="include\UiIo.h" />
     <ClInclude Include="include\UiMenu.h" />
     <ClInclude Include="include\UiOption.h" />
+    <ClInclude Include="include\Uuid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,10 +17,11 @@ public:
 	static std::vector<size_t> GetRandomSequence(size_t const max);
 
 	template<IsInt T = size_t>
-	T Integer(T min, T max);
+	static T Integer(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max());
 
 private:
 	static std::random_device	g_randomDevice;
+	static std::seed_seq		g_seedSequence;
 	static std::mt19937			g_generator;
 };
 

@@ -6,7 +6,8 @@ namespace Nebula // ------------------------------------------------------------
 {
 
 std::random_device	Random::g_randomDevice;
-std::mt19937		Random::g_generator(g_randomDevice());
+std::seed_seq		Random::g_seedSequence({ g_randomDevice(), g_randomDevice(), g_randomDevice() });
+std::mt19937		Random::g_generator(g_seedSequence);
 
 // --------------------------------------------------------------------------------------------------------------------------------
 

@@ -102,23 +102,23 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 	}, TestHandler::FRangeIndex<int>(), TestHandler::FRangeZero<int, float>(), "Vector3 Dot of perpendicular vectors", TestHandler::IndexRange<int>(1, 10));
 
-	testHandler.Assert<float, size_t>([&](size_t index)
+	testHandler.Assert<float, int64_t>([&](int64_t index)
 	{
 		Vector3 lhs((float)index, 0, 0);
 		Vector3 rhs((float)(index * ((index % 2) ? 1 : -1)), 0, 0);
 
 		return lhs.Dot(rhs);
 
-	}, TestHandler::FRangeIndex(), [](size_t index) { return (float)(Maths::Pow(index, 2) * ((index % 2) ? 1 : -1)); }, "Vector3 Dot of parallel and anti-parallel vectors", { 1, 5 });
+	}, TestHandler::FRangeIndex(), [](int64_t index) { return (float)(Maths::Pow(index, 2) * ((index % 2) ? 1 : -1)); }, "Vector3 Dot of parallel and anti-parallel vectors", { 1, 5 });
 
-	testHandler.Assert<bool, size_t>([&](size_t index)
+	testHandler.Assert<bool, int64_t>([&](int64_t index)
 	{
-		Vector3 lhs((float)((int)index - 6), ((index % 2) ? 1.f : -1.f), 0);
+		Vector3 lhs((float)index, ((index % 2) ? 1.f : -1.f), 0);
 		Vector3 rhs(1.f, 0.f, 0);
 
 		return (0.f < lhs.Dot(rhs));
 
-	}, TestHandler::FRangeIndex(), [](size_t index) { return (0 < index); }, "Vector3 Dot product has correct sign", { 1, 11, 2 });
+	}, TestHandler::FRangeIndex(), [](int64_t index) { return (0 < index); }, "Vector3 Dot product has correct sign", { -5, 5, 2 });
 
 	// Cross.
 	testHandler.Assert<Vector3, int>([&](int index)
@@ -128,8 +128,8 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 		return lhs.Cross(rhs);
 
-	}, TestHandler::FRangeIndex(), [](int index) { return Vector3(0, 0, (float)(Maths::Pow(index, 2) * ((index % 2) ? 1 : -1))); },
-		"Vector3 Cross of perpendicular vectors", { 1, 10 });
+	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(0, 0, (float)(Maths::Pow(index, 2) * ((index % 2) ? 1 : -1))); },
+		"Vector3 Cross of perpendicular vectors", TestHandler::IndexRange<int>(1, 10));
 
 	testHandler.Assert<Vector3, int>([&](int index)
 	{
@@ -138,7 +138,7 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 		return lhs.Cross(rhs);
 
-	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(); }, "Vector3 Cross of parallel and anti-parallel vectors", { 1, 10 });
+	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(); }, "Vector3 Cross of parallel and anti-parallel vectors", TestHandler::IndexRange<int>(1, 10));
 
 	// Precise Cross.
 	testHandler.Assert<Vector3, int>([&](int index)
@@ -149,7 +149,7 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 		return lhs.PreciseCross(rhs);
 
 	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(0, 0, (float)(Maths::Pow(index, 2) * ((index % 2) ? 1 : -1))); },
-		"Vector3 Precise Cross of perpendicular vectors", { 1, 10 });
+		"Vector3 Precise Cross of perpendicular vectors", TestHandler::IndexRange<int>(1, 10));
 
 	testHandler.Assert<Vector3, int>([&](int index)
 	{
@@ -158,7 +158,7 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 		return lhs.PreciseCross(rhs);
 
-	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(); }, "Vector3 Precise Cross of parallel and anti-parallel vectors", { 1, 10 });
+	}, TestHandler::FRangeIndex<int>(), [](int index) { return Vector3(); }, "Vector3 Precise Cross of parallel and anti-parallel vectors", TestHandler::IndexRange<int>(1, 10));
 
 	testHandler.Assert<Vector3, int>([&](int index)
 	{
@@ -174,19 +174,7 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 		return lhs.Cross(rhs);
 
-	}, "Vector3 Precise Cross equals Cross", { 1, 10 });
-
-	std::vector<float> results;
-	std::array<size_t, 2> indices = { 2, 4 };
-	for (size_t index : indices)
-	{
-		Vector3 lhs((float)index, 0, 0);
-
-		int parity = (index % 2) ? 1 : -1;
-		Vector3 rhs((float)(index * parity), 0, 0);
-
-		results.push_back(lhs.Dot(rhs));
-	}
+	}, "Vector3 Precise Cross equals Cross", TestHandler::IndexRange<int>(1, 10));
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

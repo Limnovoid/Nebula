@@ -166,7 +166,7 @@ void TestHandlerTestScript::RunImpl(TestHandler & testHandler)
 
 	// Random index sequence
 	TestHandler::IndexRange<size_t> indexRange = { 0, 10 };
-	std::vector<size_t> const indexSequence = TestHandler::IndexRange<>::GetIndexSequence(indexRange);
+	std::vector<size_t> const indexSequence = TestHandler::IndexRange<size_t>::GetIndexSequence(indexRange);
 	std::set<size_t> previousIndices;
 
 	testHandler.Assert<bool, size_t>([&](size_t index)

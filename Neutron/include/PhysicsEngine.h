@@ -5,6 +5,7 @@
 #include "PriorityQueue.h"
 #include "Vector3.h"
 #include "NeutronTime.h"
+#include "Uuid.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -17,11 +18,6 @@ using namespace Nova;
 class PhysicsEngine
 {
 public:
-	PhysicsEngine();
-
-	void Tick(Time::Microseconds dT);
-
-private:
 	/* Forward declarations. */
 	class Body;
 	class LocalSpace;
@@ -39,6 +35,8 @@ private:
 		class Elements
 		{
 		public:
+			Elements(LocalSpace const& localSpace, Vector3 const& localPosition, Vector3 const& localVelocity);
+
 			Result Compute(LocalSpace const& localSpace, Vector3 const& localPosition, Vector3 const& localVelocity);
 
 			double	m_angularMomentum;				/// Orbital specific angular momentum
@@ -85,46 +83,86 @@ private:
 		};
 	};
 
-	class LocalSpace
+	class Node
 	{
 	public:
-		/// <returns> The position of the local primary relative to this local space. Distances are parameterized to this local space. </returns>
-		Vector3 GetLocalPrimaryPosition() const;
+		Node(Uuid const uuid = {});
 
-		/// <returns> The velocity of the local primary relative to this local space. Distances are parameterized to this local space. </returns>
-		Vector3 GetLocalPrimaryVelocity() const;
+		Uuid const	m_uuid;
+	};
 
-	private:
-		int64_t	m_trueRadius;			// Radius in meters.
-		float	m_radius;				// Radius relative to parent space.
-		double	m_gravityParameter;		// Gravitational parameter = M * G | G = gravitational constant, M = mass of locally influencing body.
+	class LocalSpace : public Node
+	{
+	public:
+		struct PrimaryAttributes
+		{
+			float		m_gravityParameter;		// Locally scaled gravitational parameter = M * G | G = gravitational constant, M = mass of locally influencing body.
+			Vector3		m_localPosition;		// Locally scaled position of the influencing body relative to this space.
+			Vector3		m_localVelocity;		// Locally scaled velocity of the influencing body relative to this space.
+		};
+
+		LocalSpace();
+
+		bool IsInfluencing() const;
+
+		Result OnHostTick();
+
+		/// <summary>
+		/// Compute the position and velocity of the local primary relative to this local space. Distances are parameterized to this local space.
+		/// Stores the results in this object's m_primaryAttributes.
+		/// </summary>
+		/// <returns> A reference to the object storing the computed values. </returns>
+		PrimaryAttributes const& ComputeLocalPrimaryKinetics();
+
+		float						m_trueRadius;			// Radius in meters.
+		float						m_radius;				// Radius relative to parent space.
+
+		PrimaryAttributes			m_primaryAttributes;
 
 		SharedPtr<Body>				m_pHost;
 		std::list<SharedPtr<Body>>	m_bodies;
 	};
 
-	class Body
+	class Body : public Node
 	{
 	public:
 		// Physical attributes...
-		double			m_mass;
-		Vector3			m_localPosition;
-		Vector3			m_localVelocity;
+		struct Attributes
+		{
+			float		m_mass;
+			Vector3		m_localPosition;
+			Vector3		m_localVelocity;
+		};
 
-		Orbit::Elements	m_elements;
+		Body(Attributes const& attributes, SharedPtr<LocalSpace> pHostSpace);
+
+		Attributes							m_attributes;
+		Orbit::Elements						m_elements;
+
+		SharedPtr<LocalSpace>				m_pHostSpace;
+		std::list<SharedPtr<LocalSpace>>	m_localSpaces; // Linked list of local spaces ordered by radius, highest to lowest.
 	};
 
-	/*
-	class Primary : public Body
+	class System
 	{
-		std::list<LocalSpace>	m_scaledSpaces; // Linked list of scaling spaces ordered by radius, highest to lowest.
+	public:
+		System(float hostMass, float hostSpaceTrueRadius);
+
+		float								m_hostMass;
+		SharedPtr<LocalSpace>				m_pHostSpace;
+
+		std::list<SharedPtr<LocalSpace>>	m_localSpaces; // Linked list of local spaces ordered by radius, highest to lowest.
 	};
 
-	// Sorted list of bodies to update (earliest update first) implemented as a priority queue.
-	PriorityQueue<SharedPtr<Body>>	m_updateQueue;
+	PhysicsEngine();
 
-	std::list<LocalSpace>	m_rootSpaces;
-	*/
+	void Tick(Time::Microseconds dT);
+
+	ResultCode CreateBody(Body::Attributes const& attributes, SharedPtr<LocalSpace> pHostSpace);
+
+private:
+	// Sorted list of bodies to update (earliest update first) implemented as a priority queue.
+	PriorityQueue<SharedPtr<Body>>		m_updateQueue;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------

@@ -142,15 +142,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\Neutron.h" />
-    <ClInclude Include="include\PhysicsEngine.h" />
+    <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\NeutronTime.h" />
+    <ClInclude Include="include\OrbitalSystem.h" />
+    <ClInclude Include="include\ScalingSpace.h" />
     <ClInclude Include="include\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp" />
-    <ClCompile Include="source\PhysicsEngine.cpp" />
+    <ClCompile Include="source\Particle.cpp" />
     <ClCompile Include="source\NeutronTime.cpp" />
+    <ClCompile Include="source\OrbitalSystem.cpp" />
+    <ClCompile Include="source\ScalingSpace.cpp" />
     <ClCompile Include="source\Vector3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
