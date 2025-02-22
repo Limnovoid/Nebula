@@ -28,9 +28,11 @@ public:
 	/// <returns></returns>
 	static float ComputeScaledGravityParameter(float trueRadius, float hostMass);
 
-	ScalingSpace(float trueRadius, float hostMass); // Warning - use to construct the system host space only (see OrbitalSystem).
+	ScalingSpace(float hostMass, float trueRadius, float radius = 1.f); // Warning - use to construct the system host spaces only (see OrbitalSystem).
 	ScalingSpace(float trueRadius, bool isInfluencing, SharedPtr<Particle> pHost);
 
+	float GetTrueRadius() const;
+	float GetRadius() const;
 	bool IsInfluencing() const;
 
 private:
@@ -55,6 +57,20 @@ private:
 inline float ScalingSpace::ComputeScaledGravityParameter(float trueRadius, float hostMass)
 {
 	return kGravitational * hostMass * powf(trueRadius, -3.f);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline float ScalingSpace::GetTrueRadius() const
+{
+	return m_trueRadius;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline float ScalingSpace::GetRadius() const
+{
+	return m_radius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

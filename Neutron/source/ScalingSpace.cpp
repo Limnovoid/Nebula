@@ -8,9 +8,9 @@ namespace Neutron // -----------------------------------------------------------
 namespace Orbital // --------------------------------------------------------------------------------------------------------------
 {
 
-ScalingSpace::ScalingSpace(float trueRadius, float hostMass) :
+ScalingSpace::ScalingSpace(float hostMass, float trueRadius, float radius) :
 	m_trueRadius(trueRadius),
-	m_radius(1.f),
+	m_radius(radius),
 	m_gravityParameter(ComputeScaledGravityParameter(trueRadius, hostMass)),
 	m_isInfluencing(true)
 {
@@ -24,6 +24,7 @@ ScalingSpace::ScalingSpace(float trueRadius, bool isInfluencing, SharedPtr<Parti
 	m_isInfluencing(isInfluencing),
 	m_pHost(pHost)
 {
+	assert(false); // TODO - compute radius
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

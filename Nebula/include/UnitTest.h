@@ -12,21 +12,31 @@ class UnitTest : public IUnitTest<TReturn, TParameters>
 public:
 	using IUnitTest = IUnitTest<TReturn, TParameters>;
 
-	UnitTest(std::function<TReturn(TParameters)> func, StringView title = "");
+	UnitTest(UnitTest const& other);
+	UnitTest(std::function<TReturn(TParameters)> const& func, StringView title = "");
 	virtual ~UnitTest() override;
 
 	virtual Result Invoke(TParameters const& parameters, TReturn & returned) override;
 
 private:
-	using Func = std::function<TReturn(TParameters)>;
+	using Func = std::function<TReturn(TParameters)>;			// The unit test function type alias.
 
-	Func	m_func;
+	Func const&						m_func;						// Reference to the unit test function.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters>
-UnitTest<TReturn, TParameters>::UnitTest(std::function<TReturn(TParameters)> func, StringView title) :
+UnitTest<TReturn, TParameters>::UnitTest(UnitTest const& other) :
+	IUnitTest(other.GetTitle()),
+	m_func(other.m_func)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn, typename TParameters>
+UnitTest<TReturn, TParameters>::UnitTest(std::function<TReturn(TParameters)> const& func, StringView title) :
 	IUnitTest(title),
 	m_func(func)
 {

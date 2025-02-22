@@ -3,6 +3,9 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
+namespace Time // -----------------------------------------------------------------------------------------------------------------
+{
+
 template<Time::Granularity TFromPerSecond, Time::Granularity TToPerSecond>
 struct FRangePeriodConvert
 {
@@ -30,8 +33,6 @@ TimeTestScript::~TimeTestScript()
 
 void TimeTestScript::RunImpl(TestHandler & testHandler)
 {
-	using namespace Time;
-
 	// 1 second -> other.
 	testHandler.Assert<Seconds, size_t>(FRangePeriodConvert<Second, Second>(), TestHandler::FRangeIndex(),
 		[](size_t index) { return Seconds(index); }, "1 second == 1 second", { 0, 1000, 100 });
@@ -88,5 +89,7 @@ void TimeTestScript::RunImpl(TestHandler & testHandler)
 
 	Microseconds microseconds2 = microseconds1.Add(seconds2);
 }
+
+} // namespace Time ---------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

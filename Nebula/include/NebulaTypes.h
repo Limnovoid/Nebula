@@ -87,7 +87,7 @@ using WeakPtr = std::weak_ptr<T>;
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename... TArgs>
-inline SharedPtr<T> MakeShared(TArgs... args)
+inline SharedPtr<T> MakeShared(TArgs &&... args)
 {
 	return std::make_shared<T>(std::forward<TArgs>(args)...);
 }
@@ -95,7 +95,7 @@ inline SharedPtr<T> MakeShared(TArgs... args)
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename... TArgs>
-inline UniquePtr<T> MakeUnique(TArgs... args)
+inline UniquePtr<T> MakeUnique(TArgs &&... args)
 {
 	return std::make_unique<T>(std::forward<TArgs>(args)...);
 }

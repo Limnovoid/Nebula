@@ -103,39 +103,46 @@ public:
 
 	TestHandler(Settings settings);
 
+	// Assert implementation.
 	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
-	//
+	// Assert with IUnitTest and arrays.
 	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters * pParameters, TReturn const* pExpected,
 		IndexRange<TIndex> const& testRange = {});
 
+	// Assert with IUnitTest and references.
 	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
 	Result Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TParameters const& parameters, TReturn const& expected,
 		IndexRange<TIndex> const& testRange = {});
 
-	//
+	// Assert with function and functors (force title).
 	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
-	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+	Result Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, StringView title, IndexRange<TIndex> const& testRange = {});
 
+	// Assert with function and functors (no title).
 	template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex = int64_t>
 		requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
-	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+	Result Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TFuncGetParameters funcGetParameters,
 		TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange = {});
 
-	//
+	// Assert with function and references (force title).
 	template<typename TReturn, typename TParameters, IsInt TIndex = int64_t>
-	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
+	Result Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		StringView title, IndexRange<TIndex> const& testRange = {});
 
+	// Assert with function and references (no title).
 	template<typename TReturn, typename TParameters, IsInt TIndex= int64_t>
-	Result Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters, TReturn const& expected,
+	Result Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TParameters const& parameters, TReturn const& expected,
 		IndexRange<TIndex> const& testRange = {});
+
+	template<typename TReturn>
+	Result Assert(TReturn const& value, TReturn const& expected, StringView title = "");
 
 	Result Register(SharedPtr<ITestScript> pTestScript);
 
@@ -492,7 +499,7 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
 	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
-inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TFuncGetParameters funcGetParameters,
 	TFuncGetExpected funcGetExpected, StringView title, IndexRange<TIndex> const& testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
@@ -507,7 +514,7 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 
 template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
 	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
-inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TFuncGetParameters funcGetParameters,
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TFuncGetParameters funcGetParameters,
 	TFuncGetExpected funcGetExpected, IndexRange<TIndex> const& testRange)
 {
 	return Assert(unitTestFunc, funcGetParameters, funcGetExpected, "", testRange);
@@ -516,7 +523,7 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters, IsInt TIndex>
-inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TParameters const& parameters,
 	TReturn const& expected, StringView title, IndexRange<TIndex> const& testRange)
 {
 	using UnitTest = UnitTest<TReturn, TParameters>;
@@ -530,10 +537,22 @@ inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFu
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename TReturn, typename TParameters, IsInt TIndex>
-inline Result TestHandler::Assert(std::function<TReturn(TParameters)> unitTestFunc, TParameters const& parameters,
+inline Result TestHandler::Assert(std::function<TReturn(TParameters)> const& unitTestFunc, TParameters const& parameters,
 	TReturn const& expected, IndexRange<TIndex> const& testRange)
 {
 	return Assert(unitTestFunc, parameters, expected, "", testRange);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename TReturn>
+inline Result TestHandler::Assert(TReturn const& value, TReturn const& expected, StringView title)
+{
+	using TParameters = int; // Placeholder, parameters are ignored.
+
+	auto fReturnValue = [&value](TParameters) { return value; };
+
+	return Assert<TReturn, TParameters>(fReturnValue, 0, expected, title);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
