@@ -110,6 +110,14 @@ inline SharedPtr<T> StaticPtrCast(SharedPtr<U> pT)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename T, typename U>
+inline SharedPtr<T> DynamicPtrCast(SharedPtr<U> pT)
+{
+	return std::dynamic_pointer_cast<T, U>(pT);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 template<typename T>
 inline bool operator==(WeakPtr<T> lhs, WeakPtr<T> rhs)
 {

@@ -1,6 +1,7 @@
 #include "ScalingSpace.h"
 
 #include "Particle.h"
+#include "TestHandler.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -48,6 +49,43 @@ void ScalingSpace::ComputePrimaryKinetics()
 
 		pScalingSpace = pHost->GetHostSpace().get();
 	}
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSpaceTestScript::ScalingSpaceTestScript() :
+	ITestScript("ScalingSpace")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSpaceTestScript::~ScalingSpaceTestScript()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void ScalingSpaceTestScript::RunImpl(TestHandler & testHandler)
+{
+	ScalingSpace::List list;
+
+	testHandler.Assert<int64_t, int64_t>([&](int64_t index) -> int64_t
+	{
+		float const radius = static_cast<float>(index) / 10.f;
+
+		SharedPtr<ScalingSpace> pScalingSpace = MakeShared<ScalingSpace>(1.f, radius, radius);
+
+		list.Insert(pScalingSpace);
+
+		return list.size();
+
+	}, TestHandler::FRangeRandomOrder({ 1, 10 }), TestHandler::FRangeIndex(), "List insertion", { 1, 10 });
+
+	int radius = 10;
+	for (ScalingSpace::List::const_iterator iter = list.cbegin(); list.cend() != iter; ++iter)
+		testHandler.Assert((*iter)->GetRadius(), static_cast<float>(radius--) / 10.f, "List ordering");
 }
 
 } // namespace Orbital ------------------------------------------------------------------------------------------------------------

@@ -36,6 +36,9 @@
     <ClInclude Include="include\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Orbit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Orbit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

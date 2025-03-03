@@ -4,6 +4,9 @@
 #include "NebulaTypes.h"
 #include "Exception.h"
 #include "Vector3.h"
+#include "ScalingSpace.h"
+#include "Particle.h"
+#include "ITestScript.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -13,9 +16,6 @@ namespace Orbital // -----------------------------------------------------------
 
 using namespace Nebula;
 
-class Particle;
-class ScalingSpace;
-
 // --------------------------------------------------------------------------------------------------------------------------------
 
 class System
@@ -24,6 +24,8 @@ public:
 	System(float hostMass, float hostSpaceTrueRadius);
 
 	SharedPtr<ScalingSpace> GetHostSpace() const;
+
+	ScalingSpace::List const& GetScalingSpaces() const;
 
 	/// <summary> Create a scaling space at the top level of this system (attached to the system host). </summary>
 	/// <param name="trueRadius"> The true radius of the scaling space. </param>
@@ -50,7 +52,7 @@ private:
 	float								m_hostMass;			// The magnitude of the point-mass at the centre of the simulation, around which all particles orbit.
 	SharedPtr<ScalingSpace>				m_pHostSpace;		// The host scaling space, against whose true radius all other scaling spaces' radii are parameterised.
 
-	std::list<SharedPtr<ScalingSpace>>	m_scalingSpaces;	// Linked list of scaling spaces ordered by radius, highest to lowest.
+	ScalingSpace::List					m_scalingSpaces;	// Linked list of scaling spaces ordered by radius, highest to lowest.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +60,13 @@ private:
 inline SharedPtr<ScalingSpace> System::GetHostSpace() const
 {
 	return m_pHostSpace;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScalingSpace::List const& System::GetScalingSpaces() const
+{
+	return m_scalingSpaces;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

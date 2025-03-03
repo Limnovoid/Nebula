@@ -1,6 +1,8 @@
 #ifndef NEBULA_RANDOM_H
 #define NEBULA_RANDOM_H
 
+#include "ITestScript.h"
+
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
@@ -39,6 +41,19 @@ inline std::vector<size_t> Random::GetRandomSequence(size_t const max)
 {
 	return GetRandomSequence(0, max);
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class RandomTestScript : public ITestScript
+{
+public:
+	RandomTestScript();
+	virtual ~RandomTestScript();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

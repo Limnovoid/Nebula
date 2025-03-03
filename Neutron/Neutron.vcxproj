@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\Neutron.h" />
+    <ClInclude Include="include\Orbit.h" />
     <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\NeutronTime.h" />
     <ClInclude Include="include\OrbitalSystem.h" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp" />
+    <ClCompile Include="source\Orbit.cpp" />
     <ClCompile Include="source\Particle.cpp" />
     <ClCompile Include="source\NeutronTime.cpp" />
     <ClCompile Include="source\OrbitalSystem.cpp" />

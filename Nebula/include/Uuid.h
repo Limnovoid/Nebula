@@ -14,6 +14,8 @@ public:
 
 	uint64_t Get() const;
 
+	bool operator==(Uuid const& rhs) const;
+
 private:
 	DEBUG_ONLY(static std::set<uint64_t>	s_uuids);
 
@@ -25,6 +27,13 @@ private:
 inline uint64_t Uuid::Get() const
 {
 	return m_value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Uuid::operator==(Uuid const& rhs) const
+{
+	return (m_value == rhs.m_value);
 }
 
 } // namespace Nebula ---------------------------------------------------------------------------------------------------------------

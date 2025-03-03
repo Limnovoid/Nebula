@@ -1,6 +1,7 @@
 #include "Random.h"
 
 #include "Macros.h"
+#include "TestHandler.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
@@ -32,6 +33,42 @@ T Random::Integer(T min, T max)
 	std::uniform_int_distribution<T> distribution(min, max);
 
 	return distribution(g_generator);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+RandomTestScript::RandomTestScript() :
+	ITestScript("Random")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+RandomTestScript::~RandomTestScript()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void RandomTestScript::RunImpl(TestHandler & testHandler)
+{
+	std::unordered_map<uint64_t, size_t> uuidCounts;
+
+	TestHandler::OutputMode const outputMode = testHandler.SetOutputMode(TestHandler::OutputMode::QUIET);
+
+	testHandler.Assert<bool, int, int>([&](int)
+	{
+		auto pair = uuidCounts.try_emplace(Random::Integer<uint64_t>(), 0);
+
+		if (!pair.second)
+			pair.first->second = 1 + pair.first->second;
+
+		return pair.second;
+
+	}, 0, true, "Is unique", { 0, 1000000 });
+
+	testHandler.SetOutputMode(outputMode);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

@@ -59,10 +59,14 @@ public:
 	template<typename TIndex = int64_t>
 	struct FRangeIndex
 	{
+		FRangeIndex(TIndex constantOffset = 0) : m_offset(constantOffset) {}
+
 		TIndex operator()(TIndex index)
 		{
-			return index;
+			return m_offset + index;
 		}
+
+		TIndex const		m_offset;
 	};
 
 	template<typename TIndex = int64_t, typename TReturn = TIndex>
@@ -99,6 +103,13 @@ public:
 
 		IndexRange<TIndex> const		m_indexRange;
 		std::vector<TIndex>			m_indexSequence;
+	};
+
+	enum OutputMode
+	{
+		SILENT,
+		QUIET,
+		VERBOSE
 	};
 
 	TestHandler(Settings settings);
@@ -144,11 +155,23 @@ public:
 	template<typename TReturn>
 	Result Assert(TReturn const& value, TReturn const& expected, StringView title = "");
 
-	Result Register(SharedPtr<ITestScript> pTestScript);
+	/// <summary> Register a test script so it can be run from the test handler UI. </summary>
+	/// <param name="pTestScript"> Pointer to the test script. </param>
+	/// <param name="testGroupName"> Optional test group name - if specified, the test will be placed in a UI submenu of the same name. </param>
+	Result Register(SharedPtr<ITestScript> pTestScript, StringView testGroupName = "");
 
 	void Run(SharedPtr<ITestScript> pTestScript);
 
 	SharedPtr<UiMenu> GetMenu();
+
+	/// <summary> Set the output mode. </summary>
+	/// <param name="outputMode"> The mode to be used after this function returns. </param>
+	/// <returns> The mode being used at the time this function is called. </returns>
+	OutputMode SetOutputMode(OutputMode outputMode);
+
+
+	/// TestHandler UI options...
+	void UiSetOutputMode(UiIo const& uiIo);
 
 private:
 	struct AssertResult
@@ -311,6 +334,8 @@ private:
 
 	std::vector<AssertResult>	m_assertResults;
 	size_t						m_assertIndex = 0;
+
+	OutputMode					m_outputMode;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -388,22 +413,26 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 			m_assertResults.emplace_back();
 		// /Assert ID increment
 
-		//for (size_t i = 0; i < testRange.m_numIterations; ++i)
 		auto indexSequence = testRange.GetIndexSequence();
 		for (TIndex index : indexSequence)
 		{
-			/*size_t testIndex = testRange.m_first;
-
-			if (0 < testRange.m_stepSize)
-				testIndex += i * static_cast<size_t>(testRange.m_stepSize);
-			else
-				testIndex -= i * static_cast<size_t>(Maths::Abs(testRange.m_stepSize));*/
-
-			fPrintAssertId(m_assertIndex - 1);
+			resultMessage.clear();
 
 			AssertResult assertResult = AssertSingle(pUnitTest, funcGetParameters, funcGetExpected, index, resultMessage);
 
-			fPrintResult(m_assertIndex - 1, resultMessage, isSubAssert);
+			switch (m_outputMode)
+			{
+			case (OutputMode::SILENT): break;
+			case (OutputMode::QUIET):
+				if (assertResult.IsPass())
+					break;
+				// Fall through.
+			case (OutputMode::VERBOSE):
+				fPrintAssertId(m_assertIndex - 1);
+				fPrintResult(m_assertIndex - 1, resultMessage, isSubAssert);
+
+				break;
+			}
 
 			m_assertResults[m_assertIndex - 1] += assertResult;
 
@@ -418,10 +447,9 @@ inline Result TestHandler::Assert(SharedPtr<IUnitTest<TReturn, TParameters>> pUn
 
 		AssertResult & seriesResult = m_assertResults[m_assertIndex]; // Note : must come after the loop in case sub-asserts cause the vector to be reallocated.
 
-		resultMessage = Fmt::Format("Series passed = {} / {}{}", seriesResult.nPasses, seriesResult.nAsserts,
-			(seriesResult.IsPass() ? "" : Fmt::Format(" ({} failed)", seriesResult.nAsserts - seriesResult.nPasses)));
+		Print(Fmt::Format("Series passed = {} / {}{}", seriesResult.nPasses, seriesResult.nAsserts,
+			(seriesResult.IsPass() ? "" : Fmt::Format(" ({} failed)", seriesResult.nAsserts - seriesResult.nPasses))));
 
-		Print(resultMessage);
 		Print("\n");
 
 		if (seriesResult.IsPass())
@@ -564,6 +592,17 @@ inline SharedPtr<UiMenu> TestHandler::GetMenu()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+inline TestHandler::OutputMode TestHandler::SetOutputMode(OutputMode outputMode)
+{
+	OutputMode const currentMode = m_outputMode;
+
+	m_outputMode = outputMode;
+
+	return currentMode;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 template<typename TReturn, typename TParameters, typename TFuncGetParameters, typename TFuncGetExpected, IsInt TIndex>
 	requires (IsInvocable<TFuncGetParameters, TIndex> && IsInvocable<TFuncGetExpected, TIndex>)
 inline TestHandler::AssertResult TestHandler::AssertSingle(SharedPtr<IUnitTest<TReturn, TParameters>> pUnitTest, TFuncGetParameters funcGetParameters,
@@ -580,7 +619,7 @@ inline TestHandler::AssertResult TestHandler::AssertSingle(SharedPtr<IUnitTest<T
 
 		Result result = pUnitTest->Invoke(parameters, returnValue);
 
-		resultMessage = GetEvaluationString(parameters, returnValue);
+		resultMessage += GetEvaluationString(parameters, returnValue);
 
 		if ((RESULT_CODE_SUCCESS == result) && (expected == returnValue))
 		{

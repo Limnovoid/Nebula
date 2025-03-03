@@ -148,6 +148,7 @@
     <ClCompile Include="source\Nova.cpp" />
     <ClCompile Include="source\AnchoredList.cpp" />
     <ClCompile Include="source\PriorityQueue.cpp" />
+    <ClCompile Include="source\SortedList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BinaryTree.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="include\Nova.h" />
     <ClInclude Include="include\PriorityQueue.h" />
     <ClInclude Include="include\RedBlackTree.h" />
+    <ClInclude Include="include\SortedList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

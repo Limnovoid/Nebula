@@ -13,14 +13,16 @@ TestHandler::TestHandler(Settings settings) :
 	m_shouldOutputToSharedFile(true),
 	m_shouldOutputToScriptFile(true),
 	m_shouldOutputToUi(true),
-	m_assertResults(1)
+	m_assertResults(1),
+	m_outputMode(OutputMode::QUIET)
 {
-	m_pMenu->AddOption(SharedPtr<UiMenu>(m_pTestScriptMenu));
+	m_pMenu->AddOption(StaticPtrCast<IOption>(m_pTestScriptMenu));
+	m_pMenu->AddOption("Set output mode", std::bind(&TestHandler::UiSetOutputMode, this, std::placeholders::_1));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result TestHandler::Register(SharedPtr<ITestScript> pTestScript)
+Result TestHandler::Register(SharedPtr<ITestScript> pTestScript, StringView testGroupName)
 {
 	m_testScripts.push_back(pTestScript);
 
@@ -36,7 +38,36 @@ Result TestHandler::Register(SharedPtr<ITestScript> pTestScript)
 		}
 	});
 
-	m_pTestScriptMenu->AddOption(pTestScriptUiOption);
+	if (!testGroupName.empty())
+	{
+		UiMenu::OptionList options = m_pTestScriptMenu->GetOptions();
+
+		SharedPtr<UiMenu> pTestGroupMenu;
+
+		for (SharedPtr<IOption> pOption : options)
+		{
+			if (pTestGroupMenu = DynamicPtrCast<UiMenu>(pOption))
+			{
+				if (testGroupName == pTestGroupMenu->GetHeader())
+					break;
+				else
+					pTestGroupMenu.reset(); // Continue the search.
+			}
+		}
+
+		if (!pTestGroupMenu)
+		{
+			pTestGroupMenu = MakeShared<UiMenu>(testGroupName);
+
+			m_pTestScriptMenu->AddOption(pTestGroupMenu);
+		}
+
+		pTestGroupMenu->AddOption(pTestScriptUiOption);
+	}
+	else
+	{
+		m_pTestScriptMenu->AddOption(pTestScriptUiOption);
+	}
 
 	return RESULT_CODE_SUCCESS;
 }
@@ -66,6 +97,46 @@ void TestHandler::Run(SharedPtr<ITestScript> pTestScript)
 	Print("\n");
 
 	m_sharedLogFile.Close();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void TestHandler::UiSetOutputMode(UiIo const& uiIo)
+{
+	char outputModeChar;
+
+	switch (m_outputMode)
+	{
+	case OutputMode::SILENT:	outputModeChar = 'S';	break;
+	case OutputMode::QUIET:		outputModeChar = 'Q';	break;
+	case OutputMode::VERBOSE:	outputModeChar = 'V';	break;
+	}
+
+	uiIo.Get(outputModeChar, "Output mode (Silent|Quiet|Verbose)", true);
+
+	switch (String::ToUpper(outputModeChar))
+	{
+	case 'S':	m_outputMode = OutputMode::SILENT;	break;
+	case 'Q':	m_outputMode = OutputMode::QUIET;	break;
+	case 'V':	m_outputMode = OutputMode::VERBOSE;	break;
+	default:
+		uiIo.Print("Invalid.\n");
+		return;
+	}
+
+	uiIo.Print("Output mode set: ");
+	switch (m_outputMode)
+	{
+	case OutputMode::SILENT:
+		uiIo.Print("SILENT");
+		break;
+	case OutputMode::QUIET:
+		uiIo.Print("QUIET");
+		break;
+	case OutputMode::VERBOSE:
+		uiIo.Print("VERBOSE");
+		break;
+	}
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

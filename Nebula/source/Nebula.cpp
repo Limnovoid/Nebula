@@ -166,9 +166,10 @@ struct CompareLess
 
 void AddTests(TestHandler & testHandler)
 {
-	testHandler.Register(MakeShared<TestScriptCharToType<int>>());
-	testHandler.Register(MakeShared<TestScriptExceptions>());
-	testHandler.Register(MakeShared<TestHandlerTestScript>());
+	testHandler.Register(MakeShared<TestScriptCharToType<int>>(), "Nebula");
+	testHandler.Register(MakeShared<TestScriptExceptions>(), "Nebula");
+	testHandler.Register(MakeShared<TestHandlerTestScript>(), "Nebula");
+	testHandler.Register(MakeShared<RandomTestScript>(), "Nebula");
 
 	/*constexpr ConstString constString = "cstr1";
 	std::cout << constString << std::endl;

@@ -4,6 +4,9 @@
 #include "Vector3.h"
 #include "Constants.h"
 #include "Maths.h"
+#include "Uuid.h"
+#include "SortedList.h"
+#include "ITestScript.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -12,6 +15,7 @@ namespace Orbital // -----------------------------------------------------------
 {
 
 using namespace Nebula;
+using namespace Nova;
 
 class Particle;
 
@@ -19,7 +23,19 @@ class Particle;
 
 class ScalingSpace
 {
+	friend class System;
+
+	struct ListPredicate
+	{
+		bool operator()(SharedPtr<ScalingSpace> const& lhs, SharedPtr<ScalingSpace> const& rhs)
+		{
+			return lhs->m_radius > rhs->m_radius;
+		}
+	};
+
 public:
+	using List = SortedList<SharedPtr<ScalingSpace>, ListPredicate>;
+
 	/// <summary>
 	/// Compute the locally scaled gravitational parameter of the local primary.
 	/// </summary>
@@ -34,6 +50,10 @@ public:
 	float GetTrueRadius() const;
 	float GetRadius() const;
 	bool IsInfluencing() const;
+	Vector3 const& GetPrimaryPosition() const;
+	Vector3 const& GetPrimaryVelocity() const;
+
+	Uuid								m_uuid;
 
 private:
 	/// <summary> Compute the position and velocity of the local primary relative/scaled to this scaling space. </summary>
@@ -79,6 +99,33 @@ inline bool ScalingSpace::IsInfluencing() const
 {
 	return m_isInfluencing;
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Vector3 const& ScalingSpace::GetPrimaryPosition() const
+{
+	return m_primaryPosition;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Vector3 const& ScalingSpace::GetPrimaryVelocity() const
+{
+	return m_primaryVelocity;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class ScalingSpaceTestScript : public ITestScript
+{
+public:
+	ScalingSpaceTestScript();
+	virtual ~ScalingSpaceTestScript();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
 
 } // namespace Orbital ------------------------------------------------------------------------------------------------------------
 

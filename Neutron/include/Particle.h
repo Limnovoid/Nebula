@@ -2,6 +2,8 @@
 #define NEUTRON_PARTICLE_H
 
 #include "Vector3.h"
+#include "Uuid.h"
+#include "ScalingSpace.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -11,13 +13,18 @@ namespace Orbital // -----------------------------------------------------------
 
 using namespace Nebula;
 
+/* Forward Declarations */
 class ScalingSpace;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 class Particle
 {
+	friend class System;
+
 public:
+	using List = std::list<SharedPtr<Particle>>;
+
 	struct State
 	{
 		float		m_mass;					// Mass of the particle.
@@ -25,18 +32,19 @@ public:
 		Vector3		m_localVelocity;		// Velocity relative/scaled to the host space.
 	};
 
-	Particle(State state, SharedPtr<ScalingSpace> pHostSpace);
+	Particle(State const& state, SharedPtr<ScalingSpace> pHostSpace);
 
 	State const& GetState() const;
 
 	SharedPtr<const ScalingSpace> GetHostSpace() const;
 
-private:
+	Uuid								m_uuid;
 
+private:
 	State								m_state;						// Physical state of the particle.
 
 	SharedPtr<ScalingSpace>				m_pHostSpace;					// Pointer to the scaling space in which this particle is moving.
-	std::list<SharedPtr<ScalingSpace>>	m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
+	ScalingSpace::List					m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------

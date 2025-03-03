@@ -19,7 +19,6 @@ Uuid::Uuid() :
 Uuid::Uuid(Uuid const& other) :
 	m_value(other.m_value)
 {
-	ASSERT(s_uuids.insert(m_value).second);
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

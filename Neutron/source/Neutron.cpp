@@ -7,6 +7,7 @@
 #include "OrbitalSystem.h"
 #include "ScalingSpace.h"
 #include "Particle.h"
+#include "Orbit.h"
 
 #include "NebulaTypes.h" // For pool testing.
 
@@ -18,9 +19,10 @@ void AddTests(Nebula::TestHandler & testHandler)
 	using namespace Nebula;
 
 	//testHandler.Register(MakeShared<PhysicsEngineTestScript>());
-	testHandler.Register(MakeShared<Vector3TestScript>());
-	testHandler.Register(MakeShared<Time::TimeTestScript>());
-	testHandler.Register(MakeShared<Orbital::SystemTestScript>());
+	testHandler.Register(MakeShared<Vector3TestScript>(), "Neutron");
+	testHandler.Register(MakeShared<Time::TimeTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<Orbital::SystemTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<Orbital::ScalingSpaceTestScript>(), "Neutron");
 
 	// Pool testing.
 	std::pmr::pool_options poolOptions;

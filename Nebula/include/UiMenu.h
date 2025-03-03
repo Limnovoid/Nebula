@@ -9,6 +9,8 @@ namespace Nebula // ------------------------------------------------------------
 class UiMenu : public IOption
 {
 public:
+	using OptionList = std::vector<SharedPtr<IOption>>;
+
 	UiMenu(StringView header, bool isRootMenu = false);
 
 	// IOption interface
@@ -27,8 +29,11 @@ public:
 
 	void Return();
 
+	OptionList const& GetOptions() const;
+
+	StringView GetHeader() const;
+
 private:
-	using OptionList = std::vector<SharedPtr<IOption>>;
 
 	String					m_prompt;
 	StringView				m_header;
@@ -65,6 +70,20 @@ inline StringView UiMenu::GetPrompt() const
 inline void UiMenu::Return()
 {
 	m_isExecuting = false;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline UiMenu::OptionList const& UiMenu::GetOptions() const
+{
+	return m_options;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline StringView UiMenu::GetHeader() const
+{
+	return m_header;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
