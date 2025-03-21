@@ -62,7 +62,7 @@ private:
 class ApiException : public AssertionException
 {
 public:
-	ApiException(Result result = RESULT_CODE_FAILURE, StringView message = "", std::source_location location = std::source_location::current());
+	using AssertionException::AssertionException;
 };
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

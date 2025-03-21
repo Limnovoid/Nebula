@@ -114,7 +114,7 @@ Finite precision means that error can be introduced
 2025-02-01
 1. Scaling space true radius data type.
 
-Radius of Pluto orbit ~= 8e12;
+Radius of Pluto orbit ~= 8e12
 
 Max value representable with fixed precision types:
 1. UInt32 = 2^32 - 1 = 4.294967295e9
@@ -125,11 +125,17 @@ Max value representable with floating point types:
 1. float = 3.402823466e38
 2. double = 1.7976931348623158e308
 
+Epsilon of floating point types at magnitude 8e12:
+
+
 --------------------------------------------------------------------------------------------------------------------------------
 
 2025-02-02
+1. Approximating floating point arithmetic error.
+
 z = 1.2345e2
 |1.23 - 1.2345e2/e2|e(3-1) = (1.23 - 1.2345)e2 = 0.0045e2 = 0.45 ulp (units in last place)
 
 z = 1.70e-1
 error = |2.00 - 1.70e-1/e-1|e(3-1) = |2 - 1.7|e2 = 0.3e2 = 30 ulp
+

@@ -7,85 +7,134 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-namespace Orbital // --------------------------------------------------------------------------------------------------------------
-{
-
-System::System(float hostMass, float hostSpaceTrueRadius) :
-	m_hostMass(hostMass),
-	m_pHostSpace(MakeShared<ScalingSpace>(hostMass, hostSpaceTrueRadius)),
-	m_scalingSpaces{ m_pHostSpace }
+OrbitalSystem::OrbitalSystem(float hostMass, float hostSpaceTrueRadius) :
+	m_hostParticle(hostMass, hostSpaceTrueRadius)
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-SharedPtr<ScalingSpace> System::CreateScalingSpace(float trueRadius)
+ScalingSpace & OrbitalSystem::CreateScalingSpace(float trueRadius)
 {
-	float radius = trueRadius / m_pHostSpace->GetTrueRadius();
+	float const radius = trueRadius / m_hostParticle.m_pHostSpace->GetTrueRadius();
 
-	SharedPtr<ScalingSpace> pNewScalingSpace = MakeShared<ScalingSpace>(m_hostMass, trueRadius, radius);
+	Particle::ScalingSpaceList::iterator scalingSpaceListIter =
+		m_hostParticle.m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(&m_hostParticle, radius, trueRadius, true)));
 
-	m_scalingSpaces.Insert(pNewScalingSpace);
+	if (m_hostParticle.m_attachedSpaces.begin() != scalingSpaceListIter)
+	{
+		Particle::ScalingSpaceList::iterator outerScalingSpaceListIter = scalingSpaceListIter;
+		--outerScalingSpaceListIter;
 
-	return pNewScalingSpace;
+		(*scalingSpaceListIter)->m_pOuterSpace = outerScalingSpaceListIter->get();
+		(*outerScalingSpaceListIter)->m_pInnerSpace = scalingSpaceListIter->get();
+	}
+
+	Particle::ScalingSpaceList::iterator innerScalingSpaceListIter = scalingSpaceListIter;
+	++innerScalingSpaceListIter;
+	if (m_hostParticle.m_attachedSpaces.end() != innerScalingSpaceListIter)
+	{
+		(*scalingSpaceListIter)->m_pInnerSpace = innerScalingSpaceListIter->get();
+		(*innerScalingSpaceListIter)->m_pOuterSpace = scalingSpaceListIter->get();
+	}
+
+	return **scalingSpaceListIter;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-SharedPtr<Particle> System::CreateParticle(float mass, Vector3 position, Vector3 velocity, SharedPtr<ScalingSpace> pHostSpace)
+Particle & OrbitalSystem::CreateParticle(float mass, Vector3 position, Vector3 velocity, ScalingSpace & hostSpace)
 {
-	SharedPtr<Particle> pNewParticle = MakeShared<Particle>(Particle::State{ mass, position, velocity }, pHostSpace);
+	float const positionMagnitude = sqrtf(position.SqareMagnitude());
 
-	pHostSpace->m_particles.push_back(pNewParticle);
+	if (hostSpace.m_pInnerSpace != nullptr)
+	{
+		API_ASSERT_THROW(hostSpace.m_pInnerSpace->m_radius < positionMagnitude,
+			RESULT_CODE_INVALID_PARAMETER, Fmt::Format("Position ({}) overlaps inner scaling space (radius {})",
+				position, hostSpace.m_pInnerSpace->m_radius));
+	}
 
-	assert(false); // TODO ...
+	API_ASSERT_THROW(positionMagnitude < hostSpace.m_radius, RESULT_CODE_INVALID_PARAMETER,
+		Fmt::Format("Position ({}) is outside scaling space (radius {})", position, hostSpace.m_radius));
 
-	return nullptr;
+	UniquePtr<Particle> & pNewParticle =
+		hostSpace.m_particles.emplace_back(
+			std::move(MakeUnique<Particle>(Particle::State{ mass, position, velocity }, &hostSpace)));
+
+	return *pNewParticle;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-SharedPtr<ScalingSpace> System::CreateScalingSpace(float trueRadius, SharedPtr<Particle> pHostParticle)
+ScalingSpace & OrbitalSystem::CreateScalingSpace(float trueRadius, Particle & hostParticle)
 {
-	assert(false); // TODO ...
+	float const radius = trueRadius / hostParticle.m_pHostSpace->GetTrueRadius();
 
-	return nullptr;
+	Particle::ScalingSpaceList::iterator scalingSpaceListIter =
+		hostParticle.m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(&hostParticle, radius, trueRadius, false)));
+
+	ScalingSpace & newScalingSpace = **scalingSpaceListIter;
+
+	if (hostParticle.m_attachedSpaces.begin() != scalingSpaceListIter)
+	{
+		Particle::ScalingSpaceList::iterator outerScalingSpaceListIter = scalingSpaceListIter;
+		--outerScalingSpaceListIter;
+
+		if ((*outerScalingSpaceListIter)->IsInfluencing())
+			newScalingSpace.m_isInfluencing = true;
+
+		newScalingSpace.m_pOuterSpace = outerScalingSpaceListIter->get();
+		(*outerScalingSpaceListIter)->m_pInnerSpace = scalingSpaceListIter->get();
+	}
+
+	Particle::ScalingSpaceList::iterator innerScalingSpaceListIter = scalingSpaceListIter;
+	++innerScalingSpaceListIter;
+	if (m_hostParticle.m_attachedSpaces.end() != innerScalingSpaceListIter)
+	{
+		(*scalingSpaceListIter)->m_pInnerSpace = innerScalingSpaceListIter->get();
+		(*innerScalingSpaceListIter)->m_pOuterSpace = scalingSpaceListIter->get();
+	}
+
+	return newScalingSpace;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-SystemTestScript::SystemTestScript() :
+OrbitalSystemTestScript::OrbitalSystemTestScript() :
 	ITestScript("OrbitalSystem")
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-SystemTestScript::~SystemTestScript()
+OrbitalSystemTestScript::~OrbitalSystemTestScript()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void SystemTestScript::RunImpl(TestHandler & testHandler)
+void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 {
-	static const float hostMass = 1e30f;
-	static const float hostSpaceTrueRadius = 8e12f;
+	static constexpr float hostMass = 1e30f, hostSpaceTrueRadius = 8e12f;
+	static float const hostGravityParameter = ScalingSpace::ComputeScaledGravityParameter(hostSpaceTrueRadius, hostMass);
 
-	TestHandler::OutputMode outputMode = testHandler.SetOutputMode(TestHandler::VERBOSE);
+	TestHandler::OutputMode const outputMode = testHandler.SetOutputMode(TestHandler::VERBOSE);
 
-	System orbitalSystem(hostMass, hostSpaceTrueRadius);
+	OrbitalSystem orbitalSystem(hostMass, hostSpaceTrueRadius);
 
-	SharedPtr<ScalingSpace> pHostSpace = orbitalSystem.GetHostSpace();
+	Particle::ScalingSpaceList const& hostScalingSpaces = orbitalSystem.GetScalingSpaces();
+
+	testHandler.Assert(hostScalingSpaces.size(), 1ull, "Host scaling space exists");
+
+	ScalingSpace & hostSpace = orbitalSystem.GetHostSpace();
+
+	testHandler.Assert(hostSpace.m_uuid, (*hostScalingSpaces.begin())->m_uuid, "Host space UUID");
 
 	// Host space.
-	testHandler.Assert(pHostSpace->GetRadius(), 1.f, "Host space radius");
-	testHandler.Assert(pHostSpace->GetTrueRadius(), hostSpaceTrueRadius, "Host space true radius");
-
-	ScalingSpace::List const& hostScalingSpaces = orbitalSystem.GetScalingSpaces();
-
-	testHandler.Assert(hostScalingSpaces.size(), 1ull, "Host space list size");
+	testHandler.Assert(hostSpace.GetRadius(), 1.f, "Host space radius");
+	testHandler.Assert(hostSpace.GetTrueRadius(), hostSpaceTrueRadius, "Host space true radius");
+	testHandler.Assert(hostSpace.GetGravityParameter(), hostGravityParameter, "Host space gravity parameter");
 
 	// Adding host spaces.
 	testHandler.Assert<int, int>([&](int index)
@@ -93,23 +142,27 @@ void SystemTestScript::RunImpl(TestHandler & testHandler)
 		float const trueRadius = hostSpaceTrueRadius / powf(2.f, static_cast<float>(index));
 		float const radius = 1.f / powf(2.f, static_cast<float>(index));
 
-		SharedPtr<ScalingSpace> pNewHostSpace = orbitalSystem.CreateScalingSpace(trueRadius);
+		ScalingSpace & newHostSpace = orbitalSystem.CreateScalingSpace(trueRadius);
 
-		testHandler.Assert(pNewHostSpace->GetTrueRadius(), trueRadius, "True radius");
-		testHandler.Assert(pNewHostSpace->GetRadius(), radius, "Radius");
+		testHandler.Assert(newHostSpace.GetTrueRadius(), trueRadius, "True radius");
+		testHandler.Assert(newHostSpace.GetRadius(), radius, "Radius");
 
-		testHandler.Assert((*(--hostScalingSpaces.cend()))->m_uuid, pNewHostSpace->m_uuid, "List position");
+		auto newSpaceIter = --hostScalingSpaces.cend();
+		testHandler.Assert((*newSpaceIter)->m_uuid, newHostSpace.m_uuid, "List position");
+
+		auto prevSpaceIter = newSpaceIter; --prevSpaceIter;
+		testHandler.Assert(reinterpret_cast<uintptr_t>(newHostSpace.m_pInnerSpace), reinterpret_cast<uintptr_t>(nullptr), "Inner space pointer");
+		testHandler.Assert(reinterpret_cast<uintptr_t>(newHostSpace.m_pOuterSpace), reinterpret_cast<uintptr_t>(prevSpaceIter->get()), "Outer space pointer");
+		testHandler.Assert(reinterpret_cast<uintptr_t>((*prevSpaceIter)->m_pInnerSpace), reinterpret_cast<uintptr_t>(newSpaceIter->get()), "Outer space's inner space pointer");
 
 		return static_cast<int>(hostScalingSpaces.size());
 
 	}, TestHandler::FRangeIndex<int>(), TestHandler::FRangeIndex<int>(1), "Adding host spaces", TestHandler::IndexRange<int>{ 1, 10 });
 
 	// Creating particles.
-	SharedPtr<Particle> pNewParticle = orbitalSystem.CreateParticle(1.f, { 0.75f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, pHostSpace);
+	Particle & newParticle = orbitalSystem.CreateParticle(1.f, { 0.75f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, hostSpace);
 
 	testHandler.SetOutputMode(outputMode);
 }
-
-} // namespace Orbital ------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

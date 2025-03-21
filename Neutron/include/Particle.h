@@ -4,11 +4,9 @@
 #include "Vector3.h"
 #include "Uuid.h"
 #include "ScalingSpace.h"
+#include "Orbit.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
-{
-
-namespace Orbital // --------------------------------------------------------------------------------------------------------------
 {
 
 using namespace Nebula;
@@ -20,10 +18,16 @@ class ScalingSpace;
 
 class Particle
 {
-	friend class System;
+	friend class OrbitalSystem;
+	friend class ParticleTestScript;
+
+	struct ScalingSpaceListPredicate
+	{
+		bool operator()(UniquePtr<ScalingSpace> const& lhs, UniquePtr<ScalingSpace> const& rhs);
+	};
 
 public:
-	using List = std::list<SharedPtr<Particle>>;
+	using ScalingSpaceList = SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>;
 
 	struct State
 	{
@@ -32,19 +36,30 @@ public:
 		Vector3		m_localVelocity;		// Velocity relative/scaled to the host space.
 	};
 
-	Particle(State const& state, SharedPtr<ScalingSpace> pHostSpace);
+	/// <summary> Compute the radius of influence. Result has the same units as the orbit radius provided. </summary>
+	/// <param name="orbitRadius"> The orbit radius. </param>
+	/// <param name="particleMass"> The mass of the orbiting particle whose radius of influence is being computed. </param>
+	/// <param name="primaryMass"> The mass of the orbit primary. </param>
+	/// <returns> The radius of influence. </returns>
+	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
+
+	Particle(State const& state, ScalingSpace * pHostSpace);
 
 	State const& GetState() const;
-
-	SharedPtr<const ScalingSpace> GetHostSpace() const;
+	ScalingSpace * GetHostSpace();
+	ScalingSpaceList const& GetScalingSpaceList() const;
 
 	Uuid								m_uuid;
 
 private:
+	Particle(float mass, float hostSpaceTrueRadius);
+
 	State								m_state;						// Physical state of the particle.
 
-	SharedPtr<ScalingSpace>				m_pHostSpace;					// Pointer to the scaling space in which this particle is moving.
-	ScalingSpace::List					m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
+	UniquePtr<Orbit::Elements>			m_pElements;					// Pointer to the orbit elements.
+
+	ScalingSpace *						m_pHostSpace;					// Pointer to the scaling space in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
+	ScalingSpaceList					m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -56,12 +71,30 @@ inline Particle::State const& Particle::GetState() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline SharedPtr<const ScalingSpace> Particle::GetHostSpace() const
+inline ScalingSpace * Particle::GetHostSpace()
 {
 	return m_pHostSpace;
 }
 
-} // namespace Orbital ------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Particle::ScalingSpaceList const& Particle::GetScalingSpaceList() const
+{
+	return m_attachedSpaces;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class ParticleTestScript : public ITestScript
+{
+public:
+	ParticleTestScript();
+	virtual ~ParticleTestScript();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------
 

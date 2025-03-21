@@ -35,8 +35,20 @@ public:
 	static constexpr TVector3 Z1();
 
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
+	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
+	/// <param name="direction"> Storage for the direction of the computed cross product. </param>
 	/// <returns> The cross product = lhs x rhs. </returns>
-	static TVector3 PreciseCross(TVector3 const& lhs, TVector3 const& rhs);
+	static void PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction);
+
+	/// <param name="tolerance"> The vectors are approximately parallel if their dot product is greater than this tolerance. </param>
+	/// <returns> Whether the vectors are approximately parallel. </returns>
+	static bool AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance = std::numeric_limits<T>::epsilon());
+
+	/// <summary>
+	/// Compute the angle (radians) between two unit vectors.
+	/// Handles floating point error which can result in a dot product being greater than 1 for approximately-parallel unit vectors.
+	/// </summary>
+	static T AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs);
 
 	/// <returns> The X-component. </returns>
 	T X() const;
@@ -62,9 +74,17 @@ public:
 	/// <returns> The cross product of this vector (the left-hand side) and another (the right-hand side) = lhs x rhs. </returns>
 	TVector3 Cross(TVector3 const& rhs) const;
 
+	/// <summary> Compute the vector cross product = this x rhs. Optimised for precision when operating on vector components with very different magnitudes. </summary>
+	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
+	/// <param name="direction"> Storage for the direction of the computed cross product. </param>
+	void PreciseCross(TVector3 const& rhs, T & magnitude, TVector3 & direction) const;
+
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <returns> The cross product = lhs x rhs. </returns>
-	TVector3 PreciseCross(TVector3 const& rhs);
+	TVector3 PreciseCross(TVector3 const& rhs) const;
+
+	/// <returns> Whether this and another vector are approximately parallel. </returns>
+	bool IsApproxParallel(TVector3 const& other, T tolerance = std::numeric_limits<T>::epsilon()) const;
 
 	/// <summary> Normalize this vector. </summary>
 	/// <returns> A reference to this (normalized) vector. </returns>
@@ -174,7 +194,7 @@ inline constexpr TVector3<T> TVector3<T>:: Z1()
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs)
+inline void TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction)
 {
 	T lhsMagnitude = Maths::Sqrt<T>(lhs.SqareMagnitude());
 	T rhsMagnitude = Maths::Sqrt<T>(rhs.SqareMagnitude());
@@ -182,7 +202,7 @@ inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const
 	TVector3 lhsNormalized = lhs / lhsMagnitude;
 	TVector3 rhsNormalized = rhs / rhsMagnitude;
 
-	TVector3 crossDirection = lhsNormalized.Cross(rhsNormalized);
+	direction = lhsNormalized.Cross(rhsNormalized).Normalize();
 
 	T magnitudeProduct = lhsMagnitude * rhsMagnitude;
 
@@ -190,9 +210,26 @@ inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const
 
 	T sinAngle = Maths::Sqrt<T>(static_cast<T>(1) - (cosAngle * cosAngle)); // Trig. ident. 1 = sin^2(a) + cos^2(a)
 
-	T crossMagnitude = lhsMagnitude * rhsMagnitude * sinAngle;
+	magnitude = magnitudeProduct * sinAngle;
+}
 
-	return crossDirection * crossMagnitude;
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline bool TVector3<T>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
+{
+	return ((static_cast<T>(1) - tolerance) < lhs.Dot(rhs));
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline T TVector3<T>::AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs)
+{
+	assert(T(1) == lhs.SqareMagnitude());
+	assert(T(1) == rhs.SqareMagnitude());
+
+	return std::acosf(std::clamp(lhs.Dot(rhs), T(-1), T(1))); // Clamp in case of precision error.
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -271,9 +308,30 @@ inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& rhs)
+inline void TVector3<T>::PreciseCross(TVector3 const& rhs, T & magnitude, TVector3 & direction) const
 {
-	return PreciseCross(*this, rhs);
+	PreciseCross(*this, rhs, magnitude, direction);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& rhs) const
+{
+	T magnitude;
+	TVector3 direction;
+
+	PreciseCross(*this, rhs, magnitude, direction);
+
+	return magnitude * direction;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool TVector3<T>::IsApproxParallel(TVector3 const& other, T tolerance) const
+{
+	return TVector3::AreApproxParallel(*this, other, tolerance);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -395,6 +453,17 @@ inline TVector3<T>& TVector3<T>::operator/=(const T scalar)
 	m_z /= scalar;
 
 	return *this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+/* Non-member Binary Operators */
+
+template<typename T>
+inline TVector3<T> operator*(T scalar, TVector3<T> const& vector)
+{
+	return vector * scalar;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

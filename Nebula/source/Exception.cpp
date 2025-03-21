@@ -33,12 +33,4 @@ String AssertionException::CreateExceptionMessage(Result result, std::source_loc
 	return exceptionMessage;
 }
 
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-ApiException::ApiException(Result result, StringView message, std::source_location location) :
-	AssertionException(result, message, location)
-{
-}
-
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

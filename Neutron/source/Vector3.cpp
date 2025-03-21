@@ -163,18 +163,21 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert<Vector3, int>([&](int index)
 	{
 		Vector3 lhs((float)index, 0, 0);
-		Vector3 rhs(0, (float)(index * ((index % 2) ? 1 : -1)), 0);
+		Vector3 rhs(5 < index ? 1.f : 0.f, (float)(index * ((index % 2) ? 1 : -1)), 0);
 
 		return lhs.PreciseCross(rhs);
 
 	}, TestHandler::FRangeIndex<int>(), [](int index)
 	{
 		Vector3 lhs((float)index, 0, 0);
-		Vector3 rhs(0, (float)(index * ((index % 2) ? 1 : -1)), 0);
+		Vector3 rhs(5 < index ? 1.f : 0.f, (float)(index * ((index % 2) ? 1 : -1)), 0);
 
 		return lhs.Cross(rhs);
 
 	}, "Vector3 Precise Cross equals Cross", TestHandler::IndexRange<int>(1, 10));
+
+	// Approx. parallel
+	assert(false); // TODO ...
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

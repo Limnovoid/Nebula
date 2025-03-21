@@ -21,8 +21,9 @@ void AddTests(Nebula::TestHandler & testHandler)
 	//testHandler.Register(MakeShared<PhysicsEngineTestScript>());
 	testHandler.Register(MakeShared<Vector3TestScript>(), "Neutron");
 	testHandler.Register(MakeShared<Time::TimeTestScript>(), "Neutron");
-	testHandler.Register(MakeShared<Orbital::SystemTestScript>(), "Neutron");
-	testHandler.Register(MakeShared<Orbital::ScalingSpaceTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<OrbitalSystemTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<ScalingSpaceTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<OrbitTestScript>(), "Neutron");
 
 	// Pool testing.
 	std::pmr::pool_options poolOptions;

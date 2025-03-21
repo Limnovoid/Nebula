@@ -33,6 +33,9 @@ public:
 	template<Granularity NFromPerSecond>
 	static Period Convert(Period<NFromPerSecond> const fromPeriod);
 
+	template<IsFloatingPoint T, Granularity NFromPerSecond = Second>
+	static Period Convert(T value);
+
 	Period(int64_t value);
 
 	template<IsInt T = int64_t>
@@ -67,6 +70,17 @@ template<Granularity NFromPerSecond>
 inline Period<NPerSecond> Period<NPerSecond>::Convert(Period<NFromPerSecond> const fromPeriod)
 {
 	return { Convert<NPerSecond, NFromPerSecond>(fromPeriod.m_value) };
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<Granularity NPerSecond>
+template<IsFloatingPoint T, Granularity NFromPerSecond>
+inline Period<NPerSecond> Period<NPerSecond>::Convert(T value)
+{
+	static constexpr T CONVERSION_RATIO = static_cast<T>(NPerSecond) / static_cast<T>(NFromPerSecond);
+
+	return Period(static_cast<int64_t>(value * CONVERSION_RATIO));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

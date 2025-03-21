@@ -11,26 +11,22 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-namespace Orbital // --------------------------------------------------------------------------------------------------------------
-{
-
 using namespace Nebula;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class System
+class OrbitalSystem
 {
 public:
-	System(float hostMass, float hostSpaceTrueRadius);
+	OrbitalSystem(float hostMass, float hostSpaceTrueRadius);
 
-	SharedPtr<ScalingSpace> GetHostSpace() const;
-
-	ScalingSpace::List const& GetScalingSpaces() const;
+	ScalingSpace & GetHostSpace();
+	Particle::ScalingSpaceList const& GetScalingSpaces() const;
 
 	/// <summary> Create a scaling space at the top level of this system (attached to the system host). </summary>
 	/// <param name="trueRadius"> The true radius of the scaling space. </param>
 	/// <returns> A pointer to the created scaling space. </returns>
-	SharedPtr<ScalingSpace> CreateScalingSpace(float trueRadius);
+	ScalingSpace & CreateScalingSpace(float trueRadius);
 
 	/// <summary> Create a particle in the given scaling space. </summary>
 	/// <param name="mass"> The mass of the particle. </param>
@@ -38,51 +34,46 @@ public:
 	/// <param name="velocity"> The velocity of the particle, relative/scaled to the host space. </param>
 	/// <param name="pHostSpace"> Pointer to the host scaling space. </param>
 	/// <returns> A pointer to the created particle. </returns>
-	SharedPtr<Particle> CreateParticle(float mass, Vector3 position, Vector3 velocity, SharedPtr<ScalingSpace> pHostSpace);
+	Particle & CreateParticle(float mass, Vector3 position, Vector3 velocity, ScalingSpace & hostSpace);
 
 	/// <summary> Create a scaling space attached to the given particle. </summary>
-	/// <param name="trueRadius"> The true radius (in meters) of the scaling space. </param>
+	/// <param name="radius"> The true radius of the scaling space (in meters). </param>
 	/// <param name="pHostParticle"> Pointer to the host particle. </param>
 	/// <returns> A pointer to the created scaling space. </returns>
 	/// <exception cref="AssertionException"> Radius is too large. </exception>
 	/// <exception cref="AssertionException"> Radius is too small. </exception>
-	SharedPtr<ScalingSpace> CreateScalingSpace(float trueRadius, SharedPtr<Particle> pHostParticle);
+	ScalingSpace & CreateScalingSpace(float trueRadius, Particle & hostParticle);
 
 private:
-	float								m_hostMass;			// The magnitude of the point-mass at the centre of the simulation, around which all particles orbit.
-	SharedPtr<ScalingSpace>				m_pHostSpace;		// The host scaling space, against whose true radius all other scaling spaces' radii are parameterised.
-
-	ScalingSpace::List					m_scalingSpaces;	// Linked list of scaling spaces ordered by radius, highest to lowest.
+	Particle		m_hostParticle;			// The host particle, around which all other particles in the system orbit.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline SharedPtr<ScalingSpace> System::GetHostSpace() const
+inline ScalingSpace & OrbitalSystem::GetHostSpace()
 {
-	return m_pHostSpace;
+	return *m_hostParticle.GetHostSpace();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScalingSpace::List const& System::GetScalingSpaces() const
+inline Particle::ScalingSpaceList const& OrbitalSystem::GetScalingSpaces() const
 {
-	return m_scalingSpaces;
+	return m_hostParticle.GetScalingSpaceList();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class SystemTestScript : public ITestScript
+class OrbitalSystemTestScript : public ITestScript
 {
 public:
-	SystemTestScript();
-	virtual ~SystemTestScript();
+	OrbitalSystemTestScript();
+	virtual ~OrbitalSystemTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;
 };
-
-} // namespace Orbital ------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------
 
