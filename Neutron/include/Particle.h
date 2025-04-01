@@ -16,6 +16,9 @@ class ScalingSpace;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+/// <summary>
+/// The particle class implementing the orbital motion of a point mass in a scaled simulation space.
+/// </summary>
 class Particle
 {
 	friend class OrbitalSystem;
@@ -27,7 +30,28 @@ class Particle
 	};
 
 public:
-	using ScalingSpaceList = SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>;
+	class ScalingSpaceList : public SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>
+	{
+		using Base = SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>;
+
+	public:
+		using iterator = Base::iterator;
+		using const_iterator = Base::const_iterator;
+		using Base::SortedList;
+		using Base::begin;
+		using Base::end;
+		using Base::cbegin;
+		using Base::cend;
+		using Base::size;
+		using Base::empty;
+		using Base::clear;
+
+		iterator FindSpaceOfInfluence();
+		const_iterator FindSpaceOfInfluence() const;
+
+	};
+
+	//using ScalingSpaceList = SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>;
 
 	struct State
 	{
@@ -36,26 +60,20 @@ public:
 		Vector3		m_localVelocity;		// Velocity relative/scaled to the host space.
 	};
 
-	/// <summary> Compute the radius of influence. Result has the same units as the orbit radius provided. </summary>
-	/// <param name="orbitRadius"> The orbit radius. </param>
-	/// <param name="particleMass"> The mass of the orbiting particle whose radius of influence is being computed. </param>
-	/// <param name="primaryMass"> The mass of the orbit primary. </param>
-	/// <returns> The radius of influence. </returns>
-	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
-
 	Particle(State const& state, ScalingSpace * pHostSpace);
+	Particle(float mass, float hostSpaceTrueRadius);
+
+	void Set(Vector3 const& position, Vector3 const& velocity, ScalingSpace * pHostSpace);
 
 	State const& GetState() const;
 	ScalingSpace * GetHostSpace();
+	ScalingSpace * GetSpaceOfInfluence();
 	ScalingSpaceList const& GetScalingSpaceList() const;
 
-	Uuid								m_uuid;
+	Uuid const							m_uuid;
 
 private:
-	Particle(float mass, float hostSpaceTrueRadius);
-
 	State								m_state;						// Physical state of the particle.
-
 	UniquePtr<Orbit::Elements>			m_pElements;					// Pointer to the orbit elements.
 
 	ScalingSpace *						m_pHostSpace;					// Pointer to the scaling space in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
@@ -78,9 +96,48 @@ inline ScalingSpace * Particle::GetHostSpace()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+inline ScalingSpace * Particle::GetSpaceOfInfluence()
+{
+	ScalingSpace * pSpaceOfInfluence = nullptr;
+
+	Particle::ScalingSpaceList::iterator const spaceOfInfluenceIter = m_attachedSpaces.FindSpaceOfInfluence();
+
+	if (m_attachedSpaces.end() != spaceOfInfluenceIter)
+		pSpaceOfInfluence = (*spaceOfInfluenceIter).get();
+
+	return pSpaceOfInfluence;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 inline Particle::ScalingSpaceList const& Particle::GetScalingSpaceList() const
 {
 	return m_attachedSpaces;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+Particle::ScalingSpaceList::iterator Particle::ScalingSpaceList::FindSpaceOfInfluence()
+{
+	iterator spaceOfInfluenceIter = begin();
+
+	while ((end() != spaceOfInfluenceIter) && !(*spaceOfInfluenceIter)->IsInfluencing())
+		++spaceOfInfluenceIter;
+
+	return spaceOfInfluenceIter;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+Particle::ScalingSpaceList::const_iterator Particle::ScalingSpaceList::FindSpaceOfInfluence() const
+{
+	const_iterator spaceOfInfluenceIter = cbegin();
+
+	while ((cend() != spaceOfInfluenceIter) && !(*spaceOfInfluenceIter)->IsInfluencing())
+		++spaceOfInfluenceIter;
+
+	return spaceOfInfluenceIter;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

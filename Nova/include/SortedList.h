@@ -27,6 +27,8 @@ public:
 	using Base::cbegin;
 	using Base::cend;
 	using Base::size;
+	using Base::empty;
+	using Base::clear;
 
 	iterator Insert(T const& value);
 
@@ -35,10 +37,23 @@ public:
 
 	void Erase(iterator pos);
 
+	iterator Find(T const& value);
 	const_iterator Find(T const& value) const;
 
+	void Sort(iterator pos);
+
 private:
-	const_iterator FindSortedPos(T const& value) const;
+	/// <summary> Search forwards from 'pos' for the sorted position of the given value. </summary>
+	/// <param name="value"> The value to sort. </param>
+	/// <param name="pos"> The position of the first list item to compare against. </param>
+	/// <returns> The sorted position of the given value. </returns>
+	iterator FindSortedPosForwards(T const& value, iterator pos);
+
+	/// <summary> Search backwards from 'pos' for the sorted position of the given value. </summary>
+	/// <param name="value"> The value to sort. </param>
+	/// <param name="pos"> The position of the first list item to compare against. </param>
+	/// <returns> The sorted position of the given value. </returns>
+	iterator FindSortedPosBackwards(T const& value, iterator pos);
 
 	static TPredicate		s_predicate;
 };
@@ -53,7 +68,7 @@ TPredicate SortedList<T, TPredicate>::s_predicate = {};
 template<typename T, typename TPredicate>
 SortedList<T, TPredicate>::iterator SortedList<T, TPredicate>::Insert(T const& value)
 {
-	const_iterator pos = FindSortedPos(value);
+	iterator pos = FindSortedPosForwards(value, begin());
 
 	return Base::insert(pos, value);
 }
@@ -66,7 +81,7 @@ SortedList<T, TPredicate>::iterator SortedList<T, TPredicate>::Emplace(TArgs &&.
 {
 	T value(std::forward<TArgs>(args)...);
 
-	const_iterator pos = FindSortedPos(value);
+	iterator pos = FindSortedPosForwards(value, begin());
 
 	return Base::emplace(pos, std::move(value));
 }
@@ -82,9 +97,24 @@ void SortedList<T, TPredicate>::Erase(iterator pos)
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename TPredicate>
+SortedList<T, TPredicate>::iterator SortedList<T, TPredicate>::Find(T const& value)
+{
+	iterator pos = FindSortedPosForwards(value, begin());
+
+	// FindSortedPosForwards returns the first position for which (pos < value) is false:
+	// we test that (value < pos) is also false to confirm they are equal, and if not we return end().
+	if ((end() != pos) && s_predicate(value, *pos))
+		pos = end();
+
+	return pos;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename TPredicate>
 SortedList<T, TPredicate>::const_iterator SortedList<T, TPredicate>::Find(T const& value) const
 {
-	const_iterator pos = FindSortedPos(value);
+	const_iterator pos = FindSortedPosForwards(value, begin());
 
 	// FindSortedPos returns the first position for which (pos < value) is false:
 	// we test that (value < pos) is also false to confirm they are equal, and if not we return cend().
@@ -97,12 +127,62 @@ SortedList<T, TPredicate>::const_iterator SortedList<T, TPredicate>::Find(T cons
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename TPredicate>
-SortedList<T, TPredicate>::const_iterator SortedList<T, TPredicate>::FindSortedPos(T const& value) const
+void SortedList<T, TPredicate>::Sort(iterator pos)
 {
-	const_iterator pos = cbegin();
+	iterator newPos = end();
 
-	while ((cend() != pos) && s_predicate(*pos, value))
+	if (end() != pos)
+	{
+		iterator nextPos = pos;
+		++nextPos;
+
+		if ((end() != nextPos) && s_predicate(*nextPos, *pos))
+			newPos = FindSortedPosForwards(*pos, nextPos);
+	}
+
+	if ((end() == newPos) && (pos != begin()))
+	{
+		iterator prevPos = pos;
+		--prevPos;
+
+		if (s_predicate(*pos, *prevPos))
+			newPos = FindSortedPosBackwards(*pos, prevPos);
+	}
+
+	Base::emplace(newPos, std::move(*pos));
+	Base::erase(pos);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename TPredicate>
+SortedList<T, TPredicate>::iterator SortedList<T, TPredicate>::FindSortedPosForwards(T const& value, iterator pos)
+{
+	while ((end() != pos) && s_predicate(*pos, value))
 		++pos;
+
+	return pos;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename TPredicate>
+SortedList<T, TPredicate>::iterator SortedList<T, TPredicate>::FindSortedPosBackwards(T const& value, iterator pos)
+{
+	if (empty())
+		return end();
+
+	if (end() == pos)
+		--pos;
+
+	do
+	{
+		if (s_predicate(value, *pos))
+			break;
+
+		--pos;
+	}
+	while (begin() != pos);
 
 	return pos;
 }

@@ -19,6 +19,7 @@ constexpr float			kEccentricityEpsilon = kEpsf;		// Minimum eccentricity of a no
 constexpr float			kMaximumScalingSpaceRadius = 0.25f;
 constexpr float			kMinimumScalingSpaceRadius = 1000.f * kEpsf;
 constexpr float			kMinimumRadiusOfInfluence = kMinimumScalingSpaceRadius;
+constexpr float			kScalingSpaceEscapeRadius = 1.01f;
 
 constexpr Vector3		kReferenceX = { 1.f, 0.f, 0.f };
 constexpr Vector3		kReferenceY = { 0.f, 1.f, 0.f };

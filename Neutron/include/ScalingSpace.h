@@ -18,6 +18,9 @@ class Particle;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+/// <summary>
+/// Scaling space class representing a scaled simulation space for the orbital motion of particles.
+/// </summary>
 class ScalingSpace
 {
 	friend class OrbitalSystem;
@@ -33,7 +36,9 @@ public:
 	/// <summary> Compute the position and velocity of the local primary relative/scaled to this scaling space. </summary>
 	static void ComputePrimaryKinetics(ScalingSpace const* pScalingSpace, Vector3 & position, Vector3 & velocity);
 
-	ScalingSpace(Particle * pHost, float radius, float trueRadius, bool isInfluencing);
+	ScalingSpace(Particle * pHost, float trueRadius);
+
+	void Initialize(float radius, bool isInfluencing);
 
 	float GetTrueRadius() const;
 	float GetRadius() const;
@@ -43,9 +48,9 @@ public:
 	Vector3 const& GetPrimaryVelocity() const;
 	float GetGravityParameter() const;
 
-	float CircularOrbitSpeed(float orbitRadius);
+	float CircularOrbitSpeed(float orbitRadius) const;
 
-	Uuid								m_uuid;
+	Uuid const						m_uuid;
 
 private:
 	/// <summary> Search up through the simulation tree for this scaling space's primary. </summary>
@@ -56,8 +61,8 @@ private:
 	float							m_trueRadius;			// Radius in meters.
 	float							m_radius;				// Radius relative to superior scaling space.
 
-	float							m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 	bool							m_isInfluencing;		// Whether this scaling space is attached to the local primary.
+	float							m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 	Particle *						m_pPrimary;				// Pointer to the local primary.
 	Vector3							m_primaryPosition;		// Locally scaled position of the primary relative to this space.
@@ -128,7 +133,7 @@ inline float ScalingSpace::GetGravityParameter() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSpace::CircularOrbitSpeed(float orbitRadius)
+inline float ScalingSpace::CircularOrbitSpeed(float orbitRadius) const
 {
 	// Magnitude of velocity of a circular orbit = sqrt(gravity parameter / orbit radius).
 	return sqrtf(m_gravityParameter / orbitRadius);

@@ -10,36 +10,71 @@ Particle::Particle(State const& state, ScalingSpace * pHostSpace) :
 	m_pElements(std::move(MakeUnique<Orbit::Elements>())),
 	m_pHostSpace(pHostSpace)
 {
-	Vector3 const positionFromPrimary = m_state.m_localPosition - m_pHostSpace->GetPrimaryPosition();
-	Vector3 const velocityFromPrimary = m_state.m_localVelocity - m_pHostSpace->GetPrimaryVelocity();
+	Vector3 const positionFromPrimary = m_state.m_localPosition - pHostSpace->GetPrimaryPosition();
+	Vector3 const velocityFromPrimary = m_state.m_localVelocity - pHostSpace->GetPrimaryVelocity();
 
-	m_pElements->Compute(m_pHostSpace->GetGravityParameter(), positionFromPrimary, velocityFromPrimary);
+	m_pElements->Compute(pHostSpace->GetGravityParameter(), positionFromPrimary, velocityFromPrimary);
 
-	float const radiusOfInfluence =
-		ComputeRadiusOfInfluence(m_pElements->m_semiMajor, m_state.m_mass, m_pHostSpace->GetPrimary().m_state.m_mass);
+	// TODO - move to OrbitalSystem ...
+	/*float const radiusOfInfluence =
+		ComputeRadiusOfInfluence(m_pElements->m_semiMajor, m_state.m_mass, pHostSpace->GetPrimary().m_state.m_mass);
 
 	if (kMinimumRadiusOfInfluence < radiusOfInfluence)
 	{
 		float const trueRadiusOfInfluence = radiusOfInfluence * pHostSpace->GetTrueRadius();
 
-		m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(this, radiusOfInfluence, trueRadiusOfInfluence, true)));
-	}
+		ScalingSpace & influencingSpace =
+			**m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(this, trueRadiusOfInfluence)));
+
+		influencingSpace.Initialize(radiusOfInfluence, true);
+	}*/
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 Particle::Particle(float mass, float hostSpaceTrueRadius) :
-	m_state{ .m_mass = mass }
+	m_state{ .m_mass = mass },
+	m_pHostSpace(nullptr)
 {
-	m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(this, 1.f, hostSpaceTrueRadius, true)));
-	m_pHostSpace = (*m_attachedSpaces.begin()).get();
+	m_attachedSpaces.Emplace(std::move(MakeUnique<ScalingSpace>(this, hostSpaceTrueRadius)));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-float Particle::ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass)
+void Particle::Set(Vector3 const& position, Vector3 const& velocity, ScalingSpace * pHostSpace)
 {
-	return orbitRadius * powf(particleMass / primaryMass, 2.f / 5.f);
+	m_state.m_localPosition = position;
+	m_state.m_localVelocity = velocity;
+	m_pHostSpace = pHostSpace;
+
+	Vector3 const positionFromPrimary = m_state.m_localPosition - m_pHostSpace->GetPrimaryPosition();
+	Vector3 const velocityFromPrimary = m_state.m_localVelocity - m_pHostSpace->GetPrimaryVelocity();
+
+	m_pElements->Compute(m_pHostSpace->GetGravityParameter(), positionFromPrimary, velocityFromPrimary);
+
+	// TODO - move to OrbitalSystem ...
+	/*float const radiusOfInfluence =
+		ComputeRadiusOfInfluence(m_pElements->m_semiMajor, m_state.m_mass, m_pHostSpace->GetPrimary().m_state.m_mass);
+
+	float const trueRadiusOfInfluence = radiusOfInfluence * pHostSpace->GetTrueRadius();
+
+	ScalingSpace * pInfluence = GetInfluence();
+	if (nullptr == pInfluence)
+	{
+		if (kMinimumRadiusOfInfluence < radiusOfInfluence)
+			AddScalingSpace(radiusOfInfluence, trueRadiusOfInfluence);
+	}
+	else
+	{
+		if (kMinimumRadiusOfInfluence < radiusOfInfluence)
+		{
+			pInfluence->SetRadius(trueRadiusOfInfluence);
+		}
+		else
+		{
+			assert(false); // TODO - set influence and all smaller spaces to non-influencing ...
+		}
+	}*/
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
