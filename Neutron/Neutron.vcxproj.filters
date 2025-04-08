@@ -39,6 +39,18 @@
     <ClInclude Include="include\Orbit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\OrbitalSystem2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ParticleBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ScaledSpaceBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ScaledSpaceList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp">
@@ -60,6 +72,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Orbit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\OrbitalSystem2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ScaledSpaceBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ParticleBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ScaledSpaceList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

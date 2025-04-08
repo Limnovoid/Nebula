@@ -5,6 +5,7 @@
 #include "Vector3.h"
 #include "NeutronTime.h"
 #include "OrbitalSystem.h"
+#include "OrbitalSystem2.h"
 #include "ScalingSpace.h"
 #include "Particle.h"
 #include "Orbit.h"
@@ -22,6 +23,7 @@ void AddTests(Nebula::TestHandler & testHandler)
 	testHandler.Register(MakeShared<Vector3TestScript>(), "Neutron");
 	testHandler.Register(MakeShared<Time::TimeTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<OrbitalSystemTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<OrbitalSystem2TestScript>(), "Neutron");
 	testHandler.Register(MakeShared<ScalingSpaceTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<OrbitTestScript>(), "Neutron");
 

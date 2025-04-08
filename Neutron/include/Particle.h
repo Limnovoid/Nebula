@@ -48,7 +48,6 @@ public:
 
 		iterator FindSpaceOfInfluence();
 		const_iterator FindSpaceOfInfluence() const;
-
 	};
 
 	//using ScalingSpaceList = SortedList<UniquePtr<ScalingSpace>, ScalingSpaceListPredicate>;
@@ -118,7 +117,7 @@ inline Particle::ScalingSpaceList const& Particle::GetScalingSpaceList() const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Particle::ScalingSpaceList::iterator Particle::ScalingSpaceList::FindSpaceOfInfluence()
+inline Particle::ScalingSpaceList::iterator Particle::ScalingSpaceList::FindSpaceOfInfluence()
 {
 	iterator spaceOfInfluenceIter = begin();
 
@@ -130,7 +129,7 @@ Particle::ScalingSpaceList::iterator Particle::ScalingSpaceList::FindSpaceOfInfl
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Particle::ScalingSpaceList::const_iterator Particle::ScalingSpaceList::FindSpaceOfInfluence() const
+inline Particle::ScalingSpaceList::const_iterator Particle::ScalingSpaceList::FindSpaceOfInfluence() const
 {
 	const_iterator spaceOfInfluenceIter = cbegin();
 

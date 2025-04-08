@@ -1,6 +1,8 @@
 #ifndef NEBULA_I_TEST_SCRIPT_H
 #define NEBULA_I_TEST_SCRIPT_H
 
+#include "NebulaString.h"
+
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 

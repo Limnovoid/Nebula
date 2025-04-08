@@ -23,16 +23,16 @@ public:
 	template<typename U> constexpr TVector3(TVector3<U> const& rhs);
 
 	/// <returns> (0, 0, 0) </returns>
-	static constexpr TVector3 Zero();
+	static constexpr TVector3 const& Zero();
 
 	/// <returns> (1, 0, 0) </returns>
-	static constexpr TVector3 X1();
+	static constexpr TVector3 const& X1();
 
 	/// <returns> (0, 1, 0) </returns>
-	static constexpr TVector3 Y1();
+	static constexpr TVector3 const& Y1();
 
 	/// <returns> (0, 0, 1) </returns>
-	static constexpr TVector3 Z1();
+	static constexpr TVector3 const& Z1();
 
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
@@ -162,33 +162,41 @@ inline constexpr TVector3<T>::TVector3(TVector3<U> const& rhs) :
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline constexpr TVector3<T> TVector3<T>:: Zero()
+inline constexpr TVector3<T> const& TVector3<T>::Zero()
 {
-	return { 0, 0, 0 };
+	static constexpr TVector3 ZERO(0.f);
+
+	return ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline constexpr TVector3<T> TVector3<T>:: X1()
+inline constexpr TVector3<T> const& TVector3<T>::X1()
 {
-	return { 1, 0, 0 };
+	static constexpr TVector3 X1(1.f, 0.f, 0.f);
+
+	return X1;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline constexpr TVector3<T> TVector3<T>:: Y1()
+inline constexpr TVector3<T> const& TVector3<T>::Y1()
 {
-	return { 0, 1, 0 };
+	static constexpr TVector3 Y1(0.f, 1.f, 0.f);
+
+	return Y1;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-inline constexpr TVector3<T> TVector3<T>:: Z1()
+inline constexpr TVector3<T> const& TVector3<T>::Z1()
 {
-	return { 0, 0, 1 };
+	static constexpr TVector3 Z1(0.f, 0.f, 1.f);
+
+	return Z1;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
