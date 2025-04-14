@@ -32,12 +32,48 @@ ScaledSpaceBase & OrbitalSystem2::CreateScaledSpace(ParticleBase & hostParticle,
 		}
 	}
 
-	return *CreateScaledSpace(&hostParticle, trueRadius, isInfluencing);
+	return *CreateScaledSpaceImpl(&hostParticle, trueRadius, isInfluencing);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScaledSpaceBase * OrbitalSystem2::CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing)
+ParticleBase & OrbitalSystem2::CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, Vector3 velocity,
+	bool isInfluencing)
+{
+	API_ASSERT_THROW(sqrtf(position.SqareMagnitude()) < kScalingSpaceEscapeRadius, RESULT_CODE_INVALID_PARAMETER,
+		Fmt::Format("Position {} is outside the scaling space!", position));
+
+	if (nullptr != hostSpace.m_pInnerSpace)
+	{
+		API_ASSERT_THROW(hostSpace.m_pInnerSpace->m_radius < sqrtf(position.SqareMagnitude()), RESULT_CODE_INVALID_PARAMETER,
+			Fmt::Format("Position {} is inside the inner scaling space!", position));
+	}
+
+	UniquePtr<ParticleBase> pNewParticle;
+
+	if (isInfluencing)
+		pNewParticle = MakeUnique<InfluencingParticle>(&hostSpace, mass, position, velocity);
+	else
+		pNewParticle = MakeUnique<Particle>(&hostSpace, mass, position, velocity);
+
+	return *pNewParticle;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ParticleBase & OrbitalSystem2::CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, bool isInfluencing)
+{
+	hostSpace.CircularOrbitSpeed(sqrtf(position.SqareMagnitude()));
+
+	assert(false); // TODO - circular orbit velocity direction
+	Vector3 circularOrbitVelocity;
+
+	CreateParticle(hostSpace, mass, position, circularOrbitVelocity, isInfluencing);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScaledSpaceBase * OrbitalSystem2::CreateScaledSpaceImpl(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing)
 {
 	ScaledSpaceBase * pNewScaledSpace = nullptr;
 
@@ -75,21 +111,23 @@ OrbitalSystem2::HostParticle::HostParticle(float hostMass) :
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-OrbitalSystem2::Particle::Particle(ScaledSpaceBase * pHostSpace, float hostMass) :
-	ParticleBase(pHostSpace, hostMass)
+OrbitalSystem2::Particle::Particle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity) :
+	ParticleBase(pHostSpace, mass),
+	m_position(position),
+	m_velocity(velocity)
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-OrbitalSystem2::InfluencingParticle::InfluencingParticle(ScaledSpaceBase * pHostSpace, float hostMass) :
-	Particle(pHostSpace, hostMass)
+OrbitalSystem2::InfluencingParticle::InfluencingParticle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity) :
+	Particle(pHostSpace, mass, position, velocity)
 {
-	m_elements.Compute(pHostSpace->GetGravityParameter(), m_position - pHostSpace->GetPrimaryPosition(),
-		m_velocity - pHostSpace->GetPrimaryVelocity());
+	m_elements.Compute(pHostSpace->GetGravityParameter(), position - pHostSpace->GetPrimaryPosition(),
+		velocity - pHostSpace->GetPrimaryVelocity());
 
-	float const radiusOfInfluence = ComputeRadiusOfInfluence(m_elements.m_semiMajor, m_mass, pHostSpace->GetPrimary().m_mass);
+	float const radiusOfInfluence = ComputeRadiusOfInfluence(m_elements.m_semiMajor, mass, pHostSpace->GetPrimary().m_mass);
 
 	float const trueRadiusOfInfluence = radiusOfInfluence * pHostSpace->GetTrueRadius();
 	m_pSpaceOfInfluence = EmplaceScaledSpace<InfluencingSpace>(trueRadiusOfInfluence);
@@ -144,6 +182,48 @@ void OrbitalSystem2TestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(hostSpace.GetPrimary().m_uuid, hostParticle.m_uuid, "Host space's primary");
 	testHandler.Assert(hostSpace.GetPrimaryPosition(), Vector3::Zero(), "Host space primary position");
 	testHandler.Assert(hostSpace.GetPrimaryVelocity(), Vector3::Zero(), "Host space primary velocity");
+
+	ScaledSpaceBase & scaledSpace2 = orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 10.f);
+
+	testHandler.Assert(scaledSpace2.GetRadius(), 0.1f, "Scaled space 2 radius");
+	testHandler.Assert(scaledSpace2.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 2 host particle");
+	testHandler.Assert(scaledSpace2.GetGravityParameter(),
+		ScaledSpaceBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS / 10.f, HOST_MASS), "Scaled space 2 gravity parameter");
+	testHandler.Assert(scaledSpace2.IsInfluencing(), true, "Scaled space 2 is influencing");
+	testHandler.Assert(scaledSpace2.GetPrimary().m_uuid, hostParticle.m_uuid, "Scaled space 2 primary");
+	testHandler.Assert(scaledSpace2.GetPrimaryPosition(), Vector3::Zero(), "Scaled space 2 primary position");
+	testHandler.Assert(scaledSpace2.GetPrimaryVelocity(), Vector3::Zero(), "Scaled space 2 primary velocity");
+
+	ScaledSpaceBase & scaledSpace3 = orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 100.f);
+
+	testHandler.Assert(scaledSpace3.GetRadius(), 0.1f, "Scaled space 3 radius");
+	testHandler.Assert(scaledSpace3.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 3 host particle");
+	testHandler.Assert(scaledSpace3.GetGravityParameter(),
+		ScaledSpaceBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS / 100.f, HOST_MASS), "Scaled space 3 gravity parameter");
+	testHandler.Assert(scaledSpace3.IsInfluencing(), true, "Scaled space 3 is influencing");
+	testHandler.Assert(scaledSpace3.GetPrimary().m_uuid, hostParticle.m_uuid, "Scaled space 3 primary");
+	testHandler.Assert(scaledSpace3.GetPrimaryPosition(), Vector3::Zero(), "Scaled space 3 primary position");
+	testHandler.Assert(scaledSpace3.GetPrimaryVelocity(), Vector3::Zero(), "Scaled space 3 primary velocity");
+
+	bool isException = false;
+	try
+	{
+		orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 2.f);
+	}
+	catch (ApiException const&)
+	{
+		isException = true;
+	}
+	testHandler.Assert(isException, true, "Invalid radius causes exception");
+
+	try
+	{
+		orbitalSystem.CreateParticle(hostSpace, Vector3(0.05f, 0.f, 0.f));
+	}
+	catch (ApiException const&)
+	{
+		isException = true;
+	}
 
 }
 

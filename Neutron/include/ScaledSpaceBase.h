@@ -43,9 +43,9 @@ protected:
 	ParticleBase *						m_pHostParticle;
 	std::list<UniquePtr<ParticleBase>>	m_particles;
 
-	float							m_trueRadius;			// Radius in meters.
-	float							m_radius;				// Radius relative to superior scaling space.
-	float							m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	float								m_trueRadius;			// Radius in meters.
+	float								m_radius;				// Radius relative to superior scaling space.
+	float								m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
 	ScaledSpaceBase *					m_pOuterSpace;

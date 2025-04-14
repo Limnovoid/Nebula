@@ -169,7 +169,6 @@ public:
 	/// <returns> The mode being used at the time this function is called. </returns>
 	OutputMode SetOutputMode(OutputMode outputMode);
 
-
 	/// TestHandler UI options...
 	void UiSetOutputMode(UiIo const& uiIo);
 

@@ -67,7 +67,7 @@ class OrbitalSystem2
 	class Particle : public ParticleBase
 	{
 	public:
-		Particle(ScaledSpaceBase * pHostSpace, float hostMass);
+		Particle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
 		virtual ~Particle() override = default;
 
 		virtual Vector3 const& GetPosition() const override;
@@ -88,7 +88,7 @@ class OrbitalSystem2
 		using Particle::GetPosition;
 		using Particle::GetVelocity;
 
-		InfluencingParticle(ScaledSpaceBase * pHostSpace, float hostMass);
+		InfluencingParticle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
 		virtual ~InfluencingParticle() override = default;
 
 		virtual bool IsInfluencing() const override;
@@ -104,10 +104,35 @@ public:
 	ParticleBase & GetHostParticle();
 	ScaledSpaceBase & GetHostSpace();
 
+	/// <summary> Create a scaled space. </summary>
+	/// <param name="hostParticle"> The particle to which the new space will be attached. </param>
+	/// <param name="trueRadius"> The true radius (meters). </param>
+	/// <returns> Reference to the created space. </returns>
+	/// <exception cref="ApiException"> Invalid parameter. </exception>
 	ScaledSpaceBase & CreateScaledSpace(ParticleBase & hostParticle, float trueRadius);
 
+	/// <summary> Create a particle. </summary>
+	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
+	/// <param name="mass"> The particle mass (kg). </param>
+	/// <param name="position"> The particle initial position. </param>
+	/// <param name="velocity"> The particle initial velocity. </param>
+	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
+	/// <returns> Reference to the created particle. </returns>
+	/// <exception cref="ApiException"> Invalid parameter. </exception>
+	ParticleBase & CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, Vector3 velocity, bool isInfluencing);
+
+	/// <summary> Create a particle with circular orbit. </summary>
+	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
+	/// <param name="mass"> The particle mass (kg). </param>
+	/// <param name="position"> The particle initial position. </param>
+	/// <param name="velocity"> The particle initial velocity. </param>
+	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
+	/// <returns> Reference to the created particle. </returns>
+	/// <exception cref="ApiException"> Invalid parameter. </exception>
+	ParticleBase & CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, bool isInfluencing);
+
 private:
-	ScaledSpaceBase * CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing);
+	ScaledSpaceBase * CreateScaledSpaceImpl(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing);
 
 	UniquePtr<HostParticle>		m_pHostParticle;			// Pointer to the interface of the host particle around which all other particles in the system orbit.
 };
