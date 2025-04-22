@@ -84,7 +84,7 @@ inline constexpr size_t NumDigits(T value)
 		integerPart += static_cast<uint64_t>();
 	}*/
 
-	static_assert(false); // TODO !
+	assert(false); // TODO !
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ inline T Floor(T value)
 template<typename T>
 inline T Sqrt(T value)
 {
-	static_assert(false);
+	assert(false);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------

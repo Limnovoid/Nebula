@@ -22,7 +22,7 @@ namespace Nebula // ------------------------------------------------------------
 
 #ifdef  _DEBUG
 #define ASSERT(expression) assert(expression)
-#elif
+#else
 #define ASSERT(expression)
 #endif//_DEBUG
 
