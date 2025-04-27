@@ -68,7 +68,7 @@ ParticleBase & OrbitalSystem2::CreateParticle(ScaledSpaceBase & hostSpace, float
 	assert(false); // TODO - circular orbit velocity direction
 	Vector3 circularOrbitVelocity;
 
-	CreateParticle(hostSpace, mass, position, circularOrbitVelocity, isInfluencing);
+	return CreateParticle(hostSpace, mass, position, circularOrbitVelocity, isInfluencing);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ void OrbitalSystem2TestScript::RunImpl(TestHandler & testHandler)
 
 	try
 	{
-		orbitalSystem.CreateParticle(hostSpace, Vector3(0.05f, 0.f, 0.f));
+		orbitalSystem.CreateParticle(hostSpace, 1e7f, Vector3(0.05f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), false);
 	}
 	catch (ApiException const&)
 	{

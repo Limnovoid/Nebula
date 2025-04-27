@@ -42,6 +42,9 @@ namespace Nebula // ------------------------------------------------------------
 
 #define ASSERT_THROW_RESULT(name, op, expression, message) { Result const result = (expression);\
 	IF_RESULT_CODE(name, op, result) { throw AssertionException(result, message, std::source_location::current()); } }
+#else
+#define ASSERT_THROW(expression, resultCode, message)
+#define ASSERT_THROW_RESULT(name, op, expression, message)
 #endif//_DEBUG
 
 #ifdef _DEBUG
