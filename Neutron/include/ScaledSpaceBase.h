@@ -32,6 +32,10 @@ public:
 	float GetGravityParameter() const;
 	float CircularOrbitSpeed(float orbitRadius) const;
 
+	/// <summary> Modify the radius. Re-intializes the scaled space with the new radius. </summary>
+	/// <param name="radius"></param>
+	void SetRadius(float radius);
+
 	virtual bool IsInfluencing() const = 0;
 	virtual ParticleBase const& GetPrimary() const = 0;
 	virtual Vector3 const& GetPrimaryPosition() const = 0;

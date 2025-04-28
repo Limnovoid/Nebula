@@ -205,10 +205,12 @@ void OrbitalSystem2TestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(scaledSpace3.GetPrimaryPosition(), Vector3::Zero(), "Scaled space 3 primary position");
 	testHandler.Assert(scaledSpace3.GetPrimaryVelocity(), Vector3::Zero(), "Scaled space 3 primary velocity");
 
-	bool isException = false;
+	bool isException;
+
 	try
 	{
 		orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 2.f);
+		isException = false;
 	}
 	catch (ApiException const&)
 	{
@@ -216,14 +218,48 @@ void OrbitalSystem2TestScript::RunImpl(TestHandler & testHandler)
 	}
 	testHandler.Assert(isException, true, "Invalid radius causes exception");
 
-	try
+	/*try
 	{
 		orbitalSystem.CreateParticle(hostSpace, 1e7f, Vector3(0.05f, 0.f, 0.f), Vector3(0.f, 1.f, 0.f), false);
+		isException = false;
+	}
+	catch (ApiException const&)
+	{
+		isException = true;
+	}*/
+
+	try
+	{
+		scaledSpace2.SetRadius(0.5f);
+		isException = false;
 	}
 	catch (ApiException const&)
 	{
 		isException = true;
 	}
+	testHandler.Assert(isException, true, "Resizing populated space causes exception");
+
+	try
+	{
+		ScaledSpaceBase & smallestSpace = hostParticle.GetAttachedSpaces().Back();
+
+		float const newTrueRadius = 0.5f * smallestSpace.GetTrueRadius();
+		float const newRadius = 0.5f * smallestSpace.GetRadius();
+
+		smallestSpace.SetRadius(newRadius);
+
+		testHandler.Assert(smallestSpace.GetRadius(), newRadius, "New radius");
+		testHandler.Assert(smallestSpace.GetTrueRadius(), newTrueRadius, "New true radius");
+		testHandler.Assert(scaledSpace3.GetGravityParameter(),
+			ScaledSpaceBase::ComputeScaledGravityParameter(newTrueRadius, HOST_MASS), "New gravity parameter");
+
+		isException = false;
+	}
+	catch (ApiException const&)
+	{
+		isException = true;
+	}
+	testHandler.Assert(isException, false, "Resizing unpopulated space causes exception");
 
 }
 

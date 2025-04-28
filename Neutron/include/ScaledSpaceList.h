@@ -40,7 +40,9 @@ public:
 	using Base::empty;
 	using Base::clear;
 
+	ScaledSpaceBase & Front();
 	ScaledSpaceBase const& Front() const;
+	ScaledSpaceBase & Back();
 	ScaledSpaceBase const& Back() const;
 
 	template<typename TScaledSpace>
@@ -55,11 +57,29 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+inline ScaledSpaceBase & ScaledSpaceList::Front()
+{
+	assert(!empty());
+
+	return **begin();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 inline ScaledSpaceBase const& ScaledSpaceList::Front() const
 {
 	assert(!empty());
 
 	return **cbegin();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScaledSpaceBase & ScaledSpaceList::Back()
+{
+	assert(!empty());
+
+	return **(--end());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
