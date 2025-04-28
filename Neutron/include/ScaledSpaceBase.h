@@ -33,7 +33,8 @@ public:
 	float CircularOrbitSpeed(float orbitRadius) const;
 
 	/// <summary> Modify the radius. Re-intializes the scaled space with the new radius. </summary>
-	/// <param name="radius"></param>
+	/// <param name="radius"> The new radius, relative to the containing space. </param>
+	/// <exception cref="ApiException"> Invalid parameter or state. </exception>
 	void SetRadius(float radius);
 
 	virtual bool IsInfluencing() const = 0;

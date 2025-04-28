@@ -14,7 +14,7 @@ public:
 	Exception(Result result, StringView message);
 
 	Result GetResult() const;
-	StringView GetMessage() const;
+	String const& GetMessage() const;
 
 	String ToString() const;
 
@@ -32,7 +32,7 @@ inline Result Exception::GetResult() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline StringView Exception::GetMessage() const
+inline String const& Exception::GetMessage() const
 {
 	return m_message;
 }
