@@ -22,7 +22,7 @@ ScaledSpaceBase::ScaledSpaceBase(ParticleBase * pHostParticle, float trueRadius)
 void ScaledSpaceBase::Initialize(float radius)
 {
 	m_radius = radius;
-	m_gravityParameter = ComputeScaledGravityParameter(m_trueRadius, GetPrimary().GetMass());
+	m_gravityParameter = ComputeScaledGravityParameter(m_trueRadius, GetPrimary()->GetMass());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

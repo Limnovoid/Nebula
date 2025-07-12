@@ -15,6 +15,8 @@ class ScaledSpaceBase
 	friend class ScaledSpaceList;
 
 public:
+	using ParticleList = std::list<UniquePtr<ParticleBase>>;
+
 	/// <summary> Compute the scaled gravitational parameter of a primary with given mass. </summary>
 	/// <param name="trueRadius"> The true radius of the scaled space whose gravitational parameter is being computed. </param>
 	/// <param name="primaryMass"> The mass of the scaled space's primary. </param>
@@ -27,9 +29,14 @@ public:
 	virtual void Initialize(float radius);
 
 	ParticleBase * GetHostParticle() const;
+	ParticleList const& GetParticleList() const;
+	ScaledSpaceBase * GetOuterSpace() const;
+	ScaledSpaceBase * GetInnerSpace() const;
+
 	float GetTrueRadius() const;
 	float GetRadius() const;
 	float GetGravityParameter() const;
+
 	float CircularOrbitSpeed(float orbitRadius) const;
 
 	/// <summary> Modify the radius. Re-intializes the scaled space with the new radius. </summary>
@@ -38,23 +45,23 @@ public:
 	void SetRadius(float radius);
 
 	virtual bool IsInfluencing() const = 0;
-	virtual ParticleBase const& GetPrimary() const = 0;
+	virtual ParticleBase const* GetPrimary() const = 0;
 	virtual Vector3 const& GetPrimaryPosition() const = 0;
 	virtual Vector3 const& GetPrimaryVelocity() const = 0;
 
-	Uuid									m_uuid;
+	Uuid				m_uuid;
 
 protected:
-	ParticleBase *						m_pHostParticle;
-	std::list<UniquePtr<ParticleBase>>	m_particles;
+	ParticleBase *		m_pHostParticle;
+	ParticleList		m_particles;
 
-	float								m_trueRadius;			// Radius in meters.
-	float								m_radius;				// Radius relative to superior scaling space.
-	float								m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	float				m_trueRadius;			// Radius in meters.
+	float				m_radius;				// Radius relative to superior scaling space.
+	float				m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
-	ScaledSpaceBase *					m_pOuterSpace;
-	ScaledSpaceBase *					m_pInnerSpace;
+	ScaledSpaceBase *	m_pOuterSpace;
+	ScaledSpaceBase *	m_pInnerSpace;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -70,6 +77,27 @@ inline float ScaledSpaceBase::ComputeScaledGravityParameter(float trueRadius, fl
 inline ParticleBase * ScaledSpaceBase::GetHostParticle() const
 {
 	return m_pHostParticle;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScaledSpaceBase::ParticleList const& ScaledSpaceBase::GetParticleList() const
+{
+	return m_particles;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScaledSpaceBase * ScaledSpaceBase::GetOuterSpace() const
+{
+	return m_pOuterSpace;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScaledSpaceBase * ScaledSpaceBase::GetInnerSpace() const
+{
+	return m_pInnerSpace;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

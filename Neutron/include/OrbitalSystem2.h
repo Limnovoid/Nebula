@@ -18,18 +18,20 @@ using namespace Nebula;
 
 class OrbitalSystem2
 {
+	friend class ParticleBase;
 	friend class OrbitalSystem2TestScript;
 
 	class HostParticle : public ParticleBase
 	{
 	public:
-		HostParticle(float hostMass);
+		HostParticle(OrbitalSystem2 & orbitalSystem, float hostMass);
 		virtual ~HostParticle() override = default;
 
 		virtual Vector3 const& GetPosition() const override;
 		virtual Vector3 const& GetVelocity() const override;
 		virtual bool IsInfluencing() const override;
-		virtual ScaledSpaceBase * GetSpaceOfInfluence() override;
+		virtual ScaledSpaceBase * GetSpaceOfInfluence() const override;
+		virtual Orbit const* GetOrbit() const override;
 	};
 
 	class InfluencingSpace : public ScaledSpaceBase
@@ -38,7 +40,7 @@ class OrbitalSystem2
 		using ScaledSpaceBase::ScaledSpaceBase;
 
 		virtual bool IsInfluencing() const override;
-		virtual ParticleBase const& GetPrimary() const override;
+		virtual ParticleBase const* GetPrimary() const override;
 		virtual Vector3 const& GetPrimaryPosition() const override;
 		virtual Vector3 const& GetPrimaryVelocity() const override;
 	};
@@ -51,7 +53,7 @@ class OrbitalSystem2
 		virtual void Initialize(float radius) override;
 
 		virtual bool IsInfluencing() const override;
-		virtual ParticleBase const& GetPrimary() const override;
+		virtual ParticleBase const* GetPrimary() const override;
 		virtual Vector3 const& GetPrimaryPosition() const override;
 		virtual Vector3 const& GetPrimaryVelocity() const override;
 
@@ -59,27 +61,28 @@ class OrbitalSystem2
 		static ParticleBase * FindPrimary(ScaledSpaceBase const* pScaledSpace);
 		static void ComputePrimaryKinetics(ScaledSpaceBase const* pScaledSpace, Vector3 & position, Vector3 & velocity);
 
-		ParticleBase *		m_pPrimary;				// Pointer to the local primary.
-		Vector3				m_primaryPosition;		// Locally scaled position of the primary relative to this space.
-		Vector3				m_primaryVelocity;		// Locally scaled velocity of the primary relative to this space.
+		ParticleBase *	m_pPrimary;			// Pointer to the local primary.
+		Vector3			m_primaryPosition;	// Locally scaled position of the primary relative to this space.
+		Vector3			m_primaryVelocity;	// Locally scaled velocity of the primary relative to this space.
 	};
 
 	class Particle : public ParticleBase
 	{
 	public:
-		Particle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
+		Particle(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
 		virtual ~Particle() override = default;
 
 		virtual Vector3 const& GetPosition() const override;
 		virtual Vector3 const& GetVelocity() const override;
 		virtual bool IsInfluencing() const override;
-		virtual ScaledSpaceBase * GetSpaceOfInfluence() override;
+		virtual ScaledSpaceBase * GetSpaceOfInfluence() const override;
+		virtual Orbit const* GetOrbit() const override;
 
 	protected:
-		Vector3					m_position;
-		Vector3					m_velocity;
+		Vector3				m_position;
+		Vector3				m_velocity;
 
-		Orbit::Elements			m_elements;
+		UniquePtr<Orbit>	m_pOrbit;
 	};
 
 	class InfluencingParticle : public Particle
@@ -88,28 +91,29 @@ class OrbitalSystem2
 		using Particle::GetPosition;
 		using Particle::GetVelocity;
 
-		InfluencingParticle(ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
+		InfluencingParticle(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
 		virtual ~InfluencingParticle() override = default;
 
 		virtual bool IsInfluencing() const override;
-		virtual ScaledSpaceBase * GetSpaceOfInfluence() override;
+		virtual ScaledSpaceBase * GetSpaceOfInfluence() const override;
+		virtual Orbit const* GetOrbit() const override;
 
 	private:
-		InfluencingSpace *		m_pSpaceOfInfluence;
+		InfluencingSpace *	m_pSpaceOfInfluence;
 	};
 
 public:
 	OrbitalSystem2(float hostMass, float hostSpaceTrueRadius);
 
-	ParticleBase & GetHostParticle();
-	ScaledSpaceBase & GetHostSpace();
+	ParticleBase * GetHostParticle();
+	ScaledSpaceBase * GetHostSpace();
 
 	/// <summary> Create a scaled space. </summary>
 	/// <param name="hostParticle"> The particle to which the new space will be attached. </param>
 	/// <param name="trueRadius"> The true radius (meters). </param>
 	/// <returns> Reference to the created space. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ScaledSpaceBase & CreateScaledSpace(ParticleBase & hostParticle, float trueRadius);
+	ScaledSpaceBase * CreateScaledSpace(ParticleBase & hostParticle, float trueRadius);
 
 	/// <summary> Create a particle. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -119,7 +123,7 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase & CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, Vector3 velocity, bool isInfluencing);
+	ParticleBase * CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, Vector3 velocity, bool isInfluencing);
 
 	/// <summary> Create a particle with circular orbit. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -129,26 +133,30 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase & CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, bool isInfluencing);
+	ParticleBase * CreateParticle(ScaledSpaceBase & hostSpace, float mass, Vector3 position, bool isInfluencing);
+
+	/// <summary> Destroy a particle in this orbital system. </summary>
+	/// <param name="pParticleBase"> Pointer to the particle to be destroyed. </param>
+	void DestroyParticle(ParticleBase * pParticleBase);
 
 private:
 	ScaledSpaceBase * CreateScaledSpaceImpl(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing);
 
-	UniquePtr<HostParticle>		m_pHostParticle;			// Pointer to the interface of the host particle around which all other particles in the system orbit.
+	UniquePtr<HostParticle>	m_pHostParticle;	// Pointer to the interface of the host particle around which all other particles in the system orbit.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ParticleBase & OrbitalSystem2::GetHostParticle()
+inline ParticleBase * OrbitalSystem2::GetHostParticle()
 {
-	return *static_cast<ParticleBase *>(m_pHostParticle.get());
+	return static_cast<ParticleBase *>(m_pHostParticle.get());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase & OrbitalSystem2::GetHostSpace()
+inline ScaledSpaceBase * OrbitalSystem2::GetHostSpace()
 {
-	return *m_pHostParticle->GetSpaceOfInfluence();
+	return m_pHostParticle->GetSpaceOfInfluence();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -175,9 +183,16 @@ inline bool OrbitalSystem2::HostParticle::IsInfluencing() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * OrbitalSystem2::HostParticle::GetSpaceOfInfluence()
+inline ScaledSpaceBase * OrbitalSystem2::HostParticle::GetSpaceOfInfluence() const
 {
 	return m_attachedSpaces.begin()->get();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Orbit const* OrbitalSystem2::HostParticle::GetOrbit() const
+{
+	return nullptr;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -190,9 +205,9 @@ inline bool OrbitalSystem2::InfluencingSpace::IsInfluencing() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ParticleBase const& OrbitalSystem2::InfluencingSpace::GetPrimary() const
+inline ParticleBase const* OrbitalSystem2::InfluencingSpace::GetPrimary() const
 {
-	return *m_pHostParticle;
+	return m_pHostParticle;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -217,6 +232,7 @@ inline OrbitalSystem2::NonInfluencingSpace::NonInfluencingSpace(ParticleBase * p
 	m_pPrimary(FindPrimary(this))
 {
 }
+
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline void OrbitalSystem2::NonInfluencingSpace::Initialize(float radius)
@@ -235,9 +251,9 @@ inline bool OrbitalSystem2::NonInfluencingSpace::IsInfluencing() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ParticleBase const& OrbitalSystem2::NonInfluencingSpace::GetPrimary() const
+inline ParticleBase const* OrbitalSystem2::NonInfluencingSpace::GetPrimary() const
 {
-	return *m_pPrimary;
+	return m_pPrimary;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -323,9 +339,16 @@ inline bool OrbitalSystem2::Particle::IsInfluencing() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * OrbitalSystem2::Particle::GetSpaceOfInfluence()
+inline ScaledSpaceBase * OrbitalSystem2::Particle::GetSpaceOfInfluence() const
 {
 	return nullptr;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Orbit const* OrbitalSystem2::Particle::GetOrbit() const
+{
+	return m_pOrbit.get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -338,9 +361,16 @@ inline bool OrbitalSystem2::InfluencingParticle::IsInfluencing() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * OrbitalSystem2::InfluencingParticle::GetSpaceOfInfluence()
+inline ScaledSpaceBase * OrbitalSystem2::InfluencingParticle::GetSpaceOfInfluence() const
 {
 	return m_pSpaceOfInfluence;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Orbit const* OrbitalSystem2::InfluencingParticle::GetOrbit() const
+{
+	return m_pOrbit.get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

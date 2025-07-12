@@ -5,6 +5,18 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
+Orbit::Orbit() :
+	m_sections(1),
+	m_currentSectionIndex(0),
+	m_trueAnomaly(0.0)
+{
+	assert(1 == m_sections.size());
+	m_sections.front() = MakeUnique<Section>();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
 void Orbit::Elements::Compute(float gravityParameter, Vector3 const& position, Vector3 const& velocity)
 {
 	// Angular momentum (H) = R x V.

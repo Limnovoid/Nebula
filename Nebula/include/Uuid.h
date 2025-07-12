@@ -47,4 +47,17 @@ struct std::formatter<Nebula::Uuid> : std::formatter<uint64_t>
 	}
 };
 
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template <>
+struct std::hash<Nebula::Uuid>
+{
+	std::size_t operator()(Nebula::Uuid const& uuid) const
+	{
+		static const std::hash<uint64_t> hasher;
+
+		return hasher(uuid.Get());
+	}
+};
+
 #endif//NEBULA_UUID

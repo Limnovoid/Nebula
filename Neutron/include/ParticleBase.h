@@ -22,9 +22,10 @@ class ParticleBase
 public:
 	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
 
-	ParticleBase(ScaledSpaceBase * pHostSpace, float mass);
-	virtual ~ParticleBase() = default;
+	ParticleBase(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHostSpace, float mass);
+	virtual ~ParticleBase();
 
+	OrbitalSystem2 & GetOrbitalSystem();
 	ScaledSpaceBase * GetHostSpace();
 	ScaledSpaceList & GetAttachedSpaces();
 	float GetMass() const;
@@ -32,13 +33,16 @@ public:
 	virtual Vector3 const& GetPosition() const = 0;
 	virtual Vector3 const& GetVelocity() const = 0;
 	virtual bool IsInfluencing() const = 0;
-	virtual ScaledSpaceBase * GetSpaceOfInfluence() = 0;
+	virtual ScaledSpaceBase * GetSpaceOfInfluence() const = 0;
+	virtual class Orbit const* GetOrbit() const = 0;
 
 	Uuid									m_uuid;
 
 protected:
 	template<typename TScaledSpace>
 	TScaledSpace * EmplaceScaledSpace(float trueRadius);
+
+	OrbitalSystem2 &						m_orbitalSystem;				// Reference to the orbital system.
 
 	ScaledSpaceBase *						m_pHostSpace;					// Pointer to the scaling space in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
 	ScaledSpaceList							m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
@@ -51,6 +55,13 @@ protected:
 inline float ParticleBase::ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass)
 {
 	return orbitRadius * powf(particleMass / primaryMass, 2.f / 5.f);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline OrbitalSystem2 & ParticleBase::GetOrbitalSystem()
+{
+	return m_orbitalSystem;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
