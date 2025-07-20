@@ -2,9 +2,10 @@
 #define NEUTRON_I_PARTICLE_H
 
 #include "NebulaTypes.h"
-#include "ScaledSpaceList.h"
+#include "ScalingSphereList.h"
 #include "Vector3.h"
 #include "Uuid.h"
+#include "NeedsInitializationHelper.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -17,37 +18,40 @@ using namespace Nova;
 
 class ParticleBase
 {
-	friend class OrbitalSystem2;
-
 public:
 	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
 
-	ParticleBase(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHostSpace, float mass);
+	ParticleBase(ScalingSphereBase * pHostSphere, float mass);
 	virtual ~ParticleBase();
 
-	OrbitalSystem2 & GetOrbitalSystem();
-	ScaledSpaceBase * GetHostSpace();
-	ScaledSpaceList & GetAttachedSpaces();
-	float GetMass() const;
+	virtual void Initialize() = 0;
+	virtual void SetPosition(Vector3 const& position) = 0;
+	virtual void SetVelocity(Vector3 const& velocity) = 0;
 
 	virtual Vector3 const& GetPosition() const = 0;
 	virtual Vector3 const& GetVelocity() const = 0;
 	virtual bool IsInfluencing() const = 0;
-	virtual ScaledSpaceBase * GetSpaceOfInfluence() const = 0;
+	virtual ScalingSphereBase * GetSphereOfInfluence() const = 0;
 	virtual class Orbit const* GetOrbit() const = 0;
 
-	Uuid									m_uuid;
+	void SetHostSphere(ScalingSphereBase * pHostSphere);
+
+	ScalingSphereBase * GetHostSphere() const;
+	ScalingSphereBase * GetFirstSphere() const;
+	ScalingSphereList const& GetScalingSphereList() const;
+	float GetMass() const;
+
+	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr);
+	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase);
+
+	Uuid						m_uuid;
+	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
-	template<typename TScaledSpace>
-	TScaledSpace * EmplaceScaledSpace(float trueRadius);
+	ScalingSphereBase *			m_pHostSphere;		// Pointer to the scaling spheres in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
+	ScalingSphereList			m_attachedSpheres;	// List of pointers to scaling spheres attached to this particle.
 
-	OrbitalSystem2 &						m_orbitalSystem;				// Reference to the orbital system.
-
-	ScaledSpaceBase *						m_pHostSpace;					// Pointer to the scaling space in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
-	ScaledSpaceList							m_attachedSpaces;				// List of pointers to scaling spaces attached to this particle.
-
-	float									m_mass;							// The particle mass.
+	float						m_mass;				// The particle mass.
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -59,23 +63,25 @@ inline float ParticleBase::ComputeRadiusOfInfluence(float orbitRadius, float par
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline OrbitalSystem2 & ParticleBase::GetOrbitalSystem()
+inline void ParticleBase::SetHostSphere(ScalingSphereBase * pHostSphere)
 {
-	return m_orbitalSystem;
+	m_pHostSphere = pHostSphere;
+
+	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * ParticleBase::GetHostSpace()
+inline ScalingSphereBase * ParticleBase::GetHostSphere() const
 {
-	return m_pHostSpace;
+	return m_pHostSphere;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceList & ParticleBase::GetAttachedSpaces()
+inline ScalingSphereList const& ParticleBase::GetScalingSphereList() const
 {
-	return m_attachedSpaces;
+	return m_attachedSpheres;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -83,14 +89,6 @@ inline ScaledSpaceList & ParticleBase::GetAttachedSpaces()
 inline float ParticleBase::GetMass() const
 {
 	return m_mass;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename TScaledSpace>
-inline TScaledSpace * ParticleBase::EmplaceScaledSpace(float trueRadius)
-{
-	return static_cast<TScaledSpace *>(m_attachedSpaces.Emplace<TScaledSpace>(this, trueRadius)->get());
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

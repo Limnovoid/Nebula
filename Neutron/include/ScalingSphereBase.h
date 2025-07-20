@@ -8,11 +8,15 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-class ScaledSpaceBase
+class ParticleBase;
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class ScalingSphereBase
 {
-	friend class OrbitalSystem2;
-	friend class ParticleBase;
-	friend class ScaledSpaceList;
+	friend class OrbitalSystem;
+	friend class ScalingSphereList;
 
 public:
 	using ParticleList = std::list<UniquePtr<ParticleBase>>;
@@ -23,15 +27,15 @@ public:
 	/// <returns> The scaled gravitational parameter. </returns>
 	static float ComputeScaledGravityParameter(float trueRadius, float primaryMass);
 
-	ScaledSpaceBase(ParticleBase * pHostParticle, float trueRadius);
-	virtual ~ScaledSpaceBase() = default;
+	ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius);
+	virtual ~ScalingSphereBase() = default;
 
-	virtual void Initialize(float radius);
+	virtual void Initialize();
 
 	ParticleBase * GetHostParticle() const;
 	ParticleList const& GetParticleList() const;
-	ScaledSpaceBase * GetOuterSpace() const;
-	ScaledSpaceBase * GetInnerSpace() const;
+	ScalingSphereBase * GetOuterSpace() const;
+	ScalingSphereBase * GetInnerSpace() const;
 
 	float GetTrueRadius() const;
 	float GetRadius() const;
@@ -55,18 +59,18 @@ protected:
 	ParticleBase *		m_pHostParticle;
 	ParticleList		m_particles;
 
-	float				m_trueRadius;			// Radius in meters.
-	float				m_radius;				// Radius relative to superior scaling space.
-	float				m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	float				m_trueRadius;		// Radius in meters.
+	float				m_radius;			// Radius relative to superior scaling space.
+	float				m_gravityParameter;	// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
-	ScaledSpaceBase *	m_pOuterSpace;
-	ScaledSpaceBase *	m_pInnerSpace;
+	ScalingSphereBase *	m_pOuterSpace;
+	ScalingSphereBase *	m_pInnerSpace;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScaledSpaceBase::ComputeScaledGravityParameter(float trueRadius, float primaryMass)
+inline float ScalingSphereBase::ComputeScaledGravityParameter(float trueRadius, float primaryMass)
 {
 	// Gravity parameter / (true radius)^3 = G * M / r^3.
 	return kGravitational * primaryMass * powf(trueRadius, -3.f);
@@ -74,56 +78,56 @@ inline float ScaledSpaceBase::ComputeScaledGravityParameter(float trueRadius, fl
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ParticleBase * ScaledSpaceBase::GetHostParticle() const
+inline ParticleBase * ScalingSphereBase::GetHostParticle() const
 {
 	return m_pHostParticle;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase::ParticleList const& ScaledSpaceBase::GetParticleList() const
+inline ScalingSphereBase::ParticleList const& ScalingSphereBase::GetParticleList() const
 {
 	return m_particles;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * ScaledSpaceBase::GetOuterSpace() const
+inline ScalingSphereBase * ScalingSphereBase::GetOuterSpace() const
 {
 	return m_pOuterSpace;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScaledSpaceBase * ScaledSpaceBase::GetInnerSpace() const
+inline ScalingSphereBase * ScalingSphereBase::GetInnerSpace() const
 {
 	return m_pInnerSpace;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScaledSpaceBase::GetTrueRadius() const
+inline float ScalingSphereBase::GetTrueRadius() const
 {
 	return m_trueRadius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScaledSpaceBase::GetRadius() const
+inline float ScalingSphereBase::GetRadius() const
 {
 	return m_radius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScaledSpaceBase::GetGravityParameter() const
+inline float ScalingSphereBase::GetGravityParameter() const
 {
 	return m_gravityParameter;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScaledSpaceBase::CircularOrbitSpeed(float orbitRadius) const
+inline float ScalingSphereBase::CircularOrbitSpeed(float orbitRadius) const
 {
 	// Magnitude of velocity of a circular orbit = sqrt(gravity parameter / orbit radius).
 	return sqrtf(m_gravityParameter / orbitRadius);

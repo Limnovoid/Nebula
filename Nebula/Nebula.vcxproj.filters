@@ -152,5 +152,8 @@
     <ClInclude Include="include\Uuid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NeedsInitializationHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

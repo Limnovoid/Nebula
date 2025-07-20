@@ -15,6 +15,7 @@
 #include "Metadata.h"
 #include "NebulaString.h"
 #include "NebulaTypes.h"
+#include "NeedsInitializationHelper.h"
 #include "Random.h"
 #include "Result.h"
 #include "Stable.h"

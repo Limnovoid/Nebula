@@ -1,14 +1,12 @@
 #include "ParticleBase.h"
 
-#include "OrbitalSystem2.h"
-#include "ScaledSpaceBase.h"
+#include "ScalingSphereBase.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-ParticleBase::ParticleBase(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHostSpace, float mass) :
-	m_orbitalSystem(orbitalSystem),
-	m_pHostSpace(pHostSpace),
+ParticleBase::ParticleBase(ScalingSphereBase * pHostSphere, float mass) :
+	m_pHostSphere(pHostSphere),
 	m_mass(mass)
 {
 }
@@ -17,6 +15,36 @@ ParticleBase::ParticleBase(OrbitalSystem2 & orbitalSystem, ScaledSpaceBase * pHo
 
 ParticleBase::~ParticleBase()
 {
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ParticleBase::GetFirstSphere() const
+{
+	return m_attachedSpheres.Empty() ? nullptr : m_attachedSpheres.Front().get();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ParticleBase::AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr)
+{
+	ScalingSphereBase * pScalingSphereBase = m_attachedSpheres.Insert(std::forward<UniquePtr<ScalingSphereBase>>(scalingSphereBasePtr))->get();
+
+	pScalingSphereBase->Initialize();
+
+	return pScalingSphereBase;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase)
+{
+	ScalingSphereList::Iterator scalingSphereIter = m_attachedSpheres.Find(pScalingSphereBase);
+
+	if (m_attachedSpheres.End() != scalingSphereIter)
+		return m_attachedSpheres.Remove(scalingSphereIter);
+
+	return nullptr;
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

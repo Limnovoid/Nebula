@@ -1,13 +1,9 @@
 #include "Neutron.h"
 
 // Include all project headers for library building.
-//#include "PhysicsEngine.h"
 #include "Vector3.h"
 #include "NeutronTime.h"
 #include "OrbitalSystem.h"
-#include "OrbitalSystem2.h"
-#include "ScalingSpace.h"
-#include "Particle.h"
 #include "Orbit.h"
 
 #include "NebulaTypes.h" // For pool testing.
@@ -19,13 +15,11 @@ void AddTests(Nebula::TestHandler & testHandler)
 {
 	using namespace Nebula;
 
-	//testHandler.Register(MakeShared<PhysicsEngineTestScript>());
 	testHandler.Register(MakeShared<Vector3TestScript>(), "Neutron");
 	testHandler.Register(MakeShared<Time::TimeTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<OrbitalSystemTestScript>(), "Neutron");
-	testHandler.Register(MakeShared<OrbitalSystem2TestScript>(), "Neutron");
-	testHandler.Register(MakeShared<ScalingSpaceTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<OrbitTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<ScalingSphereListTestScript>(), "Neutron");
 
 	// Pool testing.
 	std::pmr::pool_options poolOptions;

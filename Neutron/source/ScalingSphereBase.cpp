@@ -1,11 +1,11 @@
-#include "ScaledSpaceBase.h"
+#include "ScalingSphereBase.h"
 
 #include "ParticleBase.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-ScaledSpaceBase::ScaledSpaceBase(ParticleBase * pHostParticle, float trueRadius) :
+ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius) :
 	m_pHostParticle(pHostParticle),
 	m_pOuterSpace(nullptr),
 	m_pInnerSpace(nullptr),
@@ -19,15 +19,17 @@ ScaledSpaceBase::ScaledSpaceBase(ParticleBase * pHostParticle, float trueRadius)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScaledSpaceBase::Initialize(float radius)
+void ScalingSphereBase::Initialize()
 {
-	m_radius = radius;
+	if (nullptr != m_pOuterSpace)
+		m_radius = m_trueRadius / m_pOuterSpace->m_trueRadius;
+
 	m_gravityParameter = ComputeScaledGravityParameter(m_trueRadius, GetPrimary()->GetMass());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScaledSpaceBase::SetRadius(float radius)
+void ScalingSphereBase::SetRadius(float radius)
 {
 	API_ASSERT_THROW(nullptr != m_pOuterSpace, RESULT_CODE_INVALID_STATE, "Cannot set the relative radius of the host space");
 
@@ -39,7 +41,7 @@ void ScaledSpaceBase::SetRadius(float radius)
 
 	m_trueRadius = m_pOuterSpace->m_trueRadius * radius;
 
-	Initialize(radius);
+	Initialize();
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

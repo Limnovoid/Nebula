@@ -32,10 +32,10 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 	{
 		TestHandler::OutputMode const outputMode = testHandler.SetOutputMode(TestHandler::OutputMode::SILENT);
 
-		SortedList<int64_t>::iterator iter = sortedList.Insert(index);
+		SortedList<int64_t>::Iterator iter = sortedList.Insert(index);
 
-		for (SortedList<int64_t>::const_iterator iterNext = sortedList.cbegin(), iter = iterNext++;
-			sortedList.cend() != iterNext;
+		for (SortedList<int64_t>::ConstIterator iterNext = sortedList.CBegin(), iter = iterNext++;
+			sortedList.CEnd() != iterNext;
 			++iter, ++iterNext)
 		{
 			testHandler.Assert(*iter < *iterNext, true, "Order preserved");
@@ -43,7 +43,7 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 
 		testHandler.SetOutputMode(outputMode);
 
-		return sortedList.size();
+		return sortedList.Size();
 
 	}, TestHandler::FRangeRandomOrder({ 1, I_MAX }), TestHandler::FRangeIndex(), "Insert", { 1, I_MAX });
 
@@ -51,12 +51,12 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 	{
 		TestHandler::OutputMode const outputMode = testHandler.SetOutputMode(TestHandler::OutputMode::SILENT);
 
-		SortedList<int64_t>::iterator pos = sortedList.Find(index);
+		SortedList<int64_t>::Iterator pos = sortedList.Find(index);
 		*pos += 100;
 		sortedList.Sort(pos);
 
-		for (SortedList<int64_t>::const_iterator iterNext = sortedList.cbegin(), iter = iterNext++;
-			sortedList.cend() != iterNext;
+		for (SortedList<int64_t>::ConstIterator iterNext = sortedList.CBegin(), iter = iterNext++;
+			sortedList.CEnd() != iterNext;
 			++iter, ++iterNext)
 		{
 			testHandler.Assert(*iter < *iterNext, true, "Order preserved");
@@ -64,7 +64,7 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 
 		testHandler.SetOutputMode(outputMode);
 
-		return sortedList.size();
+		return sortedList.Size();
 
 	}, TestHandler::FRangeRandomOrder({ 1, I_MAX }), TestHandler::FRangeConstant(I_MAX), "Modify and Sort", { 1, I_MAX });
 
@@ -72,15 +72,15 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 	{
 		TestHandler::OutputMode const outputMode = testHandler.SetOutputMode(TestHandler::OutputMode::SILENT);
 
-		SortedList<int64_t>::iterator iterToRemove = sortedList.begin();
+		SortedList<int64_t>::Iterator iterToRemove = sortedList.Begin();
 
-		for (size_t i = 0; i < Random::Integer(0ull, sortedList.size()); ++i)
+		for (size_t i = 1; i < Random::Integer(1ull, sortedList.Size()); ++i)
 			++iterToRemove;
 
 		sortedList.Erase(iterToRemove);
 
-		for (SortedList<int64_t>::const_iterator iterNext = sortedList.cbegin(), iter = iterNext++;
-			sortedList.cend() != iterNext;
+		for (SortedList<int64_t>::ConstIterator iterNext = sortedList.CBegin(), iter = iterNext++;
+			sortedList.CEnd() != iterNext;
 			++iter, ++iterNext)
 		{
 			testHandler.Assert(*iter < *iterNext, true, "Order preserved");
@@ -88,7 +88,7 @@ void SortedListTestScript::RunImpl(TestHandler & testHandler)
 
 		testHandler.SetOutputMode(outputMode);
 
-		return sortedList.size();
+		return sortedList.Size();
 
 	}, TestHandler::FRangeIndex(), TestHandler::FRangeIndex(), "Erase", { I_MAX - 1, 1, -1 });
 }

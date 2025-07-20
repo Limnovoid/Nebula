@@ -24,31 +24,25 @@
     <ClInclude Include="include\NeutronTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\OrbitalSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ScalingSpace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Orbit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\OrbitalSystem2.h">
+    <ClInclude Include="include\OrbitalSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ParticleBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ScaledSpaceBase.h">
+    <ClInclude Include="include\ScalingSphereBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ScaledSpaceList.h">
+    <ClInclude Include="include\ScalingSphereList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,28 +56,22 @@
     <ClCompile Include="source\NeutronTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\OrbitalSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ScalingSpace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Particle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\Orbit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\OrbitalSystem2.cpp">
+    <ClCompile Include="source\OrbitalSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ScaledSpaceBase.cpp">
+    <ClCompile Include="source\ScalingSphereBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\ParticleBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ScaledSpaceList.cpp">
+    <ClCompile Include="source\ScalingSphereList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
