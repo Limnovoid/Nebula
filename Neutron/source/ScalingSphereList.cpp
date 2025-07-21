@@ -54,7 +54,7 @@ UniquePtr<ScalingSphereBase> ScalingSphereList::Remove(Iterator pos)
 
 	Erase(posToRemove);
 
-	if (End() != pos)
+	if ((End() != pos) || (End() != --pos))
 		InitializeInnerOuter(pos);
 
 	return returnOwnership;

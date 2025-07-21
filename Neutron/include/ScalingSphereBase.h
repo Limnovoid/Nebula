@@ -4,6 +4,7 @@
 #include "Vector3.h"
 #include "Constants.h"
 #include "Uuid.h"
+#include "NeedsInitializationHelper.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -30,6 +31,8 @@ public:
 	ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius);
 	virtual ~ScalingSphereBase() = default;
 
+	void SetTrueRadius(const float trueRadius);
+
 	virtual void Initialize();
 
 	ParticleBase * GetHostParticle() const;
@@ -41,31 +44,38 @@ public:
 	float GetRadius() const;
 	float GetGravityParameter() const;
 
-	float CircularOrbitSpeed(float orbitRadius) const;
-
-	/// <summary> Modify the radius. Re-intializes the scaled space with the new radius. </summary>
-	/// <param name="radius"> The new radius, relative to the containing space. </param>
-	/// <exception cref="ApiException"> Invalid parameter or state. </exception>
-	void SetRadius(float radius);
-
 	virtual bool IsInfluencing() const = 0;
 	virtual ParticleBase const* GetPrimary() const = 0;
 	virtual Vector3 const& GetPrimaryPosition() const = 0;
 	virtual Vector3 const& GetPrimaryVelocity() const = 0;
 
-	Uuid				m_uuid;
+	float CircularOrbitSpeed(float orbitRadius) const;
+
+	void HandleResized(const float previousTrueRadius);
+
+	/// <summary> If the given Particle has escaped this Sphere, transfer ownership to the appropriate Sphere. </summary>
+	/// <param name="pParticle"> The Particle which may have escaped this Sphere. </param>
+	/// <returns> A pointer to the Particle's host Sphere at the end of the function call - points to this Sphere if the Particle has not escaped - or nullptr if the Particle does not belong to this Sphere. </returns>
+	ScalingSphereBase * HandleParticleMaybeEscaped(ParticleBase * pParticle);
+
+	Uuid						m_uuid;
+	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
-	ParticleBase *		m_pHostParticle;
-	ParticleList		m_particles;
+	ScalingSphereBase * HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
+	ScalingSphereBase * HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
+	ScalingSphereBase * HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
 
-	float				m_trueRadius;		// Radius in meters.
-	float				m_radius;			// Radius relative to superior scaling space.
-	float				m_gravityParameter;	// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	ParticleBase *				m_pHostParticle;
+	ParticleList				m_particles;
+
+	float						m_trueRadius;		// Radius in meters.
+	float						m_radius;			// Radius relative to superior scaling space.
+	float						m_gravityParameter;	// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
-	ScalingSphereBase *	m_pOuterSpace;
-	ScalingSphereBase *	m_pInnerSpace;
+	ScalingSphereBase *			m_pOuterSphere;
+	ScalingSphereBase *			m_pInnerSphere;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +84,15 @@ inline float ScalingSphereBase::ComputeScaledGravityParameter(float trueRadius, 
 {
 	// Gravity parameter / (true radius)^3 = G * M / r^3.
 	return kGravitational * primaryMass * powf(trueRadius, -3.f);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void ScalingSphereBase::SetTrueRadius(const float trueRadius)
+{
+	m_trueRadius = trueRadius;
+
+	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +148,7 @@ inline float ScalingSphereBase::GetGravityParameter() const
 
 inline float ScalingSphereBase::CircularOrbitSpeed(float orbitRadius) const
 {
-	// Magnitude of velocity of a circular orbit = sqrt(gravity parameter / orbit radius).
+	// Velocity magnitude of a circular orbit = sqrt(gravity parameter / orbit radius).
 	return sqrtf(m_gravityParameter / orbitRadius);
 }
 

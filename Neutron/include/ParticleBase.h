@@ -24,25 +24,28 @@ public:
 	ParticleBase(ScalingSphereBase * pHostSphere, float mass);
 	virtual ~ParticleBase();
 
-	virtual void Initialize() = 0;
+	void SetHostSphere(ScalingSphereBase * pHostSphere);
+	void SetMass(const float mass);
+
 	virtual void SetPosition(Vector3 const& position) = 0;
 	virtual void SetVelocity(Vector3 const& velocity) = 0;
+	virtual void Rescale(const float rescaleFactor) = 0;
+	virtual void Initialize() = 0;
 
-	virtual Vector3 const& GetPosition() const = 0;
-	virtual Vector3 const& GetVelocity() const = 0;
-	virtual bool IsInfluencing() const = 0;
-	virtual ScalingSphereBase * GetSphereOfInfluence() const = 0;
-	virtual class Orbit const* GetOrbit() const = 0;
-
-	void SetHostSphere(ScalingSphereBase * pHostSphere);
+	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr);
+	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase);
+	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
 
 	ScalingSphereBase * GetHostSphere() const;
 	ScalingSphereBase * GetFirstSphere() const;
 	ScalingSphereList const& GetScalingSphereList() const;
 	float GetMass() const;
 
-	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr);
-	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase);
+	virtual bool IsInfluencing() const = 0;
+	virtual ScalingSphereBase * GetSphereOfInfluence() const = 0;
+	virtual Vector3 const& GetPosition() const = 0;
+	virtual Vector3 const& GetVelocity() const = 0;
+	virtual class Orbit const* GetOrbit() const = 0;
 
 	Uuid						m_uuid;
 	NeedsInitializationHelper	m_needsInitializationHelper;
@@ -66,6 +69,15 @@ inline float ParticleBase::ComputeRadiusOfInfluence(float orbitRadius, float par
 inline void ParticleBase::SetHostSphere(ScalingSphereBase * pHostSphere)
 {
 	m_pHostSphere = pHostSphere;
+
+	m_needsInitializationHelper.Set();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleBase::SetMass(const float mass)
+{
+	m_mass = mass;
 
 	m_needsInitializationHelper.Set();
 }

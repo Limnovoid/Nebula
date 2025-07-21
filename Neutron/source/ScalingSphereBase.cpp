@@ -21,7 +21,9 @@ ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, float trueRad
 
 void ScalingSphereBase::Initialize()
 {
-	if (nullptr != m_pOuterSpace)
+	if (nullptr == m_pOuterSpace)
+		m_radius = 1.f;
+	else
 		m_radius = m_trueRadius / m_pOuterSpace->m_trueRadius;
 
 	m_gravityParameter = ComputeScaledGravityParameter(m_trueRadius, GetPrimary()->GetMass());
@@ -29,19 +31,73 @@ void ScalingSphereBase::Initialize()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::SetRadius(float radius)
+void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 {
-	API_ASSERT_THROW(nullptr != m_pOuterSpace, RESULT_CODE_INVALID_STATE, "Cannot set the relative radius of the host space");
+	const float particleRescaleFactor = previousTrueRadius / m_trueRadius;
 
-	API_ASSERT_THROW(m_particles.empty() && (nullptr == m_pInnerSpace), RESULT_CODE_INVALID_STATE,
-		"Cannot resize a Scaled Space containing any smaller spaces or particles");
+	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
+	{
+		(*particleListIter)->Rescale(particleRescaleFactor);
 
-	API_ASSERT_THROW((kMinimumScalingSpaceRadius <= radius) && (radius < kMaximumScalingSpaceRadius), RESULT_CODE_INVALID_PARAMETER,
-		Fmt::Format("Radius must be a value in the range [{}, {})", kMinimumScalingSpaceRadius, kMaximumScalingSpaceRadius));
+		ScalingSphereBase * pNewScalingSphere = nullptr;
+		if (previousTrueRadius < m_trueRadius) // Radius increased ...
+		{
+			pNewScalingSphere = HandleParticleMaybeEscapedToInner(particleListIter);
+		}
+		else if (m_trueRadius < previousTrueRadius) // Radius decreased ...
+		{
+			pNewScalingSphere = HandleParticleMaybeEscapedToOuter(particleListIter);
+		}
 
-	m_trueRadius = m_pOuterSpace->m_trueRadius * radius;
+		// Explicitly re-initialize particles which have NOT escaped.
+		if (this == pNewScalingSphere)
+			(*particleListIter)->Initialize();
+	}
+}
 
-	Initialize();
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ScalingSphereBase::HandleParticleMaybeEscaped(ParticleBase * pParticle)
+{
+	assert(this == pParticle->GetHostSphere());
+
+	ParticleList::iterator particleListIterator = m_particles.begin();
+	
+	while (m_particles.end() != particleListIterator)
+	{
+		if (particleListIterator->get() == pParticle)
+			break;
+
+		++particleListIterator;
+	};
+
+	if (m_particles.end() == particleListIterator)
+		return nullptr;
+
+	return HandleParticleMaybeEscaped(particleListIterator);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ScalingSphereBase::HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator)
+{
+	assert(false); // TODO - check if escaped into outer Sphere
+
+	return this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ScalingSphereBase::HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator)
+{
+	return this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * ScalingSphereBase::HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator)
+{
+	return this;
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

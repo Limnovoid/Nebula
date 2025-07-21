@@ -10,7 +10,6 @@ namespace Neutron // -----------------------------------------------------------
 using namespace Nebula;
 using namespace Nova;
 
-class ParticleBase;
 class ScalingSphereBase;
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +38,7 @@ public:
 	using Base::CEnd;
 	using Base::Front;
 	using Base::Back;
+	using Base::Sort;
 
 	Iterator Insert(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
 

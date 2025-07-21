@@ -78,16 +78,28 @@ void OrbitalSystem::DestroyParticle(ParticleBase * pParticleBase)
 
 	ScalingSphereBase::ParticleList & particleList = pParticleBase->GetHostSphere()->m_particles;
 
-	for (ScalingSphereBase::ParticleList::const_iterator citerator = particleList.cbegin(); particleList.cend() != citerator; ++citerator)
+	ScalingSphereBase::ParticleList::const_iterator citerator = particleList.cbegin();
+
+	while (particleList.cend() != citerator)
 	{
-		if ((*citerator)->m_uuid == pParticleBase->m_uuid)
-		{
-			particleList.erase(citerator);
-			return;
-		}
+		if (citerator->get() == pParticleBase)
+			break;
+
+		++citerator;
 	}
 
-	assert(false); // We shouldn't be here!
+	assert(particleList.cend() != citerator);
+	
+	particleList.erase(citerator);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+Result OrbitalSystem::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius)
+{
+	ParticleBase * pHostParticle = pScalingSphereBase->GetHostParticle();
+
+	return pHostParticle->ResizeScalingSphere(pScalingSphereBase, trueRadius);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -131,12 +143,6 @@ OrbitalSystem::HostParticle::HostParticle(float hostMass) :
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
-
-void OrbitalSystem::HostParticle::Initialize()
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
 OrbitalSystem::PassiveParticle::PassiveParticle(ScalingSphereBase * pHostSpace, float mass, Vector3 position, Vector3 velocity) :
@@ -161,7 +167,8 @@ void OrbitalSystem::PassiveParticle::Initialize()
 // --------------------------------------------------------------------------------------------------------------------------------
 
 OrbitalSystem::InfluencingParticle::InfluencingParticle(ScalingSphereBase * pHostSpace, float mass, Vector3 position, Vector3 velocity) :
-	PassiveParticle(pHostSpace, mass, position, velocity)
+	PassiveParticle(pHostSpace, mass, position, velocity),
+	m_pSphereOfInfluence(nullptr)
 {
 }
 
@@ -263,7 +270,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	try
 	{
-		orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 2.f);
+		orbitalSystem.CreateScaledSpace(hostParticle, 0.5f * HOST_SPACE_RADIUS);
 		isException = false;
 	}
 	catch (ApiException const&)
@@ -284,7 +291,8 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	try
 	{
-		scaledSpace2.SetRadius(0.5f);
+		orbitalSystem.ResizeScalingSphere(&scaledSpace2, 0.5f * HOST_SPACE_RADIUS);
+
 		isException = false;
 	}
 	catch (ApiException const&)
@@ -300,7 +308,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 		float const newTrueRadius = 0.5f * smallestSpace.GetTrueRadius();
 		float const newRadius = 0.5f * smallestSpace.GetRadius();
 
-		smallestSpace.SetRadius(newRadius);
+		orbitalSystem.ResizeScalingSphere(&smallestSpace, newTrueRadius);
 
 		testHandler.Assert(smallestSpace.GetRadius(), newRadius, "New radius");
 		testHandler.Assert(smallestSpace.GetTrueRadius(), newTrueRadius, "New true radius");
@@ -447,16 +455,29 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 	}
 
 	scalingSpherePtr = list.Remove(insertedIterator);
+	{
+		list.Back()->Initialize();
 
-	list.Back()->Initialize();
+		testHandler.Assert(nullptr == scalingSpherePtr, false, "ScalingSpherePtr is not null after removal from list");
+		testHandler.Assert(scalingSpherePtr->m_uuid.Get(), uuid3, "Removed ScalingSphere UUID equals the constructed ScalingSphere's UUID");
+		testHandler.Assert(scalingSpherePtr->GetTrueRadius(), TRUE_RADIUS_3, "Removed ScalingSphere TrueRadius");
 
-	testHandler.Assert(nullptr == scalingSpherePtr, false, "ScalingSpherePtr is not null after removal from list");
-	testHandler.Assert(scalingSpherePtr->m_uuid.Get(), uuid3, "Removed ScalingSphere UUID equals the constructed ScalingSphere's UUID");
-	testHandler.Assert(scalingSpherePtr->GetTrueRadius(), TRUE_RADIUS_3, "Removed ScalingSphere TrueRadius");
+		testHandler.Assert(list.Size(), 2ull, "Size of list after removing middle element");
+		testHandler.Assert(list.Front()->GetTrueRadius() > list.Back()->GetTrueRadius(), true, "Ordering of elements preserved after removal");
+		testHandler.Assert(list.Back()->GetRadius(), TRUE_RADIUS_2 / TRUE_RADIUS_1, "Last element new Radius");
+	}
 
-	testHandler.Assert(list.Size(), 2ull, "Size of list after removing middle element");
-	testHandler.Assert(list.Front()->GetTrueRadius() > list.Back()->GetTrueRadius(), true, "Ordering of elements preserved after removal");
-	testHandler.Assert(list.Back()->GetRadius(), TRUE_RADIUS_2 / TRUE_RADIUS_1, "Last element new Radius");
+	scalingSpherePtr = list.Remove(--list.End());
+	{
+		list.Front()->Initialize();
+
+		testHandler.Assert(nullptr == scalingSpherePtr, false, "ScalingSpherePtr is not null after removal from list");
+		testHandler.Assert(scalingSpherePtr->m_uuid.Get(), uuid2, "Removed ScalingSphere UUID equals the constructed ScalingSphere's UUID");
+		testHandler.Assert(scalingSpherePtr->GetTrueRadius(), TRUE_RADIUS_2, "Removed ScalingSphere TrueRadius");
+
+		testHandler.Assert(list.Size(), 1ull, "Size of list after removing last element");
+		testHandler.Assert(list.Front()->m_uuid.Get(), list.Back()->m_uuid.Get(), "First element is now also the last element");
+	}
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

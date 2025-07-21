@@ -59,7 +59,7 @@ public:
 
 	/// <summary> Sort a particular element relative to its neighbours. </summary>
 	/// <param name="pos"> The position of the element to sort. </param>
-	void Sort(Iterator pos);
+	Iterator Sort(Iterator pos);
 
 protected:
 	/// <summary> Search forwards from 'pos' for the sorted position of the given value. </summary>
@@ -228,9 +228,9 @@ SortedList<T, TPredicate, TContainer>::ConstIterator SortedList<T, TPredicate, T
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename TPredicate, template <typename> class TContainer>
-void SortedList<T, TPredicate, TContainer>::Sort(Iterator pos)
+SortedList<T, TPredicate, TContainer>::Iterator SortedList<T, TPredicate, TContainer>::Sort(Iterator pos)
 {
-	ConstIterator newPos = m_container.end();
+	Iterator newPos = m_container.end();
 
 	if (m_container.end() != pos)
 	{
@@ -250,8 +250,10 @@ void SortedList<T, TPredicate, TContainer>::Sort(Iterator pos)
 			newPos = FindSortedPosBackwards(*pos, prevPos);
 	}
 
-	m_container.emplace(newPos, std::move(*pos));
+	newPos = m_container.emplace(newPos, std::move(*pos));
 	m_container.erase(pos);
+
+	return newPos;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
