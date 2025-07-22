@@ -42,9 +42,9 @@ ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase & hostSpace, floa
 	API_ASSERT_THROW(sqrtf(position.SqareMagnitude()) < kScalingSpaceEscapeRadius, RESULT_CODE_INVALID_PARAMETER,
 		Fmt::Format("Position {} is outside the scaling space!", position));
 
-	if (nullptr != hostSpace.m_pInnerSpace)
+	if (nullptr != hostSpace.m_pInnerSphere)
 	{
-		API_ASSERT_THROW(hostSpace.m_pInnerSpace->m_radius < sqrtf(position.SqareMagnitude()), RESULT_CODE_INVALID_PARAMETER,
+		API_ASSERT_THROW(hostSpace.m_pInnerSphere->m_radius < sqrtf(position.SqareMagnitude()), RESULT_CODE_INVALID_PARAMETER,
 			Fmt::Format("Position {} is inside the inner scaling space!", position));
 	}
 
@@ -112,15 +112,15 @@ ScalingSphereBase * OrbitalSystem::CreateScaledSpaceImpl(ParticleBase * pHostPar
 	{
 		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(pHostParticle, trueRadius));
 
-		assert((nullptr == pNewScalingSphere->m_pOuterSpace) || pNewScalingSphere->m_pOuterSpace->IsInfluencing());
+		assert((nullptr == pNewScalingSphere->m_pOuterSphere) || pNewScalingSphere->m_pOuterSphere->IsInfluencing());
 	}
 	else
 	{
 		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, trueRadius));
 
-		assert(nullptr != pNewScalingSphere->m_pOuterSpace); // A non-influencing sphere should always be contained in a large sphere.
-		assert(!pNewScalingSphere->m_pOuterSpace->IsInfluencing() || // A non-influencing sphere cannot be smaller than an influencing sphere on the same host.
-			(pNewScalingSphere->m_pOuterSpace->m_pHostParticle != pNewScalingSphere->m_pHostParticle));
+		assert(nullptr != pNewScalingSphere->m_pOuterSphere); // A non-influencing sphere should always be contained in a large sphere.
+		assert(!pNewScalingSphere->m_pOuterSphere->IsInfluencing() || // A non-influencing sphere cannot be smaller than an influencing sphere on the same host.
+			(pNewScalingSphere->m_pOuterSphere->m_pHostParticle != pNewScalingSphere->m_pHostParticle));
 	}
 
 	if (!((kMinimumScalingSpaceRadius <= pNewScalingSphere->m_radius) && (pNewScalingSphere->m_radius < kMaximumScalingSpaceRadius)))
@@ -289,42 +289,24 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 		isException = true;
 	}*/
 
-	try
-	{
-		orbitalSystem.ResizeScalingSphere(&scaledSpace2, 0.5f * HOST_SPACE_RADIUS);
+	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&scaledSpace2, 0.5f * HOST_SPACE_RADIUS),
+		Result(RESULT_CODE_SUCCESS), "ResizeScalingSphere succeeds");
 
-		isException = false;
-	}
-	catch (ApiException const&)
-	{
-		isException = true;
-	}
-	testHandler.Assert(isException, true, "Resizing populated space causes exception");
+	ScalingSphereBase & smallestSpace = *hostParticle.GetScalingSphereList().Back();
 
-	try
-	{
-		ScalingSphereBase & smallestSpace = *hostParticle.GetScalingSphereList().Back();
+	float const newTrueRadius = 0.5f * smallestSpace.GetTrueRadius();
+	float const newRadius = 0.5f * smallestSpace.GetRadius();
 
-		float const newTrueRadius = 0.5f * smallestSpace.GetTrueRadius();
-		float const newRadius = 0.5f * smallestSpace.GetRadius();
+	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&smallestSpace, newTrueRadius),
+		Result(RESULT_CODE_SUCCESS), "ResizeScalingSphere succeeds");
 
-		orbitalSystem.ResizeScalingSphere(&smallestSpace, newTrueRadius);
-
-		testHandler.Assert(smallestSpace.GetRadius(), newRadius, "New radius");
-		testHandler.Assert(smallestSpace.GetTrueRadius(), newTrueRadius, "New true radius");
-		testHandler.Assert(scaledSpace3.GetGravityParameter(),
-			ScalingSphereBase::ComputeScaledGravityParameter(newTrueRadius, HOST_MASS), "New gravity parameter");
-
-		isException = false;
-	}
-	catch (ApiException const&)
-	{
-		isException = true;
-	}
-	testHandler.Assert(isException, false, "Resizing unpopulated space causes exception");
+	testHandler.Assert(smallestSpace.GetRadius(), newRadius, "New radius");
+	testHandler.Assert(smallestSpace.GetTrueRadius(), newTrueRadius, "New true radius");
+	testHandler.Assert(scaledSpace3.GetGravityParameter(),
+		ScalingSphereBase::ComputeScaledGravityParameter(newTrueRadius, HOST_MASS), "New gravity parameter");
 
 	const float particleMass = 1e10f;
-	const float orbitRadius = 0.5f;
+	const float orbitRadius = 0.6f;
 	const float orbitSpeed = hostSpace.CircularOrbitSpeed(orbitRadius);
 	const Vector3 particlePosition(orbitRadius, 0.f, 0.f);
 	const Vector3 particleVelocity(0.f, orbitSpeed, 0.f);
@@ -345,8 +327,8 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	testHandler.Assert(particleScaledSpace.GetHostParticle()->m_uuid, particle.m_uuid, "PassiveParticle scaled space host particle");
 	testHandler.Assert(particleScaledSpace.GetParticleList().size(), 0ull, "PassiveParticle scaled space particle list size");
-	testHandler.Assert(particleScaledSpace.GetOuterSpace()->m_uuid, hostSpace.m_uuid, "PassiveParticle scaled space outer space");
-	testHandler.Assert(reinterpret_cast<uintptr_t>(particleScaledSpace.GetInnerSpace()), reinterpret_cast<uintptr_t>(nullptr), "PassiveParticle scaled space inner space");
+	testHandler.Assert(particleScaledSpace.GetOuterSphere()->m_uuid, hostSpace.m_uuid, "PassiveParticle scaled space outer space");
+	testHandler.Assert(reinterpret_cast<uintptr_t>(particleScaledSpace.GetInnerSphere()), reinterpret_cast<uintptr_t>(nullptr), "PassiveParticle scaled space inner space");
 
 	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceTrueRadius, "PassiveParticle scaled space true radius");
 	testHandler.Assert(particleScaledSpace.GetRadius(), particleScaledSpaceRadius, "PassiveParticle scaled space radius");
@@ -362,10 +344,31 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	const float particleScaledSpaceNewRadius = 0.04f;
 	const float particleScaledSpaceNewTrueRadius = HOST_SPACE_RADIUS * particleScaledSpaceNewRadius;
 
-	particleScaledSpace.SetRadius(particleScaledSpaceNewRadius);
+	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&particleScaledSpace, particleScaledSpaceNewRadius),
+		Result(RESULT_CODE_SUCCESS), "ResizeScalingSphere succeeds");
 
 	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceNewTrueRadius, "PassiveParticle scaled space new true radius");
 	testHandler.Assert(particleScaledSpace.GetRadius(), particleScaledSpaceNewRadius, "PassiveParticle scaled space new radius");
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+OrbitalSystemTestScript2::OrbitalSystemTestScript2() :
+	ITestScript("OrbitalSystem-2")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+OrbitalSystemTestScript2::~OrbitalSystemTestScript2()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void OrbitalSystemTestScript2::RunImpl(TestHandler & testHandler)
+{
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -414,6 +417,8 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 		testHandler.Assert(list.Empty(), false, "List is not empty after insertion");
 		testHandler.Assert(reinterpret_cast<uintptr_t>(list.Begin()->get()), reinterpret_cast<uintptr_t>(insertedIterator->get()),
 			"Begin iterator is the new inserted iterator");
+		testHandler.Assert(list.Front()->GetOuterSphere() == nullptr, true, "Lone element outer Sphere is null");
+		testHandler.Assert(list.Front()->GetInnerSphere() == nullptr, true, "Lone element inner Sphere is null");
 
 		testHandler.Assert(list.Front()->m_uuid.Get(), uuid1, "Inserted element UUID equals the constructed ScalingSphere's UUID");
 		testHandler.Assert(list.Front()->GetTrueRadius(), TRUE_RADIUS_1, "Inserted element TrueRadius");
@@ -430,6 +435,9 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 		testHandler.Assert(list.Size(), 2ull, "Size of list after second insertion");
 		testHandler.Assert(reinterpret_cast<uintptr_t>((++list.Begin())->get()), reinterpret_cast<uintptr_t>(insertedIterator->get()),
 			"Begin iterator is the new inserted iterator");
+		testHandler.Assert(list.Front()->GetOuterSphere() == nullptr, true, "First element outer Sphere is null");
+		testHandler.Assert(list.Back()->GetInnerSphere() == nullptr, true, "Last element inner Sphere is null");
+		testHandler.Assert(list.Front()->GetInnerSphere() == list.Back()->GetOuterSphere(), true, "Inner-outer Spheres point to each other");
 
 		testHandler.Assert(list.Back()->m_uuid.Get(), uuid2, "Inserted ScalingSphere UUID equals the constructed ScalingSphere's UUID");
 		testHandler.Assert(list.Back()->GetTrueRadius(), TRUE_RADIUS_2, "Inserted element TrueRadius");
@@ -448,6 +456,7 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 		testHandler.Assert(list.Size(), 3ull, "Size of list after third insertion");
 		testHandler.Assert(reinterpret_cast<uintptr_t>((++list.Begin())->get()), reinterpret_cast<uintptr_t>(insertedIterator->get()),
 			"Begin iterator is the new inserted iterator");
+		testHandler.Assert(list.Front()->m_uuid.Get(), list.Back()->m_uuid.Get(), "First element is now also the last element");
 
 		testHandler.Assert((*insertedIterator)->GetTrueRadius(), TRUE_RADIUS_3, "Inserted element TrueRadius");
 		testHandler.Assert((*insertedIterator)->GetRadius(), TRUE_RADIUS_3 / TRUE_RADIUS_1, "Inserted element Radius");
@@ -465,6 +474,7 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 		testHandler.Assert(list.Size(), 2ull, "Size of list after removing middle element");
 		testHandler.Assert(list.Front()->GetTrueRadius() > list.Back()->GetTrueRadius(), true, "Ordering of elements preserved after removal");
 		testHandler.Assert(list.Back()->GetRadius(), TRUE_RADIUS_2 / TRUE_RADIUS_1, "Last element new Radius");
+		testHandler.Assert(list.Front()->GetInnerSphere() == list.Back()->GetOuterSphere(), true, "Inner-outer Spheres point to each other after removing middle element");
 	}
 
 	scalingSpherePtr = list.Remove(--list.End());

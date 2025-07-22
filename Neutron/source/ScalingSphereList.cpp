@@ -46,6 +46,18 @@ ScalingSphereList::ConstIterator ScalingSphereList::Find(ScalingSphereBase * pSc
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+bool ScalingSphereList::Sort(Iterator &pos)
+{
+	const bool hasOrderChanged = Base::Sort(pos);
+
+	if (hasOrderChanged)
+		InitializeInnerOuter(pos);
+
+	return hasOrderChanged;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 UniquePtr<ScalingSphereBase> ScalingSphereList::Remove(Iterator pos)
 {
 	UniquePtr<ScalingSphereBase> returnOwnership(std::move(*pos)); // Transfers ownership to local variable.
@@ -66,30 +78,42 @@ void ScalingSphereList::InitializeInnerOuter(Iterator pos)
 {
 	assert(End() != pos);
 
+	ScalingSphereBase *const pScalingSphere = pos->get();
+
+	// Re-initialize previous neighbours to remove the moved Sphere.
+	if (nullptr != pScalingSphere->m_pOuterSphere)
+		pScalingSphere->m_pOuterSphere->m_pInnerSphere = pScalingSphere->m_pInnerSphere;
+
+	if (nullptr != pScalingSphere->m_pInnerSphere)
+		pScalingSphere->m_pInnerSphere->m_pOuterSphere = pScalingSphere->m_pOuterSphere;
+
+	// Update the moved/inserted Sphere and its new neighbours:
+	// Outer...
 	if (Begin() != pos)
 	{
-		ScalingSphereList::Iterator outerScalingSpaceListIter = pos;
-		--outerScalingSpaceListIter;
+		ScalingSphereList::Iterator outerScalingSphereListIter = pos;
+		--outerScalingSphereListIter;
 
-		(*pos)->m_pOuterSpace = outerScalingSpaceListIter->get();
-		(*outerScalingSpaceListIter)->m_pInnerSpace = pos->get();
+		pScalingSphere->m_pOuterSphere = outerScalingSphereListIter->get();
+		(*outerScalingSphereListIter)->m_pInnerSphere = pScalingSphere;
 	}
 	else
 	{
-		(*pos)->m_pOuterSpace = (*pos)->m_pHostParticle->GetHostSphere(); // Note: equals nullptr if host particle is the system host.
+		pScalingSphere->m_pOuterSphere = pScalingSphere->m_pHostParticle->GetHostSphere(); // Note: equals nullptr if host particle is the system host.
 	}
 
-	ScalingSphereList::Iterator innerScalingSpaceListIter = pos;
-	++innerScalingSpaceListIter;
+	// Inner...
+	ScalingSphereList::Iterator innerScalingSphereListIter = pos;
+	++innerScalingSphereListIter;
 
-	if (End() == innerScalingSpaceListIter)
+	if (End() == innerScalingSphereListIter)
 	{
-		(*pos)->m_pInnerSpace = nullptr;
+		pScalingSphere->m_pInnerSphere = nullptr;
 	}
 	else
 	{
-		(*pos)->m_pInnerSpace = innerScalingSpaceListIter->get();
-		(*innerScalingSpaceListIter)->m_pOuterSpace = pos->get();
+		pScalingSphere->m_pInnerSphere = innerScalingSphereListIter->get();
+		(*innerScalingSphereListIter)->m_pOuterSphere = pScalingSphere;
 	}
 }
 

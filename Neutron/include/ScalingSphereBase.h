@@ -37,8 +37,8 @@ public:
 
 	ParticleBase * GetHostParticle() const;
 	ParticleList const& GetParticleList() const;
-	ScalingSphereBase * GetOuterSpace() const;
-	ScalingSphereBase * GetInnerSpace() const;
+	ScalingSphereBase * GetOuterSphere() const;
+	ScalingSphereBase * GetInnerSphere() const;
 
 	float GetTrueRadius() const;
 	float GetRadius() const;
@@ -52,19 +52,20 @@ public:
 	float CircularOrbitSpeed(float orbitRadius) const;
 
 	void HandleResized(const float previousTrueRadius);
+	void HandleNewInnerSphere();
 
 	/// <summary> If the given Particle has escaped this Sphere, transfer ownership to the appropriate Sphere. </summary>
 	/// <param name="pParticle"> The Particle which may have escaped this Sphere. </param>
-	/// <returns> A pointer to the Particle's host Sphere at the end of the function call - points to this Sphere if the Particle has not escaped - or nullptr if the Particle does not belong to this Sphere. </returns>
-	ScalingSphereBase * HandleParticleMaybeEscaped(ParticleBase * pParticle);
+	/// <returns> True if the particle escaped, otherwise false. NOTE: Returns false if the particle does not belong to this Sphere. </returns>
+	bool HandleParticleMaybeEscaped(ParticleBase * pParticle);
 
 	Uuid						m_uuid;
 	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
-	ScalingSphereBase * HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
-	ScalingSphereBase * HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
-	ScalingSphereBase * HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
 
 	ParticleBase *				m_pHostParticle;
 	ParticleList				m_particles;
@@ -111,16 +112,16 @@ inline ScalingSphereBase::ParticleList const& ScalingSphereBase::GetParticleList
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScalingSphereBase * ScalingSphereBase::GetOuterSpace() const
+inline ScalingSphereBase * ScalingSphereBase::GetOuterSphere() const
 {
-	return m_pOuterSpace;
+	return m_pOuterSphere;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScalingSphereBase * ScalingSphereBase::GetInnerSpace() const
+inline ScalingSphereBase * ScalingSphereBase::GetInnerSphere() const
 {
-	return m_pInnerSpace;
+	return m_pInnerSphere;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

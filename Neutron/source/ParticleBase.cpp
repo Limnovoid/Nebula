@@ -47,7 +47,7 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 	assert(this == pScalingSphereBase->GetHostParticle());
 
 	const float previousTrueRadius = pScalingSphereBase->GetTrueRadius();
-	ScalingSphereBase *const pPreviousInnerSphere = pScalingSphereBase->GetInnerSpace();
+	ScalingSphereBase *const pPreviousInnerSphere = pScalingSphereBase->GetInnerSphere();
 
 	ScalingSphereList::Iterator scalingSphereIter = m_attachedSpheres.Find(pScalingSphereBase);
 
@@ -56,18 +56,24 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 	pScalingSphereBase->SetTrueRadius(trueRadius);
 
-	scalingSphereIter = m_attachedSpheres.Sort(scalingSphereIter);
+	const bool hasScalingSphereOrderChanged = m_attachedSpheres.Sort(scalingSphereIter);
 	assert(scalingSphereIter->get() == pScalingSphereBase);
 
 	pScalingSphereBase->Initialize();
 
-	if (nullptr != pScalingSphereBase->GetInnerSpace())
-		pScalingSphereBase->GetInnerSpace()->Initialize();
+	if (nullptr != pScalingSphereBase->GetInnerSphere())
+		pScalingSphereBase->GetInnerSphere()->Initialize();
 
-	if ((nullptr != pPreviousInnerSphere) && (pPreviousInnerSphere != pScalingSphereBase->GetInnerSpace()))
+	if (hasScalingSphereOrderChanged && (nullptr != pPreviousInnerSphere))
+	{
+		assert(pPreviousInnerSphere != pScalingSphereBase->GetInnerSphere());
 		pPreviousInnerSphere->Initialize();
+	}
 
 	pScalingSphereBase->HandleResized(previousTrueRadius);
+
+	if (nullptr != pScalingSphereBase->GetOuterSphere())
+		pScalingSphereBase->GetOuterSphere()->HandleNewInnerSphere();
 
 	return RESULT_CODE_SUCCESS;
 }

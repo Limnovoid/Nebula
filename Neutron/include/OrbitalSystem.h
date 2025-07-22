@@ -318,7 +318,7 @@ inline ParticleBase * OrbitalSystem::NonInfluencingSpace::FindPrimary(ScalingSph
 {
 	ParticleBase * pHostParticle = pScaledSpace->GetHostParticle();
 
-	while ((nullptr != pScaledSpace) && !pScaledSpace->IsInfluencing());
+	while ((nullptr != pScaledSpace) && !pScaledSpace->IsInfluencing())
 	{
 		assert(nullptr != pHostParticle);
 
@@ -451,6 +451,19 @@ class OrbitalSystemTestScript : public ITestScript
 public:
 	OrbitalSystemTestScript();
 	virtual ~OrbitalSystemTestScript();
+
+protected:
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class OrbitalSystemTestScript2 : public ITestScript
+{
+public:
+	OrbitalSystemTestScript2();
+	virtual ~OrbitalSystemTestScript2();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;

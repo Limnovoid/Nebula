@@ -38,12 +38,13 @@ public:
 	using Base::CEnd;
 	using Base::Front;
 	using Base::Back;
-	using Base::Sort;
 
 	Iterator Insert(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
 
 	Iterator Find(ScalingSphereBase * pScalingSphere);
 	ConstIterator Find(ScalingSphereBase * pScalingSphere) const;
+
+	bool Sort(Iterator &pos);
 
 	UniquePtr<ScalingSphereBase> Remove(Iterator pos);
 

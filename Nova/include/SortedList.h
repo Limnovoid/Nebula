@@ -58,8 +58,9 @@ public:
 	ConstIterator Find(T const& value) const;
 
 	/// <summary> Sort a particular element relative to its neighbours. </summary>
-	/// <param name="pos"> The position of the element to sort. </param>
-	Iterator Sort(Iterator pos);
+	/// <param name="pos"> The position of the element to sort. Is set to the position of the element after sorting. </param>
+	/// <returns> Whether the element's position has changed as a result of this operation. </returns>
+	bool Sort(Iterator &pos);
 
 protected:
 	/// <summary> Search forwards from 'pos' for the sorted position of the given value. </summary>
@@ -228,7 +229,7 @@ SortedList<T, TPredicate, TContainer>::ConstIterator SortedList<T, TPredicate, T
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename TPredicate, template <typename> class TContainer>
-SortedList<T, TPredicate, TContainer>::Iterator SortedList<T, TPredicate, TContainer>::Sort(Iterator pos)
+bool SortedList<T, TPredicate, TContainer>::Sort(Iterator &pos)
 {
 	Iterator newPos = m_container.end();
 
@@ -250,10 +251,14 @@ SortedList<T, TPredicate, TContainer>::Iterator SortedList<T, TPredicate, TConta
 			newPos = FindSortedPosBackwards(*pos, prevPos);
 	}
 
+	if (m_container.end() == newPos)
+		return false; // Item did not move - nothing to do.
+
 	newPos = m_container.emplace(newPos, std::move(*pos));
 	m_container.erase(pos);
 
-	return newPos;
+	pos = newPos;
+	return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
