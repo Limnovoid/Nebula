@@ -46,6 +46,9 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 {
 	assert(this == pScalingSphereBase->GetHostParticle());
 
+	if (GetSphereOfInfluence() == pScalingSphereBase)
+		return RESULT_CODE_INVALID_PARAMETER;
+
 	const float previousTrueRadius = pScalingSphereBase->GetTrueRadius();
 	ScalingSphereBase *const pPreviousInnerSphere = pScalingSphereBase->GetInnerSphere();
 
@@ -73,7 +76,12 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 	pScalingSphereBase->HandleResized(previousTrueRadius);
 
 	if (nullptr != pScalingSphereBase->GetOuterSphere())
-		pScalingSphereBase->GetOuterSphere()->HandleNewInnerSphere();
+	{
+		if (m_attachedSpheres.Front().get() == pScalingSphereBase)
+			pScalingSphereBase->GetOuterSphere()->HandleParticleSphereResized(pScalingSphereBase);
+		else
+			pScalingSphereBase->GetOuterSphere()->HandleNewInnerSphere();
+	}
 
 	return RESULT_CODE_SUCCESS;
 }

@@ -16,10 +16,10 @@ constexpr float			kEpsf = std::numeric_limits<float>::epsilon();
 
 constexpr float			kGravitational = 6.6743e-11f;		// Gravitational constant, units: m^3 kg^-1 s^-2
 constexpr float			kEccentricityEpsilon = kEpsf;		// Minimum eccentricity of a non-circular orbit.
-constexpr float			kMaximumScalingSpaceRadius = 0.25f;
-constexpr float			kMinimumScalingSpaceRadius = 1000.f * kEpsf;
-constexpr float			kMinimumRadiusOfInfluence = kMinimumScalingSpaceRadius;
-constexpr float			kScalingSpaceEscapeRadius = 1.01f;
+constexpr float			kMaximumScalingSphereRadius = 0.25f;
+constexpr float			kMinimumScalingSphereRadius = 1000.f * kEpsf;
+constexpr float			kMinimumRadiusOfInfluence = kMinimumScalingSphereRadius;
+constexpr float			kScalingSphereEscapeRadius = 1.01f;
 
 constexpr Vector3		kReferenceX = { 1.f, 0.f, 0.f };
 constexpr Vector3		kReferenceY = { 0.f, 1.f, 0.f };

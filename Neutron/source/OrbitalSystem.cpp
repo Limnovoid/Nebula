@@ -39,7 +39,7 @@ ScalingSphereBase * OrbitalSystem::CreateScaledSpace(ParticleBase & hostParticle
 ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase & hostSpace, float mass, Vector3 position, Vector3 velocity,
 	bool isInfluencing)
 {
-	API_ASSERT_THROW(sqrtf(position.SqareMagnitude()) < kScalingSpaceEscapeRadius, RESULT_CODE_INVALID_PARAMETER,
+	API_ASSERT_THROW(sqrtf(position.SqareMagnitude()) < kScalingSphereEscapeRadius, RESULT_CODE_INVALID_PARAMETER,
 		Fmt::Format("Position {} is outside the scaling space!", position));
 
 	if (nullptr != hostSpace.m_pInnerSphere)
@@ -123,12 +123,12 @@ ScalingSphereBase * OrbitalSystem::CreateScaledSpaceImpl(ParticleBase * pHostPar
 			(pNewScalingSphere->m_pOuterSphere->m_pHostParticle != pNewScalingSphere->m_pHostParticle));
 	}
 
-	if (!((kMinimumScalingSpaceRadius <= pNewScalingSphere->m_radius) && (pNewScalingSphere->m_radius < kMaximumScalingSpaceRadius)))
+	if (!((kMinimumScalingSphereRadius <= pNewScalingSphere->m_radius) && (pNewScalingSphere->m_radius < kMaximumScalingSphereRadius)))
 	{
 		(void) pHostParticle->RemoveScalingSphere(pNewScalingSphere);
 
 		API_ASSERT_THROW(false, RESULT_CODE_INVALID_PARAMETER,
-			Fmt::Format("Radius must be a value in the range [{}, {})", kMinimumScalingSpaceRadius, kMaximumScalingSpaceRadius));
+			Fmt::Format("Radius must be a value in the range [{}, {})", kMinimumScalingSphereRadius, kMaximumScalingSphereRadius));
 	}
 
 	return pNewScalingSphere;
@@ -155,12 +155,15 @@ OrbitalSystem::PassiveParticle::PassiveParticle(ScalingSphereBase * pHostSpace, 
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void OrbitalSystem::PassiveParticle::Initialize()
+void OrbitalSystem::PassiveParticle::Initialize(bool isInitializationFinal)
 {
 	Orbit::Elements &elements = m_pOrbit->GetCurrentSection().m_elements;
 
 	elements.Compute(m_pHostSphere->GetGravityParameter(), m_position - m_pHostSphere->GetPrimaryPosition(),
 		m_velocity - m_pHostSphere->GetPrimaryVelocity());
+
+	if (isInitializationFinal)
+		m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -174,9 +177,9 @@ OrbitalSystem::InfluencingParticle::InfluencingParticle(ScalingSphereBase * pHos
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void OrbitalSystem::InfluencingParticle::Initialize()
+void OrbitalSystem::InfluencingParticle::Initialize(bool isInitializationFinal)
 {
-	PassiveParticle::Initialize();
+	PassiveParticle::Initialize(false);
 
 	Orbit::Elements &elements = m_pOrbit->GetCurrentSection().m_elements;
 
@@ -194,6 +197,9 @@ void OrbitalSystem::InfluencingParticle::Initialize()
 	{
 		assert(false); // TODO - resize SphereOfInfluence...
 	}
+
+	if (isInitializationFinal)
+		m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -342,9 +348,9 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(particleScaledSpace.GetPrimaryVelocity(), particleVelocity * -1.f / particleScaledSpaceRadius, "PassiveParticle scaled space primary velocity");
 
 	const float particleScaledSpaceNewRadius = 0.04f;
-	const float particleScaledSpaceNewTrueRadius = HOST_SPACE_RADIUS * particleScaledSpaceNewRadius;
+	const float particleScaledSpaceNewTrueRadius = particle.GetHostSphere()->GetTrueRadius() * particleScaledSpaceNewRadius;
 
-	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&particleScaledSpace, particleScaledSpaceNewRadius),
+	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&particleScaledSpace, particleScaledSpaceNewTrueRadius),
 		Result(RESULT_CODE_SUCCESS), "ResizeScalingSphere succeeds");
 
 	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceNewTrueRadius, "PassiveParticle scaled space new true radius");

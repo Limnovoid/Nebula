@@ -26,11 +26,11 @@ public:
 
 	void SetHostSphere(ScalingSphereBase * pHostSphere);
 	void SetMass(const float mass);
+	void Initialize();
 
 	virtual void SetPosition(Vector3 const& position) = 0;
 	virtual void SetVelocity(Vector3 const& velocity) = 0;
 	virtual void Rescale(const float rescaleFactor) = 0;
-	virtual void Initialize() = 0;
 
 	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr);
 	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase);
@@ -51,6 +51,8 @@ public:
 	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
+	virtual void InitializeImpl(bool isInitializationFinal) = 0;
+
 	ScalingSphereBase *			m_pHostSphere;		// Pointer to the scaling spheres in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
 	ScalingSphereList			m_attachedSpheres;	// List of pointers to scaling spheres attached to this particle.
 
@@ -80,6 +82,13 @@ inline void ParticleBase::SetMass(const float mass)
 	m_mass = mass;
 
 	m_needsInitializationHelper.Set();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleBase::Initialize()
+{
+	InitializeImpl(true);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

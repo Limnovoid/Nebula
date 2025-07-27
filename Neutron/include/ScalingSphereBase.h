@@ -42,6 +42,7 @@ public:
 
 	float GetTrueRadius() const;
 	float GetRadius() const;
+	float GetSquareRadius() const;
 	float GetGravityParameter() const;
 
 	virtual bool IsInfluencing() const = 0;
@@ -53,30 +54,40 @@ public:
 
 	void HandleResized(const float previousTrueRadius);
 	void HandleNewInnerSphere();
+	void HandleParticleSphereResized(ScalingSphereBase * pScalingSphere);
 
 	/// <summary> If the given Particle has escaped this Sphere, transfer ownership to the appropriate Sphere. </summary>
 	/// <param name="pParticle"> The Particle which may have escaped this Sphere. </param>
 	/// <returns> True if the particle escaped, otherwise false. NOTE: Returns false if the particle does not belong to this Sphere. </returns>
 	bool HandleParticleMaybeEscaped(ParticleBase * pParticle);
 
+	void ReceiveParticleFromInner(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle ascending from the inner Sphere.
+	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle descending from the outer Sphere on the same host Particle.
+	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle leaving the first Sphere of another Particle in this Sphere.
+	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
+
 	Uuid						m_uuid;
 	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
 	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator, ScalingSphereBase * pParticleScalingSphere);
 	bool HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
 	bool HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscapedToParticleSphere(ParticleList::iterator particleListIterator);
 
 	ParticleBase *				m_pHostParticle;
 	ParticleList				m_particles;
 
 	float						m_trueRadius;		// Radius in meters.
 	float						m_radius;			// Radius relative to superior scaling space.
+	float						m_squareRadius;		// Radius squared.
 	float						m_gravityParameter;	// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
 	ScalingSphereBase *			m_pOuterSphere;
 	ScalingSphereBase *			m_pInnerSphere;
+
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -136,6 +147,13 @@ inline float ScalingSphereBase::GetTrueRadius() const
 inline float ScalingSphereBase::GetRadius() const
 {
 	return m_radius;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline float ScalingSphereBase::GetSquareRadius() const
+{
+	return m_squareRadius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
