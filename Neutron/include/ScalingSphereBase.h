@@ -67,7 +67,6 @@ public:
 	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
 
 	Uuid						m_uuid;
-	NeedsInitializationHelper	m_needsInitializationHelper;
 
 protected:
 	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
@@ -103,8 +102,6 @@ inline float ScalingSphereBase::ComputeScaledGravityParameter(float trueRadius, 
 inline void ScalingSphereBase::SetTrueRadius(const float trueRadius)
 {
 	m_trueRadius = trueRadius;
-
-	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

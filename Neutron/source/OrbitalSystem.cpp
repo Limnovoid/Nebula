@@ -155,15 +155,12 @@ OrbitalSystem::PassiveParticle::PassiveParticle(ScalingSphereBase * pHostSpace, 
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void OrbitalSystem::PassiveParticle::Initialize(bool isInitializationFinal)
+void OrbitalSystem::PassiveParticle::Initialize()
 {
 	Orbit::Elements &elements = m_pOrbit->GetCurrentSection().m_elements;
 
 	elements.Compute(m_pHostSphere->GetGravityParameter(), m_position - m_pHostSphere->GetPrimaryPosition(),
 		m_velocity - m_pHostSphere->GetPrimaryVelocity());
-
-	if (isInitializationFinal)
-		m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -177,9 +174,9 @@ OrbitalSystem::InfluencingParticle::InfluencingParticle(ScalingSphereBase * pHos
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void OrbitalSystem::InfluencingParticle::Initialize(bool isInitializationFinal)
+void OrbitalSystem::InfluencingParticle::Initialize()
 {
-	PassiveParticle::Initialize(false);
+	PassiveParticle::Initialize();
 
 	Orbit::Elements &elements = m_pOrbit->GetCurrentSection().m_elements;
 
@@ -197,9 +194,6 @@ void OrbitalSystem::InfluencingParticle::Initialize(bool isInitializationFinal)
 	{
 		assert(false); // TODO - resize SphereOfInfluence...
 	}
-
-	if (isInitializationFinal)
-		m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

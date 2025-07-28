@@ -45,15 +45,18 @@ void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 	{
 		(*particleListIter)->Rescale(particleRescaleFactor);
 
-		bool hasEscaped = false;
+		bool hasParticleEscaped;
 
 		if (previousTrueRadius < m_trueRadius)
-			hasEscaped = HandleParticleMaybeEscapedToInner(particleListIter);
+			hasParticleEscaped = HandleParticleMaybeEscapedToInner(particleListIter);
 		else // m_trueRadius < previousTrueRadius
-			hasEscaped = HandleParticleMaybeEscapedToOuter(particleListIter);
+			hasParticleEscaped = HandleParticleMaybeEscapedToOuter(particleListIter);
 
-		if (!hasEscaped)
+		if (!hasParticleEscaped)
+		{
+			assert((m_particles.end() != particleListIter) && (this == (*particleListIter)->GetHostSphere()));
 			(*particleListIter)->Initialize();
+		}
 	}
 }
 
@@ -75,7 +78,7 @@ void ScalingSphereBase::HandleParticleSphereResized(ScalingSphereBase * pScaling
 {
 	assert(nullptr != pScalingSphere);
 	assert(this == pScalingSphere->GetHostParticle()->GetHostSphere());
-	assert(this == pScalingSphere->m_pOuterSphere);
+	assert(this == pScalingSphere->GetOuterSphere());
 
 	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
 	{
@@ -110,16 +113,23 @@ bool ScalingSphereBase::HandleParticleMaybeEscaped(ParticleBase * pParticle)
 
 void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> && particlePtr)
 {
-	assert((this == particlePtr->GetHostSphere()->GetOuterSphere()) && (particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle));
+	assert(this == particlePtr->GetHostSphere()->GetOuterSphere());
+	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
-	assert(false); // TODO - re-position and re-scale for this Sphere
-
-
+	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
+	particlePtr->SetHostSphere(this);
 
 	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
 
-	if (!HandleParticleMaybeEscapedToOuter(particleListIterator))
-		(void) HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+	// A descending Particle can be anywhere inside this Sphere, so we check for overlaps with other Particle Spheres and the
+	// inner Sphere.
+	bool hasParticleEscapedAgain = HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		hasParticleEscapedAgain = HandleParticleMaybeEscapedToOuter(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		(*particleListIterator)->Initialize();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -127,30 +137,76 @@ void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> && part
 void ScalingSphereBase::ReceiveParticleFromOuter(UniquePtr<ParticleBase> && particlePtr)
 {
 	assert(this == particlePtr->GetHostSphere()->GetInnerSphere());
+	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
-	assert(false); // TODO - re-position and re-scale for this Sphere
+	particlePtr->Rescale(1.f / m_radius);
+	particlePtr->SetHostSphere(this);
+
+	// An ascending Particle can be anywhere outside the Sphere it has just escaped, so we check for overlaps with other Particle
+	// Spheres and for escaping the outer Sphere.
+	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
+
+	bool hasParticleEscapedAgain = HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		hasParticleEscapedAgain = HandleParticleMaybeEscapedToInner(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		(*particleListIterator)->Initialize();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 void ScalingSphereBase::ReceiveParticleFromEscape(UniquePtr<ParticleBase> && particlePtr)
 {
-	assert(false); // TODO - re-position and re-scale for this Sphere
+	assert(this == particlePtr->GetHostSphere()->GetOuterSphere());
+	assert(particlePtr->GetHostSphere()->GetHostParticle() != m_pHostParticle);
+
+	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
+	particlePtr->SetPosition(particlePtr->GetPosition() + particlePtr->GetHostSphere()->GetHostParticle()->GetPosition());
+	particlePtr->SetVelocity(particlePtr->GetVelocity() + particlePtr->GetHostSphere()->GetHostParticle()->GetVelocity());
+
+	particlePtr->SetHostSphere(this);
+
+	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
+
+	// An escaped Particle can now be anywhere in this Sphere except for overlapping the Sphere it has just escaped, so we check for
+	// all other escape events.
+	bool hasParticleEscapedAgain = HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		hasParticleEscapedAgain = HandleParticleMaybeEscapedToInner(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		hasParticleEscapedAgain = HandleParticleMaybeEscapedToOuter(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		(*particleListIterator)->Initialize();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 void ScalingSphereBase::ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr)
 {
-	assert(this == particlePtr->GetHostSphere()->m_pOuterSphere);
-	assert(this == particlePtr->GetHostSphere()->GetHostParticle()->GetHostSphere());
+	assert(particlePtr->GetHostSphere() == m_pHostParticle->GetHostSphere());
 
-	assert(false); // TODO - re-position and re-scale for this Sphere
+	particlePtr->SetPosition(particlePtr->GetPosition() - m_pHostParticle->GetPosition());
+	particlePtr->SetVelocity(particlePtr->GetVelocity() - m_pHostParticle->GetVelocity());
+	particlePtr->Rescale(1.f / m_radius);
 
+	particlePtr->SetHostSphere(this);
+
+	// A captured Particle can be anywhere inside the new host Particle's first Sphere, so we check for overlaps with the other
+	// Particle spheres and the inner Sphere.
 	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
 
-	if (!HandleParticleMaybeEscapedToOuter(particleListIterator))
-		(void)HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+	bool hasParticleEscapedAgain = HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		hasParticleEscapedAgain = HandleParticleMaybeEscapedToInner(particleListIterator);
+
+	if (!hasParticleEscapedAgain)
+		(*particleListIterator)->Initialize();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -159,9 +215,15 @@ bool ScalingSphereBase::HandleParticleMaybeEscaped(ParticleList::iterator partic
 {
 	assert(!m_particles.empty());
 
-	assert(false); // TODO - check if escaped this Sphere
+	bool hasParticleEscaped = HandleParticleMaybeEscapedToInner(particleListIterator);
 
-	return false;
+	if (!hasParticleEscaped)
+		hasParticleEscaped = HandleParticleMaybeEscapedToOuter(particleListIterator);
+
+	if (!hasParticleEscaped)
+		hasParticleEscaped = HandleParticleMaybeEscapedToParticleSphere(particleListIterator);
+
+	return hasParticleEscaped;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -169,6 +231,7 @@ bool ScalingSphereBase::HandleParticleMaybeEscaped(ParticleList::iterator partic
 bool ScalingSphereBase::HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator, ScalingSphereBase * pScalingSphere)
 {
 	assert(!m_particles.empty());
+	assert(this == pScalingSphere->GetHostParticle()->GetHostSphere());
 
 	assert(false); // TODO - check if escaped into referenced Sphere
 
@@ -181,7 +244,7 @@ bool ScalingSphereBase::HandleParticleMaybeEscapedToInner(ParticleList::iterator
 {
 	assert(!m_particles.empty());
 
-	assert(false); // TODO - check if escaped into outer Sphere
+	assert(false); // TODO - check if escaped into inner Sphere
 
 	return false;
 }
@@ -192,12 +255,12 @@ bool ScalingSphereBase::HandleParticleMaybeEscapedToOuter(ParticleList::iterator
 {
 	assert(!m_particles.empty());
 
-	ParticleBase * pParticle = particleListIterator->get();
+	ParticleBase const*const pParticle = particleListIterator->get();
 
 	const float particlePositionSquareMagnitude = pParticle->GetPosition().SqareMagnitude();
-	assert(nullptr == m_pInnerSphere ? (0.f < particlePositionSquareMagnitude) : (m_pInnerSphere->m_radius < particlePositionSquareMagnitude));
+	assert((nullptr == m_pInnerSphere) ? (0.f < particlePositionSquareMagnitude) : (m_pInnerSphere->GetSquareRadius() < particlePositionSquareMagnitude));
 
-	if (particlePositionSquareMagnitude < kScalingSphereEscapeRadius)
+	if (particlePositionSquareMagnitude < kScalingSphereEscapeRadiusSquared)
 		return false;
 
 	UniquePtr<ParticleBase> particlePtr = std::move(*particleListIterator);
@@ -236,10 +299,10 @@ bool ScalingSphereBase::HandleParticleMaybeEscapedToParticleSphere(ParticleList:
 	}
 	while (m_particles.end() != otherParticleListIterator);
 
-	if (m_particles.end() == particleListIterator)
+	if (m_particles.end() == otherParticleListIterator)
 		return false;
 
-	return HandleParticleMaybeEscaped(particleListIterator);
+	return HandleParticleMaybeEscaped(particleListIterator, (*otherParticleListIterator)->GetFirstSphere());
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

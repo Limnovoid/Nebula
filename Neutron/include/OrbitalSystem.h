@@ -30,15 +30,13 @@ class OrbitalSystem
 		virtual void SetPosition(Vector3 const& position) override;
 		virtual void SetVelocity(Vector3 const& velocity) override;
 		virtual void Rescale(const float rescaleFactor) override;
+		virtual void Initialize() override;
 
 		virtual bool IsInfluencing() const override;
 		virtual ScalingSphereBase * GetSphereOfInfluence() const override;
 		virtual Vector3 const& GetPosition() const override;
 		virtual Vector3 const& GetVelocity() const override;
 		virtual Orbit const* GetOrbit() const override;
-
-	protected:
-		virtual void InitializeImpl(bool isInitializationFinal) override;
 	};
 
 	class InfluencingSpace : public ScalingSphereBase
@@ -82,6 +80,7 @@ class OrbitalSystem
 		virtual void SetPosition(Vector3 const& position) override;
 		virtual void SetVelocity(Vector3 const& velocity) override;
 		virtual void Rescale(const float rescaleFactor) override;
+		virtual void Initialize() override;
 
 		virtual bool IsInfluencing() const override;
 		virtual ScalingSphereBase * GetSphereOfInfluence() const override;
@@ -90,8 +89,6 @@ class OrbitalSystem
 		virtual Orbit const* GetOrbit() const override;
 
 	protected:
-		virtual void InitializeImpl(bool isInitializationFinal) override;
-
 		Vector3				m_position;
 		Vector3				m_velocity;
 
@@ -107,12 +104,13 @@ class OrbitalSystem
 		InfluencingParticle(ScalingSphereBase * pHostSpace, float mass, Vector3 position, Vector3 velocity);
 		virtual ~InfluencingParticle() override = default;
 
+		virtual void Initialize() override;
+
 		virtual bool IsInfluencing() const override;
 		virtual ScalingSphereBase * GetSphereOfInfluence() const override;
 		virtual Orbit const* GetOrbit() const override;
 
 	private:
-		virtual void InitializeImpl(bool isInitializationFinal) override;
 
 		InfluencingSpace *	m_pSphereOfInfluence;
 	};
@@ -200,11 +198,8 @@ inline void OrbitalSystem::HostParticle::Rescale(const float rescaleFactor)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void OrbitalSystem::HostParticle::InitializeImpl(bool isInitializationFinal)
+inline void OrbitalSystem::HostParticle::Initialize()
 {
-	if (isInitializationFinal)
-		m_needsInitializationHelper.Set();
-
 	// Nothing to do.
 }
 
@@ -369,8 +364,6 @@ inline void OrbitalSystem::NonInfluencingSpace::ComputePrimaryKinetics(ScalingSp
 inline void OrbitalSystem::PassiveParticle::SetPosition(Vector3 const& position)
 {
 	m_position = position;
-
-	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -378,8 +371,6 @@ inline void OrbitalSystem::PassiveParticle::SetPosition(Vector3 const& position)
 inline void OrbitalSystem::PassiveParticle::SetVelocity(Vector3 const& velocity)
 {
 	m_velocity = velocity;
-
-	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -388,8 +379,6 @@ inline void OrbitalSystem::PassiveParticle::Rescale(const float rescaleFactor)
 {
 	m_position *= rescaleFactor;
 	m_velocity *= rescaleFactor;
-
-	m_needsInitializationHelper.Set();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

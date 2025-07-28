@@ -20,6 +20,7 @@ constexpr float			kMaximumScalingSphereRadius = 0.25f;
 constexpr float			kMinimumScalingSphereRadius = 1000.f * kEpsf;
 constexpr float			kMinimumRadiusOfInfluence = kMinimumScalingSphereRadius;
 constexpr float			kScalingSphereEscapeRadius = 1.01f;
+constexpr float			kScalingSphereEscapeRadiusSquared = kScalingSphereEscapeRadius * kScalingSphereEscapeRadius;
 
 constexpr Vector3		kReferenceX = { 1.f, 0.f, 0.f };
 constexpr Vector3		kReferenceY = { 0.f, 1.f, 0.f };
