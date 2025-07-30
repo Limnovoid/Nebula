@@ -50,8 +50,6 @@ public:
 	Uuid						m_uuid;
 
 protected:
-	virtual void InitializeImpl() = 0;
-
 	ScalingSphereBase *			m_pHostSphere;		// Pointer to the scaling spheres in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
 	ScalingSphereList			m_attachedSpheres;	// List of pointers to scaling spheres attached to this particle.
 

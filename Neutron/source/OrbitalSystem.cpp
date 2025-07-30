@@ -6,68 +6,68 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-OrbitalSystem::OrbitalSystem(float hostMass, float hostSpaceTrueRadius) :
+OrbitalSystem::OrbitalSystem(float hostMass, float hostSphereTrueRadius) :
 	m_pHostParticle(MakeUnique<HostParticle>(hostMass))
 {
-	ScalingSphereBase * pHostSpace = m_pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(m_pHostParticle.get(), hostSpaceTrueRadius));
+	ScalingSphereBase * pHostSpace = m_pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(m_pHostParticle.get(), hostSphereTrueRadius));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScaledSpace(ParticleBase & hostParticle, float trueRadius)
+ScalingSphereBase * OrbitalSystem::CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius)
 {
 	bool isInfluencing = false;
 
-	if (!hostParticle.GetScalingSphereList().Empty())
+	if (!pHostParticle->GetScalingSphereList().Empty())
 	{
-		if (trueRadius < hostParticle.GetScalingSphereList().Back()->m_trueRadius)
+		if (trueRadius < pHostParticle->GetScalingSphereList().Back()->m_trueRadius)
 		{
-			isInfluencing = hostParticle.IsInfluencing();
+			isInfluencing = pHostParticle->IsInfluencing();
 		}
-		else if (trueRadius < hostParticle.GetScalingSphereList().Front()->m_trueRadius)
+		else if (trueRadius < pHostParticle->GetScalingSphereList().Front()->m_trueRadius)
 		{
 			throw ApiException(RESULT_CODE_INVALID_PARAMETER,
 				"True radius must be greater or less than all existing scaled spaces on the particle.");
 		}
 	}
 
-	return CreateScaledSpaceImpl(&hostParticle, trueRadius, isInfluencing);
+	return CreateScaledSpaceImpl(pHostParticle, trueRadius, isInfluencing);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase & hostSpace, float mass, Vector3 position, Vector3 velocity,
+ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase * pHostSpace, float mass, Vector3 const& position, Vector3 const& velocity,
 	bool isInfluencing)
 {
 	API_ASSERT_THROW(sqrtf(position.SqareMagnitude()) < kScalingSphereEscapeRadius, RESULT_CODE_INVALID_PARAMETER,
 		Fmt::Format("Position {} is outside the scaling space!", position));
 
-	if (nullptr != hostSpace.m_pInnerSphere)
+	if (nullptr != pHostSpace->m_pInnerSphere)
 	{
-		API_ASSERT_THROW(hostSpace.m_pInnerSphere->m_radius < sqrtf(position.SqareMagnitude()), RESULT_CODE_INVALID_PARAMETER,
+		API_ASSERT_THROW(pHostSpace->m_pInnerSphere->m_radius < sqrtf(position.SqareMagnitude()), RESULT_CODE_INVALID_PARAMETER,
 			Fmt::Format("Position {} is inside the inner scaling space!", position));
 	}
 
-	UniquePtr<ParticleBase> &pNewParticle = hostSpace.m_particles.emplace_back();
+	UniquePtr<ParticleBase> &pNewParticle = pHostSpace->m_particles.emplace_back();
 
 	if (isInfluencing)
-		pNewParticle = MakeUnique<InfluencingParticle>(&hostSpace, mass, position, velocity);
+		pNewParticle = MakeUnique<InfluencingParticle>(pHostSpace, mass, position, velocity);
 	else
-		pNewParticle = MakeUnique<PassiveParticle>(&hostSpace, mass, position, velocity);
+		pNewParticle = MakeUnique<PassiveParticle>(pHostSpace, mass, position, velocity);
 
 	return pNewParticle.get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase & hostSpace, float mass, Vector3 position, bool isInfluencing)
+ParticleBase * OrbitalSystem::CreateParticle(ScalingSphereBase * pHostSpace, float mass, Vector3 const& position, bool isInfluencing)
 {
-	const float orbitSpeed = hostSpace.CircularOrbitSpeed(sqrtf(position.SqareMagnitude()));
+	const float orbitSpeed = pHostSpace->CircularOrbitSpeed(sqrtf(position.SqareMagnitude()));
 
 	assert(false); // TODO - circular orbit velocity direction
 	Vector3 circularOrbitVelocity;
 
-	return CreateParticle(hostSpace, mass, position, circularOrbitVelocity, isInfluencing);
+	return CreateParticle(pHostSpace, mass, position, circularOrbitVelocity, isInfluencing);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(hostSpace.GetPrimaryPosition(), Vector3::Zero(), "Host space primary position");
 	testHandler.Assert(hostSpace.GetPrimaryVelocity(), Vector3::Zero(), "Host space primary velocity");
 
-	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 10.f);
+	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScaledSpace(&hostParticle, HOST_SPACE_RADIUS / 10.f);
 
 	testHandler.Assert(scaledSpace2.GetRadius(), 0.1f, "Scaled space 2 radius");
 	testHandler.Assert(scaledSpace2.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 2 host particle");
@@ -255,7 +255,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(scaledSpace2.GetPrimaryPosition(), Vector3::Zero(), "Scaled space 2 primary position");
 	testHandler.Assert(scaledSpace2.GetPrimaryVelocity(), Vector3::Zero(), "Scaled space 2 primary velocity");
 
-	ScalingSphereBase & scaledSpace3 = *orbitalSystem.CreateScaledSpace(hostParticle, HOST_SPACE_RADIUS / 100.f);
+	ScalingSphereBase & scaledSpace3 = *orbitalSystem.CreateScaledSpace(&hostParticle, HOST_SPACE_RADIUS / 100.f);
 
 	testHandler.Assert(scaledSpace3.GetRadius(), 0.1f, "Scaled space 3 radius");
 	testHandler.Assert(scaledSpace3.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 3 host particle");
@@ -270,7 +270,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	try
 	{
-		orbitalSystem.CreateScaledSpace(hostParticle, 0.5f * HOST_SPACE_RADIUS);
+		orbitalSystem.CreateScaledSpace(&hostParticle, 0.5f * HOST_SPACE_RADIUS);
 		isException = false;
 	}
 	catch (ApiException const&)
@@ -311,7 +311,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	const Vector3 particlePosition(orbitRadius, 0.f, 0.f);
 	const Vector3 particleVelocity(0.f, orbitSpeed, 0.f);
 
-	ParticleBase & particle = *orbitalSystem.CreateParticle(hostSpace, particleMass, particlePosition, particleVelocity, false);
+	ParticleBase & particle = *orbitalSystem.CreateParticle(&hostSpace, particleMass, particlePosition, particleVelocity, false);
 
 	testHandler.Assert(particle.GetMass(), particleMass, "PassiveParticle mass");
 	testHandler.Assert(particle.GetHostSphere()->m_uuid, hostSpace.m_uuid, "Host space");
@@ -323,7 +323,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	const float particleScaledSpaceRadius = 0.05f;
 	const float particleScaledSpaceTrueRadius = HOST_SPACE_RADIUS * particleScaledSpaceRadius;
 
-	ScalingSphereBase & particleScaledSpace = *orbitalSystem.CreateScaledSpace(particle, particleScaledSpaceTrueRadius);
+	ScalingSphereBase & particleScaledSpace = *orbitalSystem.CreateScaledSpace(&particle, particleScaledSpaceTrueRadius);
 
 	testHandler.Assert(particleScaledSpace.GetHostParticle()->m_uuid, particle.m_uuid, "PassiveParticle scaled space host particle");
 	testHandler.Assert(particleScaledSpace.GetParticleList().size(), 0ull, "PassiveParticle scaled space particle list size");
@@ -349,26 +349,6 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceNewTrueRadius, "PassiveParticle scaled space new true radius");
 	testHandler.Assert(particleScaledSpace.GetRadius(), particleScaledSpaceNewRadius, "PassiveParticle scaled space new radius");
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-OrbitalSystemTestScript2::OrbitalSystemTestScript2() :
-	ITestScript("OrbitalSystem-2")
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-OrbitalSystemTestScript2::~OrbitalSystemTestScript2()
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-void OrbitalSystemTestScript2::RunImpl(TestHandler & testHandler)
-{
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -488,6 +468,46 @@ void ScalingSphereListTestScript::RunImpl(TestHandler & testHandler)
 		testHandler.Assert(list.Size(), 1ull, "Size of list after removing last element");
 		testHandler.Assert(list.Front()->m_uuid.Get(), list.Back()->m_uuid.Get(), "First element is now also the last element");
 	}
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ResizeScalingSpheresTestScript::ResizeScalingSpheresTestScript() :
+	ITestScript("Resizing ScalingSpheres")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ResizeScalingSpheresTestScript::~ResizeScalingSpheresTestScript()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
+{
+	static constexpr float HOST_MASS = 1e10f;
+	static constexpr float HOST_SPHERE_TRUE_RADIUS = 1000.f;
+
+	static constexpr Vector3 P0_POSITION = { 0.6f, 0.f, 0.f };
+	static constexpr float P0_MASS = 1e5f;
+
+	static constexpr float S1_TRUE_RADIUS = 100.f;
+	static constexpr float S2_TRUE_RADIUS = 50.f;
+	static constexpr float S3_TRUE_RADIUS = 20.f;
+
+	static constexpr Vector3 P1_POSITION = { 0.9f, 0.f, 0.f };
+	static constexpr Vector3 P2_POSITION = { 0.8f, 0.f, 0.f };
+	static constexpr Vector3 P3_POSITION = { 0.5f, 0.f, 0.f };
+	static constexpr float P1_MASS = 1.f;
+	static constexpr float P2_MASS = 1.f;
+	static constexpr float P3_MASS = 1.f;
+
+	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPHERE_TRUE_RADIUS);
+
+	orbitalSystem.CreateParticle(orbitalSystem.GetHostSpace(), P0_MASS, P0_POSITION, false);
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

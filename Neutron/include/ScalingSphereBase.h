@@ -61,19 +61,21 @@ public:
 	/// <returns> True if the particle escaped, otherwise false. NOTE: Returns false if the particle does not belong to this Sphere. </returns>
 	bool HandleParticleMaybeEscaped(ParticleBase * pParticle);
 
+	Uuid						m_uuid;
+
+protected:
+	// Family of functions to handle checking Particle positions and transferring their ownership to adjacent Spheres as required.
+	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeCaptured(ParticleList::iterator particleListIterator);
+	bool HandleParticleMaybeCaptured(ParticleList::iterator particleListIterator, ScalingSphereBase * pParticleScalingSphere);
+
+	// Family of functions to receive ownership of Particles from adjacent Spheres.
 	void ReceiveParticleFromInner(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle ascending from the inner Sphere.
 	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle descending from the outer Sphere on the same host Particle.
 	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle leaving the first Sphere of another Particle in this Sphere.
 	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
-
-	Uuid						m_uuid;
-
-protected:
-	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator);
-	bool HandleParticleMaybeEscaped(ParticleList::iterator particleListIterator, ScalingSphereBase * pParticleScalingSphere);
-	bool HandleParticleMaybeEscapedToInner(ParticleList::iterator particleListIterator);
-	bool HandleParticleMaybeEscapedToOuter(ParticleList::iterator particleListIterator);
-	bool HandleParticleMaybeEscapedToParticleSphere(ParticleList::iterator particleListIterator);
 
 	ParticleBase *				m_pHostParticle;
 	ParticleList				m_particles;

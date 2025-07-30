@@ -20,6 +20,7 @@ void AddTests(Nebula::TestHandler & testHandler)
 	testHandler.Register(MakeShared<OrbitalSystemTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<OrbitTestScript>(), "Neutron");
 	testHandler.Register(MakeShared<ScalingSphereListTestScript>(), "Neutron");
+	testHandler.Register(MakeShared<ResizeScalingSpheresTestScript>(), "Neutron");
 
 	// Pool testing.
 	std::pmr::pool_options poolOptions;

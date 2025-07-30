@@ -116,7 +116,7 @@ class OrbitalSystem
 	};
 
 public:
-	OrbitalSystem(float hostMass, float hostSpaceTrueRadius);
+	OrbitalSystem(float hostMass, float hostSphereTrueRadius);
 
 	ParticleBase * GetHostParticle();
 	ScalingSphereBase * GetHostSpace();
@@ -126,7 +126,7 @@ public:
 	/// <param name="trueRadius"> The true radius (meters). </param>
 	/// <returns> Reference to the created space. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ScalingSphereBase * CreateScaledSpace(ParticleBase & hostParticle, float trueRadius);
+	ScalingSphereBase * CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius);
 
 	/// <summary> Create a particle. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -136,7 +136,7 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase * CreateParticle(ScalingSphereBase & hostSpace, float mass, Vector3 position, Vector3 velocity, bool isInfluencing);
+	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, Vector3 const& velocity, bool isInfluencing);
 
 	/// <summary> Create a particle with circular orbit. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -146,7 +146,7 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase * CreateParticle(ScalingSphereBase & hostSpace, float mass, Vector3 position, bool isInfluencing);
+	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, bool isInfluencing);
 
 	/// <summary> Destroy a particle in this orbital system. </summary>
 	/// <param name="pParticleBase"> Pointer to the particle to be destroyed. </param>
@@ -454,11 +454,11 @@ protected:
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class OrbitalSystemTestScript2 : public ITestScript
+class ResizeScalingSpheresTestScript : public ITestScript
 {
 public:
-	OrbitalSystemTestScript2();
-	virtual ~OrbitalSystemTestScript2();
+	ResizeScalingSpheresTestScript();
+	virtual ~ResizeScalingSpheresTestScript();
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;
