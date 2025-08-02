@@ -14,24 +14,19 @@ OrbitalSystem::OrbitalSystem(float hostMass, float hostSphereTrueRadius) :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, float trueRadius)
 {
 	bool isInfluencing = false;
 
 	if (!pHostParticle->GetScalingSphereList().Empty())
 	{
-		if (trueRadius < pHostParticle->GetScalingSphereList().Back()->m_trueRadius)
+		if (pHostParticle->IsInfluencing() && (trueRadius < pHostParticle->GetSphereOfInfluence()->m_trueRadius))
 		{
 			isInfluencing = pHostParticle->IsInfluencing();
 		}
-		else if (trueRadius < pHostParticle->GetScalingSphereList().Front()->m_trueRadius)
-		{
-			throw ApiException(RESULT_CODE_INVALID_PARAMETER,
-				"True radius must be greater or less than all existing scaled spaces on the particle.");
-		}
 	}
 
-	return CreateScaledSpaceImpl(pHostParticle, trueRadius, isInfluencing);
+	return CreateScalingSphere(pHostParticle, trueRadius, isInfluencing);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +99,7 @@ Result OrbitalSystem::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScaledSpaceImpl(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing)
 {
 	ScalingSphereBase * pNewScalingSphere = nullptr;
 
@@ -112,23 +107,22 @@ ScalingSphereBase * OrbitalSystem::CreateScaledSpaceImpl(ParticleBase * pHostPar
 	{
 		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(pHostParticle, trueRadius));
 
-		assert((nullptr == pNewScalingSphere->m_pOuterSphere) || pNewScalingSphere->m_pOuterSphere->IsInfluencing());
+		assert((nullptr == pNewScalingSphere->GetOuterSphere()) || pNewScalingSphere->GetOuterSphere()->IsInfluencing());
 	}
 	else
 	{
 		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, trueRadius));
 
-		assert(nullptr != pNewScalingSphere->m_pOuterSphere); // A non-influencing sphere should always be contained in a large sphere.
-		assert(!pNewScalingSphere->m_pOuterSphere->IsInfluencing() || // A non-influencing sphere cannot be smaller than an influencing sphere on the same host.
-			(pNewScalingSphere->m_pOuterSphere->m_pHostParticle != pNewScalingSphere->m_pHostParticle));
+		assert(nullptr != pNewScalingSphere->GetOuterSphere()); // A non-influencing Sphere should always be below an influencing Sphere in the hierarchy.
+		assert((pNewScalingSphere->GetOuterSphere()->GetHostParticle() != pNewScalingSphere->GetHostParticle()) ||
+			!pNewScalingSphere->GetOuterSphere()->IsInfluencing()); // A non-influencing Sphere cannot be smaller than an influencing Sphere on the same host.
 	}
 
-	if (!((kMinimumScalingSphereRadius <= pNewScalingSphere->m_radius) && (pNewScalingSphere->m_radius < kMaximumScalingSphereRadius)))
+	if ((pNewScalingSphere->GetRadius() < kMinimumScalingSphereRadius) || (kMaximumScalingSphereRadius < pNewScalingSphere->GetRadius()))
 	{
 		(void) pHostParticle->RemoveScalingSphere(pNewScalingSphere);
 
-		API_ASSERT_THROW(false, RESULT_CODE_INVALID_PARAMETER,
-			Fmt::Format("Radius must be a value in the range [{}, {})", kMinimumScalingSphereRadius, kMaximumScalingSphereRadius));
+		return nullptr;
 	}
 
 	return pNewScalingSphere;
@@ -507,7 +501,15 @@ void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 
 	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPHERE_TRUE_RADIUS);
 
-	orbitalSystem.CreateParticle(orbitalSystem.GetHostSpace(), P0_MASS, P0_POSITION, false);
+	ParticleBase * pP0 = orbitalSystem.CreateParticle(orbitalSystem.GetHostSpace(), P0_MASS, P0_POSITION, false);
+
+	ScalingSphereBase * pS1 = orbitalSystem.CreateScaledSpace(pP0, S1_TRUE_RADIUS);
+	ScalingSphereBase * pS2 = orbitalSystem.CreateScaledSpace(pP0, S2_TRUE_RADIUS);
+	ScalingSphereBase * pS3 = orbitalSystem.CreateScaledSpace(pP0, S3_TRUE_RADIUS);
+
+	ParticleBase * pP1 = orbitalSystem.CreateParticle(pS1, P1_MASS, P1_POSITION, false);
+	ParticleBase * pP2 = orbitalSystem.CreateParticle(pS2, P2_MASS, P2_POSITION, false);
+	ParticleBase * pP3 = orbitalSystem.CreateParticle(pS3, P3_MASS, P3_POSITION, false);
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Constants.h" />
+    <ClInclude Include="include\LengthUnits.h" />
     <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\ParticleBase.h" />
     <ClInclude Include="include\ScalingSphereBase.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="include\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\LengthUnits.cpp" />
     <ClCompile Include="source\Neutron.cpp" />
     <ClCompile Include="source\Orbit.cpp" />
     <ClCompile Include="source\OrbitalSystem.cpp" />

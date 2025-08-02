@@ -41,15 +41,17 @@ void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 	if (1.f == particleRescaleFactor)
 		return; // No re-scaling, nothing to do.
 
+	const bool hasTrueRadiusIncreased = (previousTrueRadius < m_trueRadius);
+
 	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
 	{
 		(*particleListIter)->Rescale(particleRescaleFactor);
 
 		bool hasParticleEscaped;
 
-		if (previousTrueRadius < m_trueRadius)
+		if (hasTrueRadiusIncreased)
 			hasParticleEscaped = HandleParticleMaybeEscapedToInner(particleListIter);
-		else // m_trueRadius < previousTrueRadius
+		else // !hasTrueRadiusIncreased
 			hasParticleEscaped = HandleParticleMaybeEscapedToOuter(particleListIter);
 
 		if (!hasParticleEscaped)

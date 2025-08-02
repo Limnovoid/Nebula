@@ -126,7 +126,8 @@ public:
 	/// <param name="trueRadius"> The true radius (meters). </param>
 	/// <returns> Reference to the created space. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ScalingSphereBase * CreateScaledSpace(ParticleBase * pHostParticle, float trueRadius);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, Absolute radius);
+	ScalingSphereBase * CreateScalingSphere(ScalingSphereBase * pOuterSphere, Relative radius);
 
 	/// <summary> Create a particle. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -155,7 +156,7 @@ public:
 	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
 
 private:
-	ScalingSphereBase * CreateScaledSpaceImpl(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing);
 
 	UniquePtr<HostParticle>	m_pHostParticle;	// Pointer to the interface of the host particle around which all other particles in the system orbit.
 };
