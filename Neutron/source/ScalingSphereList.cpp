@@ -69,6 +69,9 @@ UniquePtr<ScalingSphereBase> ScalingSphereList::Remove(Iterator pos)
 	if ((End() != pos) || (End() != --pos))
 		InitializeInnerOuter(pos);
 
+	returnOwnership->m_pOuterSphere = nullptr;
+	returnOwnership->m_pInnerSphere = nullptr;
+
 	return returnOwnership;
 }
 

@@ -14,19 +14,19 @@ OrbitalSystem::OrbitalSystem(float hostMass, float hostSphereTrueRadius) :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, float trueRadius)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, const Absolute radius)
 {
-	bool isInfluencing = false;
+	const bool isInfluencing = pHostParticle->IsInfluencing() &&
+		(radius < pHostParticle->GetSphereOfInfluence()->GetTrueRadius());
 
-	if (!pHostParticle->GetScalingSphereList().Empty())
-	{
-		if (pHostParticle->IsInfluencing() && (trueRadius < pHostParticle->GetSphereOfInfluence()->m_trueRadius))
-		{
-			isInfluencing = pHostParticle->IsInfluencing();
-		}
-	}
+	return CreateScalingSphere(pHostParticle, radius, isInfluencing);
+}
 
-	return CreateScalingSphere(pHostParticle, trueRadius, isInfluencing);
+// --------------------------------------------------------------------------------------------------------------------------------
+
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ScalingSphereBase * pOuterSphere, const Relative radius)
+{
+	return CreateScalingSphere(pOuterSphere->GetHostParticle(), radius.ToAbsolute(*pOuterSphere));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -99,19 +99,19 @@ Result OrbitalSystem::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, float trueRadius, bool isInfluencing)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, const Absolute radius, bool isInfluencing)
 {
 	ScalingSphereBase * pNewScalingSphere = nullptr;
 
 	if (isInfluencing)
 	{
-		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(pHostParticle, trueRadius));
+		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSpace>(pHostParticle, radius.Get()));
 
 		assert((nullptr == pNewScalingSphere->GetOuterSphere()) || pNewScalingSphere->GetOuterSphere()->IsInfluencing());
 	}
 	else
 	{
-		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, trueRadius));
+		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, radius.Get()));
 
 		assert(nullptr != pNewScalingSphere->GetOuterSphere()); // A non-influencing Sphere should always be below an influencing Sphere in the hierarchy.
 		assert((pNewScalingSphere->GetOuterSphere()->GetHostParticle() != pNewScalingSphere->GetHostParticle()) ||
@@ -209,7 +209,7 @@ OrbitalSystemTestScript::~OrbitalSystemTestScript()
 void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 {
 	static constexpr float HOST_MASS = 1e30f;
-	static constexpr float HOST_SPACE_RADIUS = 8e12f;
+	static constexpr Absolute HOST_SPACE_RADIUS(8e12f);
 
 	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPACE_RADIUS);
 
@@ -229,7 +229,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 		"Host space is host particle's first attached space");
 
 	testHandler.Assert(hostSpace.GetRadius(), 1.f, "Host space radius");
-	testHandler.Assert(hostSpace.GetTrueRadius(), HOST_SPACE_RADIUS, "Host space true radius");
+	testHandler.Assert(hostSpace.GetTrueRadius(), HOST_SPACE_RADIUS.Get(), "Host space true radius");
 	testHandler.Assert(hostSpace.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Host space's host particle");
 	testHandler.Assert(hostSpace.GetGravityParameter(),
 		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS, HOST_MASS), "Host space gravity parameter");
@@ -238,7 +238,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(hostSpace.GetPrimaryPosition(), Vector3::Zero(), "Host space primary position");
 	testHandler.Assert(hostSpace.GetPrimaryVelocity(), Vector3::Zero(), "Host space primary velocity");
 
-	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScaledSpace(&hostParticle, HOST_SPACE_RADIUS / 10.f);
+	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS / 10.f);
 
 	testHandler.Assert(scaledSpace2.GetRadius(), 0.1f, "Scaled space 2 radius");
 	testHandler.Assert(scaledSpace2.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 2 host particle");
@@ -249,7 +249,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(scaledSpace2.GetPrimaryPosition(), Vector3::Zero(), "Scaled space 2 primary position");
 	testHandler.Assert(scaledSpace2.GetPrimaryVelocity(), Vector3::Zero(), "Scaled space 2 primary velocity");
 
-	ScalingSphereBase & scaledSpace3 = *orbitalSystem.CreateScaledSpace(&hostParticle, HOST_SPACE_RADIUS / 100.f);
+	ScalingSphereBase & scaledSpace3 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS / 100.f);
 
 	testHandler.Assert(scaledSpace3.GetRadius(), 0.1f, "Scaled space 3 radius");
 	testHandler.Assert(scaledSpace3.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 3 host particle");
@@ -264,7 +264,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	try
 	{
-		orbitalSystem.CreateScaledSpace(&hostParticle, 0.5f * HOST_SPACE_RADIUS);
+		orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS * 0.5f);
 		isException = false;
 	}
 	catch (ApiException const&)
@@ -314,20 +314,20 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(particle.IsInfluencing(), false, "Is particle influencing");
 	testHandler.Assert(particle.GetScalingSphereList().Size(), 0ull, "PassiveParticle attached spaces");
 
-	const float particleScaledSpaceRadius = 0.05f;
-	const float particleScaledSpaceTrueRadius = HOST_SPACE_RADIUS * particleScaledSpaceRadius;
+	const Relative particleScaledSpaceRadius(0.05f);
+	const Absolute particleScaledSpaceAbsoluteRadius = HOST_SPACE_RADIUS * particleScaledSpaceRadius;
 
-	ScalingSphereBase & particleScaledSpace = *orbitalSystem.CreateScaledSpace(&particle, particleScaledSpaceTrueRadius);
+	ScalingSphereBase & particleScaledSpace = *orbitalSystem.CreateScalingSphere(&particle, particleScaledSpaceAbsoluteRadius);
 
 	testHandler.Assert(particleScaledSpace.GetHostParticle()->m_uuid, particle.m_uuid, "PassiveParticle scaled space host particle");
 	testHandler.Assert(particleScaledSpace.GetParticleList().size(), 0ull, "PassiveParticle scaled space particle list size");
 	testHandler.Assert(particleScaledSpace.GetOuterSphere()->m_uuid, hostSpace.m_uuid, "PassiveParticle scaled space outer space");
 	testHandler.Assert(reinterpret_cast<uintptr_t>(particleScaledSpace.GetInnerSphere()), reinterpret_cast<uintptr_t>(nullptr), "PassiveParticle scaled space inner space");
 
-	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceTrueRadius, "PassiveParticle scaled space true radius");
-	testHandler.Assert(particleScaledSpace.GetRadius(), particleScaledSpaceRadius, "PassiveParticle scaled space radius");
+	testHandler.Assert(particleScaledSpace.GetTrueRadius(), particleScaledSpaceAbsoluteRadius.Get(), "PassiveParticle scaled space true radius");
+	testHandler.Assert(particleScaledSpace.GetRadius(), particleScaledSpaceRadius.Get(), "PassiveParticle scaled space radius");
 
-	const float expectedGravityParameter = ScalingSphereBase::ComputeScaledGravityParameter(particleScaledSpaceTrueRadius, HOST_MASS);
+	const float expectedGravityParameter = ScalingSphereBase::ComputeScaledGravityParameter(particleScaledSpaceAbsoluteRadius.Get(), HOST_MASS);
 	testHandler.Assert(particleScaledSpace.GetGravityParameter(), expectedGravityParameter, "PassiveParticle scaled space gravity parameter");
 
 	testHandler.Assert(particleScaledSpace.IsInfluencing(), false, "PassiveParticle scaled space is influencing");
@@ -483,14 +483,14 @@ ResizeScalingSpheresTestScript::~ResizeScalingSpheresTestScript()
 void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 {
 	static constexpr float HOST_MASS = 1e10f;
-	static constexpr float HOST_SPHERE_TRUE_RADIUS = 1000.f;
+	static constexpr Absolute HOST_SPHERE_ABSOLUTE_RADIUS(1000.f);
 
 	static constexpr Vector3 P0_POSITION = { 0.6f, 0.f, 0.f };
 	static constexpr float P0_MASS = 1e5f;
 
-	static constexpr float S1_TRUE_RADIUS = 100.f;
-	static constexpr float S2_TRUE_RADIUS = 50.f;
-	static constexpr float S3_TRUE_RADIUS = 20.f;
+	static constexpr Absolute S1_ABSOLUTE_RADIUS(100.f);
+	static constexpr Absolute S2_ABSOLUTE_RADIUS(50.f);
+	static constexpr Absolute S3_ABSOLUTE_RADIUS(20.f);
 
 	static constexpr Vector3 P1_POSITION = { 0.9f, 0.f, 0.f };
 	static constexpr Vector3 P2_POSITION = { 0.8f, 0.f, 0.f };
@@ -499,13 +499,13 @@ void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 	static constexpr float P2_MASS = 1.f;
 	static constexpr float P3_MASS = 1.f;
 
-	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPHERE_TRUE_RADIUS);
+	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPHERE_ABSOLUTE_RADIUS);
 
 	ParticleBase * pP0 = orbitalSystem.CreateParticle(orbitalSystem.GetHostSpace(), P0_MASS, P0_POSITION, false);
 
-	ScalingSphereBase * pS1 = orbitalSystem.CreateScaledSpace(pP0, S1_TRUE_RADIUS);
-	ScalingSphereBase * pS2 = orbitalSystem.CreateScaledSpace(pP0, S2_TRUE_RADIUS);
-	ScalingSphereBase * pS3 = orbitalSystem.CreateScaledSpace(pP0, S3_TRUE_RADIUS);
+	ScalingSphereBase * pS1 = orbitalSystem.CreateScalingSphere(pP0, S1_ABSOLUTE_RADIUS);
+	ScalingSphereBase * pS2 = orbitalSystem.CreateScalingSphere(pP0, S2_ABSOLUTE_RADIUS);
+	ScalingSphereBase * pS3 = orbitalSystem.CreateScalingSphere(pP0, S3_ABSOLUTE_RADIUS);
 
 	ParticleBase * pP1 = orbitalSystem.CreateParticle(pS1, P1_MASS, P1_POSITION, false);
 	ParticleBase * pP2 = orbitalSystem.CreateParticle(pS2, P2_MASS, P2_POSITION, false);

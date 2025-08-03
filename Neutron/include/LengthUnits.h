@@ -13,16 +13,28 @@ class ScalingSphereBase;
 class Absolute
 {
 public:
-	explicit Absolute(const float value);
-	Absolute(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
+	constexpr explicit Absolute(const float value);
+	Absolute(const Relative relative, ScalingSphereBase const& scalingSphereBase);
 
-	float GetValue() const;
+	float Get() const;
 
 	Relative ToRelative(ScalingSphereBase const& scalingSphereBase) const;
 	float ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const;
 
-	void SetValue(const float value);
-	void SetValue(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
+	void Set(const float value);
+	void Set(const Relative relative, ScalingSphereBase const& scalingSphereBase);
+
+	operator float() const;
+
+	const Absolute operator+(const float rhs) const;
+	const Absolute operator-(const float rhs) const;
+	const Absolute operator*(const float rhs) const;
+	const Absolute operator/(const float rhs) const;
+
+	Absolute operator+=(const float rhs);
+	Absolute operator-=(const float rhs);
+	Absolute operator*=(const float rhs);
+	Absolute operator/=(const float rhs);
 
 private:
 	float	m_value;
@@ -30,9 +42,90 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float Absolute::GetValue() const
+inline constexpr Absolute::Absolute(const float value) :
+	m_value(value)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline float Absolute::Get() const
 {
 	return m_value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void Absolute::Set(const float value)
+{
+	m_value = value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Absolute::operator float() const
+{
+	return m_value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline const Absolute Absolute::operator+(const float rhs) const
+{
+	return Absolute(m_value + rhs);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline const Absolute Absolute::operator-(const float rhs) const
+{
+	return Absolute(m_value - rhs);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline const Absolute Absolute::operator*(const float rhs) const
+{
+	return Absolute(m_value * rhs);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline const Absolute Absolute::operator/(const float rhs) const
+{
+	return Absolute(m_value / rhs);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Absolute Absolute::operator+=(const float rhs)
+{
+	m_value += rhs;
+	return *this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Absolute Absolute::operator-=(const float rhs)
+{
+	m_value -= rhs;
+	return *this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Absolute Absolute::operator*=(const float rhs)
+{
+	m_value *= rhs;
+	return *this;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Absolute Absolute::operator/=(const float rhs)
+{
+	m_value /= rhs;
+	return *this;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -41,24 +134,47 @@ inline float Absolute::GetValue() const
 class Relative
 {
 public:
-	explicit Relative(const float value);
+	constexpr explicit Relative(const float value);
 	Relative(const Absolute absolute, ScalingSphereBase const& scalingSphereBase);
 
-	float GetValue() const;
+	float Get() const;
 
 	Absolute ToAbsolute(ScalingSphereBase const& scalingSphereBase) const;
 	float ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const;
 
-	void SetValue(const float value);
-	void SetValue(const Absolute absolute, ScalingSphereBase const& scalingSphereBase);
+	void Set(const float value);
+	void Set(const Absolute absolute, ScalingSphereBase const& scalingSphereBase);
+
+	operator float() const;
 
 private:
-	float						m_value;
+	float	m_value;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float Relative::GetValue() const
+inline constexpr Relative::Relative(const float value) :
+	m_value(value)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline float Relative::Get() const
+{
+	return m_value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void Relative::Set(const float value)
+{
+	m_value = value;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Relative::operator float() const
 {
 	return m_value;
 }

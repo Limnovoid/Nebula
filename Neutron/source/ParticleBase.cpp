@@ -32,12 +32,21 @@ ScalingSphereBase * ParticleBase::AddScalingSphere(UniquePtr<ScalingSphereBase> 
 
 UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase)
 {
+	UniquePtr<ScalingSphereBase> scalingSpherePtr = nullptr;
+
 	ScalingSphereList::Iterator scalingSphereIter = m_attachedSpheres.Find(pScalingSphereBase);
 
 	if (m_attachedSpheres.End() != scalingSphereIter)
-		return m_attachedSpheres.Remove(scalingSphereIter);
+	{
+		ScalingSphereBase *const pOuterSphere = (m_attachedSpheres.Begin() == scalingSphereIter) ? nullptr : (*scalingSphereIter)->GetOuterSphere();
 
-	return nullptr;
+		scalingSpherePtr = m_attachedSpheres.Remove(scalingSphereIter);
+
+		if (nullptr != pOuterSphere)
+			pOuterSphere->HandleNewInnerSphere();
+	}
+
+	return scalingSpherePtr;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
