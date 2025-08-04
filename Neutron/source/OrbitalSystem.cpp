@@ -84,7 +84,7 @@ void OrbitalSystem::DestroyParticle(ParticleBase * pParticleBase)
 	}
 
 	assert(particleList.cend() != citerator);
-	
+
 	particleList.erase(citerator);
 }
 
