@@ -34,6 +34,44 @@ void ScalingSphereBase::Initialize()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
+ParticleBase * ScalingSphereBase::AddParticle(UniquePtr<ParticleBase> && particleBasePtr)
+{
+	assert(particleBasePtr->GetHostSphere() == this);
+
+	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particleBasePtr));
+
+	(*particleListIterator)->Initialize();
+
+	return particleListIterator->get();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+UniquePtr<ParticleBase> ScalingSphereBase::RemoveParticle(ParticleBase * pParticleBase)
+{
+	assert(pParticleBase->GetHostSphere() == this);
+
+	ScalingSphereBase::ParticleList::iterator particleIterator = m_particles.begin();
+
+	while (m_particles.end() != particleIterator)
+	{
+		if (particleIterator->get() == pParticleBase)
+			break;
+
+		++particleIterator;
+	}
+
+	assert(m_particles.end() != particleIterator);
+
+	UniquePtr<ParticleBase> particlePtr = std::move(*particleIterator);
+
+	m_particles.erase(particleIterator);
+
+	return particlePtr;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 {
 	const float particleRescaleFactor = previousTrueRadius / m_trueRadius;
@@ -43,21 +81,24 @@ void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 
 	const bool hasTrueRadiusIncreased = (previousTrueRadius < m_trueRadius);
 
-	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
+	ParticleList::iterator particleListIterator = m_particles.begin();
+	while (m_particles.end() != particleListIterator)
 	{
-		(*particleListIter)->Rescale(particleRescaleFactor);
+		ParticleList::iterator thisParticleIterator = particleListIterator++;
+
+		(*thisParticleIterator)->Rescale(particleRescaleFactor);
 
 		bool hasParticleEscaped;
 
 		if (hasTrueRadiusIncreased)
-			hasParticleEscaped = HandleParticleMaybeEscapedToInner(particleListIter);
+			hasParticleEscaped = HandleParticleMaybeEscapedToInner(thisParticleIterator);
 		else // !hasTrueRadiusIncreased
-			hasParticleEscaped = HandleParticleMaybeEscapedToOuter(particleListIter);
+			hasParticleEscaped = HandleParticleMaybeEscapedToOuter(thisParticleIterator);
 
 		if (!hasParticleEscaped)
 		{
-			assert((m_particles.end() != particleListIter) && (this == (*particleListIter)->GetHostSphere()));
-			(*particleListIter)->Initialize();
+			assert((m_particles.end() != thisParticleIterator) && (this == (*thisParticleIterator)->GetHostSphere()));
+			(*thisParticleIterator)->Initialize();
 		}
 	}
 }
@@ -68,9 +109,12 @@ void ScalingSphereBase::HandleNewInnerSphere()
 {
 	assert(nullptr != m_pInnerSphere);
 
-	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
+	ParticleList::iterator particleListIterator = m_particles.begin();
+	while (m_particles.end() != particleListIterator)
 	{
-		(void) HandleParticleMaybeEscapedToInner(particleListIter);
+		ParticleList::iterator thisParticleIterator = particleListIterator++;
+
+		(void) HandleParticleMaybeEscapedToInner(thisParticleIterator);
 	}
 }
 
@@ -82,10 +126,30 @@ void ScalingSphereBase::HandleParticleSphereResized(ScalingSphereBase * pScaling
 	assert(this == pScalingSphere->GetHostParticle()->GetHostSphere());
 	assert(this == pScalingSphere->GetOuterSphere());
 
-	for (ParticleList::iterator particleListIter = m_particles.begin(); m_particles.end() != particleListIter; ++particleListIter)
+	ParticleList::iterator particleListIterator = m_particles.begin();
+	while (m_particles.end() != particleListIterator)
 	{
-		if (particleListIter->get() != pScalingSphere->GetHostParticle())
-			(void) HandleParticleMaybeCaptured(particleListIter, pScalingSphere);
+		ParticleList::iterator thisParticleIterator = particleListIterator++;
+
+		if (thisParticleIterator->get() != pScalingSphere->GetHostParticle())
+			(void) HandleParticleMaybeCaptured(thisParticleIterator, pScalingSphere);
+	}
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void ScalingSphereBase::HandleBeingRemoved(const bool shouldDonateParticles)
+{
+	if (shouldDonateParticles)
+	{
+		if (nullptr != m_pOuterSphere)
+		{
+			DonateParticlesToOuter();
+		}
+		else
+		{
+			DonateParticlesToInner();
+		}
 	}
 }
 
@@ -97,7 +161,7 @@ bool ScalingSphereBase::HandleParticleMaybeEscaped(ParticleBase * pParticle)
 	assert(this == pParticle->GetHostSphere());
 
 	ParticleList::iterator particleListIterator = m_particles.begin();
-	
+
 	while (m_particles.end() != particleListIterator)
 	{
 		if (particleListIterator->get() == pParticle)
@@ -149,7 +213,7 @@ bool ScalingSphereBase::HandleParticleMaybeEscapedToInner(ParticleList::iterator
 
 	m_particles.erase(particleListIterator);
 
-	m_pInnerSphere->ReceiveParticleFromOuter(std::move(particlePtr));
+	m_pInnerSphere->ReceiveParticleFromOuter(particlePtr);
 
 	return true;
 }
@@ -175,9 +239,9 @@ bool ScalingSphereBase::HandleParticleMaybeEscapedToOuter(ParticleList::iterator
 	m_particles.erase(particleListIterator);
 
 	if (m_pOuterSphere->GetHostParticle() == m_pHostParticle)
-		m_pOuterSphere->ReceiveParticleFromInner(std::move(particlePtr));
+		m_pOuterSphere->ReceiveParticleFromInner(particlePtr);
 	else
-		m_pOuterSphere->ReceiveParticleFromEscape(std::move(particlePtr));
+		m_pOuterSphere->ReceiveParticleFromEscape(particlePtr);
 
 	return true;
 }
@@ -189,7 +253,6 @@ bool ScalingSphereBase::HandleParticleMaybeCaptured(ParticleList::iterator parti
 	assert(!m_particles.empty());
 
 	ParticleList::iterator otherParticleListIterator = m_particles.begin();
-
 	do
 	{
 		ScalingSphereBase *const pOtherParticleScalingSphere = (*otherParticleListIterator)->GetFirstSphere();
@@ -229,16 +292,17 @@ bool ScalingSphereBase::HandleParticleMaybeCaptured(ParticleList::iterator parti
 
 	m_particles.erase(particleListIterator);
 
-	pScalingSphere->ReceiveParticleFromCapture(std::move(particlePtr));
+	pScalingSphere->ReceiveParticleFromCapture(particlePtr);
 
 	return false;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> && particlePtr)
+void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> & particlePtr)
 {
-	assert(this == particlePtr->GetHostSphere()->GetOuterSphere());
+	assert(particlePtr->GetHostSphere() == m_pInnerSphere);
+	assert(particlePtr->GetHostSphere()->GetOuterSphere() == this);
 	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
 	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
@@ -259,9 +323,10 @@ void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> && part
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::ReceiveParticleFromOuter(UniquePtr<ParticleBase> && particlePtr)
+void ScalingSphereBase::ReceiveParticleFromOuter(UniquePtr<ParticleBase> & particlePtr)
 {
-	assert(this == particlePtr->GetHostSphere()->GetInnerSphere());
+	assert(particlePtr->GetHostSphere() == m_pOuterSphere);
+	assert(particlePtr->GetHostSphere()->GetInnerSphere() == this);
 	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
 	particlePtr->Rescale(1.f / m_radius);
@@ -282,12 +347,14 @@ void ScalingSphereBase::ReceiveParticleFromOuter(UniquePtr<ParticleBase> && part
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::ReceiveParticleFromEscape(UniquePtr<ParticleBase> && particlePtr)
+void ScalingSphereBase::ReceiveParticleFromEscape(UniquePtr<ParticleBase> & particlePtr)
 {
-	assert(this == particlePtr->GetHostSphere()->GetOuterSphere());
-	assert(particlePtr->GetHostSphere()->GetHostParticle() != m_pHostParticle);
+	assert(particlePtr->GetHostSphere()->GetOuterSphere() == this);
+	assert(std::find_if(m_particles.begin(), m_particles.end(), [&particlePtr](UniquePtr<ParticleBase> const& otherParticlePtr) {
+		return (otherParticlePtr.get() == particlePtr->GetHostSphere()->GetHostParticle()); }) != m_particles.end());
 
 	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
+
 	particlePtr->SetPosition(particlePtr->GetPosition() + particlePtr->GetHostSphere()->GetHostParticle()->GetPosition());
 	particlePtr->SetVelocity(particlePtr->GetVelocity() + particlePtr->GetHostSphere()->GetHostParticle()->GetVelocity());
 
@@ -311,12 +378,14 @@ void ScalingSphereBase::ReceiveParticleFromEscape(UniquePtr<ParticleBase> && par
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr)
+void ScalingSphereBase::ReceiveParticleFromCapture(UniquePtr<ParticleBase> & particlePtr)
 {
-	assert(particlePtr->GetHostSphere() == m_pHostParticle->GetHostSphere());
+	assert(m_pHostParticle->GetFirstSphere() == this);
+	assert(m_pHostParticle->GetHostSphere() == particlePtr->GetHostSphere());
 
 	particlePtr->SetPosition(particlePtr->GetPosition() - m_pHostParticle->GetPosition());
 	particlePtr->SetVelocity(particlePtr->GetVelocity() - m_pHostParticle->GetVelocity());
+
 	particlePtr->Rescale(1.f / m_radius);
 
 	particlePtr->SetHostSphere(this);
@@ -332,6 +401,51 @@ void ScalingSphereBase::ReceiveParticleFromCapture(UniquePtr<ParticleBase> && pa
 
 	if (!hasParticleEscapedAgain)
 		(*particleListIterator)->Initialize();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void ScalingSphereBase::DonateParticlesToInner()
+{
+	assert(nullptr != m_pInnerSphere);
+
+	ParticleList::iterator particleListIterator = m_particles.begin();
+
+	while (m_particles.end() != particleListIterator)
+	{
+		ParticleList::iterator iteratorToErase = particleListIterator++;
+
+		UniquePtr<ParticleBase> particlePtr = std::move(*iteratorToErase);
+
+		m_particles.erase(iteratorToErase);
+
+		m_pInnerSphere->ReceiveParticleFromOuter(particlePtr);
+	}
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void ScalingSphereBase::DonateParticlesToOuter()
+{
+	assert(nullptr != m_pOuterSphere);
+
+	ParticleList::iterator particleListIterator = m_particles.begin();
+
+	const bool isOuterSphereAttachedToSameHost = (m_pOuterSphere->GetHostParticle() == m_pHostParticle);
+
+	while (m_particles.end() != particleListIterator)
+	{
+		ParticleList::iterator iteratorToErase = particleListIterator++;
+
+		UniquePtr<ParticleBase> particlePtr = std::move(*iteratorToErase);
+
+		m_particles.erase(iteratorToErase);
+
+		if (isOuterSphereAttachedToSameHost)
+			m_pOuterSphere->ReceiveParticleFromInner(particlePtr);
+		else
+			m_pOuterSphere->ReceiveParticleFromEscape(particlePtr);
+	}
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

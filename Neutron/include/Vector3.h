@@ -16,24 +16,6 @@ template<typename T>
 class TVector3
 {
 public:
-	constexpr TVector3();
-	constexpr TVector3(T v);
-	constexpr TVector3(T x, T y, T z);
-	constexpr TVector3(TVector3 const& rhs);
-	template<typename U> constexpr TVector3(TVector3<U> const& rhs);
-
-	/// <returns> (0, 0, 0) </returns>
-	static constexpr TVector3 const& Zero();
-
-	/// <returns> (1, 0, 0) </returns>
-	static constexpr TVector3 const& X1();
-
-	/// <returns> (0, 1, 0) </returns>
-	static constexpr TVector3 const& Y1();
-
-	/// <returns> (0, 0, 1) </returns>
-	static constexpr TVector3 const& Z1();
-
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
 	/// <param name="direction"> Storage for the direction of the computed cross product. </param>
@@ -49,6 +31,12 @@ public:
 	/// Handles floating point error which can result in a dot product being greater than 1 for approximately-parallel unit vectors.
 	/// </summary>
 	static T AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs);
+
+	constexpr TVector3();
+	constexpr TVector3(T v);
+	constexpr TVector3(T x, T y, T z);
+	constexpr TVector3(TVector3 const& rhs);
+	template<typename U> constexpr TVector3(TVector3<U> const& rhs);
 
 	/// <returns> The X-component. </returns>
 	T X() const;
@@ -102,11 +90,64 @@ public:
 	TVector3 & operator*=(const T scalar);
 	TVector3 & operator/=(const T scalar);
 
-	inline static constexpr ConstString FORMAT_STRING = "{} {} {}";
+	static const TVector3				ZERO;
+	static const TVector3				X1;
+	static const TVector3				Y1;
+	static const TVector3				Z1;
+
+	inline static constexpr ConstString	FORMAT_STRING = "{} {} {}";
 
 private:
-	T	m_x, m_y, m_z;
+	T									m_x, m_y, m_z;
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T> const TVector3<T>	TVector3<T>::ZERO	= { T(0) };
+template<typename T> const TVector3<T>	TVector3<T>::X1		= { T(1), T(0), T(0) };
+template<typename T> const TVector3<T>	TVector3<T>::Y1		= { T(0), T(1), T(0) };
+template<typename T> const TVector3<T>	TVector3<T>::Z1		= { T(0), T(0), T(1) };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline void TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction)
+{
+	T lhsMagnitude = Maths::Sqrt<T>(lhs.SqareMagnitude());
+	T rhsMagnitude = Maths::Sqrt<T>(rhs.SqareMagnitude());
+
+	TVector3 lhsNormalized = lhs / lhsMagnitude;
+	TVector3 rhsNormalized = rhs / rhsMagnitude;
+
+	direction = lhsNormalized.Cross(rhsNormalized).Normalize();
+
+	T magnitudeProduct = lhsMagnitude * rhsMagnitude;
+
+	T cosAngle = ((lhs.m_x * rhs.m_x) + (lhs.m_y * rhs.m_y) + (lhs.m_z * rhs.m_z)) / magnitudeProduct;
+
+	T sinAngle = Maths::Sqrt<T>(static_cast<T>(1) - (cosAngle * cosAngle)); // Trig. ident. 1 = sin^2(a) + cos^2(a)
+
+	magnitude = magnitudeProduct * sinAngle;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline bool TVector3<T>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
+{
+	return ((static_cast<T>(1) - tolerance) < lhs.Dot(rhs));
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline T TVector3<T>::AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs)
+{
+	assert(T(1) == lhs.SqareMagnitude());
+	assert(T(1) == rhs.SqareMagnitude());
+
+	return std::acosf(std::clamp(lhs.Dot(rhs), T(-1), T(1))); // Clamp in case of precision error.
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
@@ -157,87 +198,6 @@ inline constexpr TVector3<T>::TVector3(TVector3<U> const& rhs) :
 	m_y(static_cast<T>(rhs.m_y)),
 	m_z(static_cast<T>(rhs.m_z))
 {
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T> const& TVector3<T>::Zero()
-{
-	static constexpr TVector3 ZERO(0.f);
-
-	return ZERO;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T> const& TVector3<T>::X1()
-{
-	static constexpr TVector3 X1(1.f, 0.f, 0.f);
-
-	return X1;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T> const& TVector3<T>::Y1()
-{
-	static constexpr TVector3 Y1(0.f, 1.f, 0.f);
-
-	return Y1;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T> const& TVector3<T>::Z1()
-{
-	static constexpr TVector3 Z1(0.f, 0.f, 1.f);
-
-	return Z1;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline void TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction)
-{
-	T lhsMagnitude = Maths::Sqrt<T>(lhs.SqareMagnitude());
-	T rhsMagnitude = Maths::Sqrt<T>(rhs.SqareMagnitude());
-
-	TVector3 lhsNormalized = lhs / lhsMagnitude;
-	TVector3 rhsNormalized = rhs / rhsMagnitude;
-
-	direction = lhsNormalized.Cross(rhsNormalized).Normalize();
-
-	T magnitudeProduct = lhsMagnitude * rhsMagnitude;
-
-	T cosAngle = ((lhs.m_x * rhs.m_x) + (lhs.m_y * rhs.m_y) + (lhs.m_z * rhs.m_z)) / magnitudeProduct;
-
-	T sinAngle = Maths::Sqrt<T>(static_cast<T>(1) - (cosAngle * cosAngle)); // Trig. ident. 1 = sin^2(a) + cos^2(a)
-
-	magnitude = magnitudeProduct * sinAngle;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline bool TVector3<T>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
-{
-	return ((static_cast<T>(1) - tolerance) < lhs.Dot(rhs));
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline T TVector3<T>::AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs)
-{
-	assert(T(1) == lhs.SqareMagnitude());
-	assert(T(1) == rhs.SqareMagnitude());
-
-	return std::acosf(std::clamp(lhs.Dot(rhs), T(-1), T(1))); // Clamp in case of precision error.
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

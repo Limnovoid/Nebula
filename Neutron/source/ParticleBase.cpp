@@ -19,32 +19,36 @@ ParticleBase::~ParticleBase()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * ParticleBase::AddScalingSphere(UniquePtr<ScalingSphereBase> &&scalingSphereBasePtr)
+ScalingSphereBase * ParticleBase::AddScalingSphere(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr)
 {
-	ScalingSphereBase * pScalingSphereBase = m_attachedSpheres.Insert(std::forward<UniquePtr<ScalingSphereBase>>(scalingSphereBasePtr))->get();
+	assert(scalingSphereBasePtr->GetHostParticle() == this);
 
-	pScalingSphereBase->Initialize();
+	const ScalingSphereList::Iterator scalingSphereIterator = m_attachedSpheres.Insert(std::forward<UniquePtr<ScalingSphereBase>>(scalingSphereBasePtr));
 
-	return pScalingSphereBase;
+	(*scalingSphereIterator)->Initialize();
+
+	return scalingSphereIterator->get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase)
+UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles)
 {
-	UniquePtr<ScalingSphereBase> scalingSpherePtr = nullptr;
+	assert(pScalingSphereBase->GetHostParticle() == this);
 
 	ScalingSphereList::Iterator scalingSphereIter = m_attachedSpheres.Find(pScalingSphereBase);
 
-	if (m_attachedSpheres.End() != scalingSphereIter)
-	{
-		ScalingSphereBase *const pOuterSphere = (m_attachedSpheres.Begin() == scalingSphereIter) ? nullptr : (*scalingSphereIter)->GetOuterSphere();
+	if (m_attachedSpheres.End() == scalingSphereIter)
+		return nullptr;
 
-		scalingSpherePtr = m_attachedSpheres.Remove(scalingSphereIter);
+	pScalingSphereBase->HandleBeingRemoved(shouldDonateParticles);
 
-		if (nullptr != pOuterSphere)
-			pOuterSphere->HandleNewInnerSphere();
-	}
+	ScalingSphereBase *const pOuterSphereOnHostParticle = (m_attachedSpheres.Begin() == scalingSphereIter) ? nullptr : (*scalingSphereIter)->GetOuterSphere();
+
+	UniquePtr<ScalingSphereBase> scalingSpherePtr = m_attachedSpheres.Remove(scalingSphereIter);
+
+	if (nullptr != pOuterSphereOnHostParticle)
+		pOuterSphereOnHostParticle->HandleNewInnerSphere();
 
 	return scalingSpherePtr;
 }
@@ -53,10 +57,14 @@ UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase
 
 Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius)
 {
-	assert(this == pScalingSphereBase->GetHostParticle());
+	assert(pScalingSphereBase->GetHostParticle() == this);
+	assert(GetSphereOfInfluence() != pScalingSphereBase);
 
-	if (GetSphereOfInfluence() == pScalingSphereBase)
-		return RESULT_CODE_INVALID_PARAMETER;
+	if ((pScalingSphereBase->IsInfluencing() && (GetSphereOfInfluence()->GetTrueRadius() < trueRadius)) ||
+		(IsInfluencing() && !pScalingSphereBase->IsInfluencing() && (trueRadius < GetSphereOfInfluence()->GetTrueRadius())))
+	{
+		return RESULT_CODE_INVALID_PARAMETER; // Changing whether the ScalingSphere is influencing is not currently supported.
+	}
 
 	const float previousTrueRadius = pScalingSphereBase->GetTrueRadius();
 	ScalingSphereBase *const pPreviousInnerSphere = pScalingSphereBase->GetInnerSphere();
@@ -70,6 +78,7 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 	const bool hasScalingSphereOrderChanged = m_attachedSpheres.Sort(scalingSphereIter);
 	assert(scalingSphereIter->get() == pScalingSphereBase);
+	assert(pScalingSphereBase->IsInfluencing() == pScalingSphereBase->GetOuterSphere()->IsInfluencing());
 
 	pScalingSphereBase->Initialize();
 
@@ -93,6 +102,26 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 	}
 
 	return RESULT_CODE_SUCCESS;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+Result ParticleBase::ResizeSphereOfInfluence(ScalingSphereBase * pSphereOfInfluenceBase, const float trueRadius)
+{
+	assert(GetSphereOfInfluence() == pSphereOfInfluenceBase);
+
+	assert(false); // TODO...
+
+	return ResizeScalingSphereImpl(pSphereOfInfluenceBase, trueRadius);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+Result ParticleBase::ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, const float trueRadius)
+{
+	assert(false); // TODO...
+
+	return RESULT_CODE_NOT_IMPLEMENTED;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

@@ -127,8 +127,8 @@ public:
 	/// <param name="trueRadius"> The true radius (meters). </param>
 	/// <returns> Reference to the created space. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Absolute radius);
-	ScalingSphereBase * CreateScalingSphere(ScalingSphereBase * pOuterSphere, const Relative radius);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius);
+	ScalingSphereBase * CreateScalingSphere(ScalingSphereBase * pOuterSphere, const Length::Relative radius);
 
 	/// <summary> Create a particle. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -138,7 +138,7 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, Vector3 const& velocity, bool isInfluencing);
+	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, Vector3 const& velocity, const bool isInfluencing);
 
 	/// <summary> Create a particle with circular orbit. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -148,7 +148,7 @@ public:
 	/// <param name="isInfluencing"> Whether the particle has a sphere of influence (an influencing scaled space). </param>
 	/// <returns> Reference to the created particle. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, bool isInfluencing);
+	ParticleBase * CreateParticle(ScalingSphereBase * pHostSphere, float mass, Vector3 const& position, const bool isInfluencing);
 
 	/// <summary> Destroy a particle in this orbital system. </summary>
 	/// <param name="pParticleBase"> Pointer to the particle to be destroyed. </param>
@@ -156,8 +156,13 @@ public:
 
 	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
 
+	/// <summary> Remove the scaling sphere from its host Particle and destroy it. </summary>
+	/// <param name="pScalingSphereBase"> Pointer to the ScalingSphere to destroy. </param>
+	/// <param name="shouldDonateParticles"> Whether to donate the Sphere's Particles to its neighbouring Spheres. Absolute Particle positions/velocities are preserved. </param>
+	void DestroyScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles);
+
 private:
-	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Absolute radius, bool isInfluencing);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius, const bool isInfluencing);
 
 	UniquePtr<HostParticle>	m_pHostParticle;	// Pointer to the interface of the host particle around which all other particles in the system orbit.
 };
@@ -223,14 +228,14 @@ inline ScalingSphereBase * OrbitalSystem::HostParticle::GetSphereOfInfluence() c
 
 inline Vector3 const& OrbitalSystem::HostParticle::GetPosition() const
 {
-	return Vector3::Zero();
+	return Vector3::ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline Vector3 const& OrbitalSystem::HostParticle::GetVelocity() const
 {
-	return Vector3::Zero();
+	return Vector3::ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -259,14 +264,14 @@ inline ParticleBase const* OrbitalSystem::InfluencingSpace::GetPrimary() const
 
 inline Vector3 const& OrbitalSystem::InfluencingSpace::GetPrimaryPosition() const
 {
-	return Vector3::Zero();
+	return Vector3::ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline Vector3 const& OrbitalSystem::InfluencingSpace::GetPrimaryVelocity() const
 {
-	return Vector3::Zero();
+	return Vector3::ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

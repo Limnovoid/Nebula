@@ -5,6 +5,9 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
+namespace Length // --------------------------------------------------------------------------------------------------------------
+{
+
 Absolute::Absolute(const Relative relative, ScalingSphereBase const& scalingSphereBase) :
 	m_value(relative.ToAbsoluteValue(scalingSphereBase))
 {
@@ -59,5 +62,7 @@ void Relative::Set(const Absolute relative, ScalingSphereBase const& scalingSphe
 {
 	m_value = relative.ToRelativeValue(scalingSphereBase);
 }
+
+} // namespace Length -------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

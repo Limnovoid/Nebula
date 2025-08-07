@@ -16,7 +16,6 @@ class ParticleBase;
 
 class ScalingSphereBase
 {
-	friend class OrbitalSystem;
 	friend class ScalingSphereList;
 
 public:
@@ -50,11 +49,15 @@ public:
 	virtual Vector3 const& GetPrimaryPosition() const = 0;
 	virtual Vector3 const& GetPrimaryVelocity() const = 0;
 
+	ParticleBase * AddParticle(UniquePtr<ParticleBase> && particleBasePtr);
+	UniquePtr<ParticleBase> RemoveParticle(ParticleBase * pParticleBase);
+
 	float CircularOrbitSpeed(float orbitRadius) const;
 
 	void HandleResized(const float previousTrueRadius);
 	void HandleNewInnerSphere();
 	void HandleParticleSphereResized(ScalingSphereBase * pScalingSphere);
+	void HandleBeingRemoved(const bool shouldDonateParticles);
 
 	/// <summary> If the given Particle has escaped this Sphere, transfer ownership to the appropriate Sphere. </summary>
 	/// <param name="pParticle"> The Particle which may have escaped this Sphere. </param>
@@ -72,10 +75,13 @@ protected:
 	bool HandleParticleMaybeCaptured(ParticleList::iterator particleListIterator, ScalingSphereBase * pParticleScalingSphere);
 
 	// Family of functions to receive ownership of Particles from adjacent Spheres.
-	void ReceiveParticleFromInner(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle ascending from the inner Sphere.
-	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle descending from the outer Sphere on the same host Particle.
-	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> && particlePtr);		// Receive Particle leaving the first Sphere of another Particle in this Sphere.
-	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> && particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
+	void ReceiveParticleFromInner(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle ascending from the inner Sphere.
+	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle descending from the outer Sphere on the same host Particle.
+	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle leaving the first Sphere of another Particle in this Sphere.
+	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
+
+	void DonateParticlesToInner();
+	void DonateParticlesToOuter();
 
 	ParticleBase *				m_pHostParticle;
 	ParticleList				m_particles;

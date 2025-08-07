@@ -32,24 +32,27 @@ public:
 	virtual void Rescale(const float rescaleFactor) = 0;
 	virtual void Initialize() = 0;
 
-	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
-	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase);
-	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
-
-	ScalingSphereBase * GetHostSphere() const;
-	ScalingSphereBase * GetFirstSphere() const;
-	ScalingSphereList const& GetScalingSphereList() const;
-	float GetMass() const;
-
 	virtual bool IsInfluencing() const = 0;
 	virtual ScalingSphereBase * GetSphereOfInfluence() const = 0;
 	virtual Vector3 const& GetPosition() const = 0;
 	virtual Vector3 const& GetVelocity() const = 0;
 	virtual class Orbit const* GetOrbit() const = 0;
 
+	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
+	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles);
+	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
+	Result ResizeSphereOfInfluence(ScalingSphereBase * pSphereOfInfluenceBase, const float trueRadius);
+
+	ScalingSphereBase * GetHostSphere() const;
+	ScalingSphereBase * GetFirstSphere() const;
+	ScalingSphereList const& GetScalingSphereList() const;
+	float GetMass() const;
+
 	Uuid						m_uuid;
 
-protected:
+private:
+	Result ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
+
 	ScalingSphereBase *			m_pHostSphere;		// Pointer to the scaling spheres in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
 	ScalingSphereList			m_attachedSpheres;	// List of pointers to scaling spheres attached to this particle.
 

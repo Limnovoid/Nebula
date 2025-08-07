@@ -28,8 +28,8 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 		[](size_t index) { return Fmt::Format(Vector3::FORMAT_STRING.Get(), Maths::Sqrt((float)index), Maths::Sqrt((float)index), Maths::Sqrt((float)index)); },
 		"Fmt::Format with Vector3 argument", {1, 5});
 
-	testHandler.Assert<Vector3, int>([](int) { return Vector3::Zero(); }, 0, Vector3(0, 0, 0), "Vector3::Zero() is (0 0 0)");
-	testHandler.Assert<bool, int>([](int) { return Vector3::Zero().IsZero(); }, 0, true, "Vector3::Zero().IsZero()");
+	testHandler.Assert<Vector3, int>([](int) { return Vector3::ZERO; }, 0, Vector3(0, 0, 0), "Vector3::ZERO is (0 0 0)");
+	testHandler.Assert<bool, int>([](int) { return Vector3::ZERO.IsZero(); }, 0, true, "Vector3::ZERO.IsZero()");
 
 	testHandler.Assert<Vector3, size_t>([&](size_t index)
 	{
@@ -61,7 +61,7 @@ void Vector3TestScript::RunImpl(TestHandler & testHandler)
 
 		return vector;
 
-	}, TestHandler::FRangeIndex(), [](size_t index) { return Vector3::Zero(); }, "Vector3 operator-=", { 0, 4 });
+	}, TestHandler::FRangeIndex(), [](size_t index) { return Vector3::ZERO; }, "Vector3 operator-=", { 0, 4 });
 
 	testHandler.Assert<Vector3, size_t>([&](size_t index)
 	{
