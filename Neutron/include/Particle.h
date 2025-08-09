@@ -10,7 +10,7 @@ class Particle
 
 public:
 	//OrbitalSystem & GetOrbitalSystem() const;
-	//ScalingSphereBase * GetHostSpace() const;
+	//ScalingSphereBase * GetHostSphere() const;
 	//ScalingSphereList const& GetAttachedSpaces() const;
 	//ScalingSphereBase * GetSpaceOfInfluence() const;
 

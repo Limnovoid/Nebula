@@ -1,6 +1,7 @@
 #ifndef NEUTRON_I_SCALED_SPACE_H
 #define NEUTRON_I_SCALED_SPACE_H
 
+#include "LengthUnits.h"
 #include "Vector3.h"
 #include "Constants.h"
 #include "Uuid.h"
@@ -22,10 +23,10 @@ public:
 	using ParticleList = std::list<UniquePtr<ParticleBase>>;
 
 	/// <summary> Compute the scaled gravitational parameter of a primary with given mass. </summary>
-	/// <param name="trueRadius"> The true radius of the scaled space whose gravitational parameter is being computed. </param>
-	/// <param name="primaryMass"> The mass of the scaled space's primary. </param>
+	/// <param name="absoluteRadius"> The absolute radius of the scaling sphere whose gravitational parameter is being computed. </param>
+	/// <param name="primaryMass"> The mass of the scaling sphere's primary. </param>
 	/// <returns> The scaled gravitational parameter. </returns>
-	static float ComputeScaledGravityParameter(float trueRadius, float primaryMass);
+	static float ComputeScaledGravityParameter(float absoluteRadius, float primaryMass);
 
 	ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius);
 	virtual ~ScalingSphereBase() = default;

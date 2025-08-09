@@ -22,25 +22,7 @@ class OrbitalSystem
 	friend class OrbitalSystemTestScript;
 	friend class ScalingSphereListTestScript;
 
-	class HostParticle : public ParticleBase
-	{
-	public:
-		HostParticle(float hostMass);
-		virtual ~HostParticle() override = default;
-
-		virtual void SetPosition(Vector3 const& position) override;
-		virtual void SetVelocity(Vector3 const& velocity) override;
-		virtual void Rescale(const float rescaleFactor) override;
-		virtual void Initialize() override;
-
-		virtual bool IsInfluencing() const override;
-		virtual ScalingSphereBase * GetSphereOfInfluence() const override;
-		virtual Vector3 const& GetPosition() const override;
-		virtual Vector3 const& GetVelocity() const override;
-		virtual Orbit const* GetOrbit() const override;
-	};
-
-	class InfluencingSpace : public ScalingSphereBase
+	class InfluencingSphere : public ScalingSphereBase
 	{
 	public:
 		using ScalingSphereBase::ScalingSphereBase;
@@ -70,6 +52,27 @@ class OrbitalSystem
 		ParticleBase *	m_pPrimary;			// Pointer to the local primary.
 		Vector3			m_primaryPosition;	// Locally scaled position of the primary relative to this space.
 		Vector3			m_primaryVelocity;	// Locally scaled velocity of the primary relative to this space.
+	};
+
+	class HostParticle : public ParticleBase
+	{
+	public:
+		HostParticle(const float mass, const Length::Absolute hostSphereAbsoluteRadius);
+		virtual ~HostParticle() override = default;
+
+		virtual void SetPosition(Vector3 const& position) override;
+		virtual void SetVelocity(Vector3 const& velocity) override;
+		virtual void Rescale(const float rescaleFactor) override;
+		virtual void Initialize() override;
+
+		virtual bool IsInfluencing() const override;
+		virtual ScalingSphereBase * GetSphereOfInfluence() const override;
+		virtual Vector3 const& GetPosition() const override;
+		virtual Vector3 const& GetVelocity() const override;
+		virtual Orbit const* GetOrbit() const override;
+
+	private:
+		InfluencingSphere *	m_pHostSphere;
 	};
 
 	class PassiveParticle : public ParticleBase
@@ -112,15 +115,14 @@ class OrbitalSystem
 		virtual Orbit const* GetOrbit() const override;
 
 	private:
-
-		InfluencingSpace *	m_pSphereOfInfluence;
+		InfluencingSphere *	m_pSphereOfInfluence;
 	};
 
 public:
-	OrbitalSystem(float hostMass, float hostSphereTrueRadius);
+	OrbitalSystem(const float hostMass, const Length::Absolute hostSphereAbsoluteRadius);
 
 	ParticleBase * GetHostParticle();
-	ScalingSphereBase * GetHostSpace();
+	ScalingSphereBase * GetHostSphere();
 
 	/// <summary> Create a scaled space. </summary>
 	/// <param name="hostParticle"> The particle to which the new space will be attached. </param>
@@ -176,100 +178,36 @@ inline ParticleBase * OrbitalSystem::GetHostParticle()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScalingSphereBase * OrbitalSystem::GetHostSpace()
+inline ScalingSphereBase * OrbitalSystem::GetHostSphere()
 {
-	return m_pHostParticle->GetScalingSphereList().Front().get();
+	return m_pHostParticle->GetSphereOfInfluence();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void OrbitalSystem::HostParticle::SetPosition(Vector3 const& position)
-{
-	assert(false); // We shouldn't be here!
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline void OrbitalSystem::HostParticle::SetVelocity(Vector3 const& velocity)
-{
-	assert(false); // We shouldn't be here!
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline void OrbitalSystem::HostParticle::Rescale(const float rescaleFactor)
-{
-	// Nothing to do.
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline void OrbitalSystem::HostParticle::Initialize()
-{
-	// Nothing to do.
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline bool OrbitalSystem::HostParticle::IsInfluencing() const
+inline bool OrbitalSystem::InfluencingSphere::IsInfluencing() const
 {
 	return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline ScalingSphereBase * OrbitalSystem::HostParticle::GetSphereOfInfluence() const
-{
-	return nullptr;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Vector3 const& OrbitalSystem::HostParticle::GetPosition() const
-{
-	return Vector3::ZERO;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Vector3 const& OrbitalSystem::HostParticle::GetVelocity() const
-{
-	return Vector3::ZERO;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Orbit const* OrbitalSystem::HostParticle::GetOrbit() const
-{
-	return nullptr;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline bool OrbitalSystem::InfluencingSpace::IsInfluencing() const
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline ParticleBase const* OrbitalSystem::InfluencingSpace::GetPrimary() const
+inline ParticleBase const* OrbitalSystem::InfluencingSphere::GetPrimary() const
 {
 	return m_pHostParticle;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline Vector3 const& OrbitalSystem::InfluencingSpace::GetPrimaryPosition() const
+inline Vector3 const& OrbitalSystem::InfluencingSphere::GetPrimaryPosition() const
 {
 	return Vector3::ZERO;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline Vector3 const& OrbitalSystem::InfluencingSpace::GetPrimaryVelocity() const
+inline Vector3 const& OrbitalSystem::InfluencingSphere::GetPrimaryVelocity() const
 {
 	return Vector3::ZERO;
 }
@@ -363,6 +301,63 @@ inline void OrbitalSystem::NonInfluencingSpace::ComputePrimaryKinetics(ScalingSp
 
 		pScaledSpace = pHostSpace;
 	}
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void OrbitalSystem::HostParticle::SetPosition(Vector3 const& position)
+{
+	assert(false); // We shouldn't be here!
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void OrbitalSystem::HostParticle::SetVelocity(Vector3 const& velocity)
+{
+	assert(false); // We shouldn't be here!
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline void OrbitalSystem::HostParticle::Rescale(const float rescaleFactor)
+{
+	// Nothing to do.
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline bool OrbitalSystem::HostParticle::IsInfluencing() const
+{
+	return true;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline ScalingSphereBase * OrbitalSystem::HostParticle::GetSphereOfInfluence() const
+{
+	return static_cast<ScalingSphereBase *>(m_pHostSphere);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Vector3 const& OrbitalSystem::HostParticle::GetPosition() const
+{
+	return Vector3::ZERO;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Vector3 const& OrbitalSystem::HostParticle::GetVelocity() const
+{
+	return Vector3::ZERO;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Orbit const* OrbitalSystem::HostParticle::GetOrbit() const
+{
+	return nullptr;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

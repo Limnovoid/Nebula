@@ -78,7 +78,8 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 	const bool hasScalingSphereOrderChanged = m_attachedSpheres.Sort(scalingSphereIter);
 	assert(scalingSphereIter->get() == pScalingSphereBase);
-	assert(pScalingSphereBase->IsInfluencing() == pScalingSphereBase->GetOuterSphere()->IsInfluencing());
+	assert(pScalingSphereBase->IsInfluencing() ? ((GetFirstSphere() == pScalingSphereBase) || pScalingSphereBase->GetOuterSphere()->IsInfluencing()) :
+		(!IsInfluencing() || (GetSphereOfInfluence() == pScalingSphereBase->GetInnerSphere()) || !pScalingSphereBase->GetInnerSphere()->IsInfluencing()));
 
 	pScalingSphereBase->Initialize();
 
