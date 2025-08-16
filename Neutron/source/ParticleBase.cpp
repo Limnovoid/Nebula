@@ -47,7 +47,7 @@ UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase
 
 	UniquePtr<ScalingSphereBase> scalingSpherePtr = m_attachedSpheres.Remove(scalingSphereIter);
 
-	if (nullptr != pOuterSphereOnHostParticle)
+	if ((nullptr != pOuterSphereOnHostParticle) && (nullptr != pOuterSphereOnHostParticle->GetInnerSphere()))
 		pOuterSphereOnHostParticle->HandleNewInnerSphere();
 
 	return scalingSpherePtr;

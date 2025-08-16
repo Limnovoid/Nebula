@@ -76,10 +76,10 @@ protected:
 	bool HandleParticleMaybeCaptured(ParticleList::iterator particleListIterator, ScalingSphereBase * pParticleScalingSphere);
 
 	// Family of functions to receive ownership of Particles from adjacent Spheres.
-	void ReceiveParticleFromInner(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle ascending from the inner Sphere.
-	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle descending from the outer Sphere on the same host Particle.
-	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle leaving the first Sphere of another Particle in this Sphere.
-	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> & particlePtr);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
+	void ReceiveParticleFromInner(UniquePtr<ParticleBase> & particlePtr, const bool shouldHandleEscape = true);		// Receive Particle ascending from the inner Sphere.
+	void ReceiveParticleFromOuter(UniquePtr<ParticleBase> & particlePtr, const bool shouldHandleEscape = true);		// Receive Particle descending from the outer Sphere on the same host Particle.
+	void ReceiveParticleFromEscape(UniquePtr<ParticleBase> & particlePtr, const bool shouldHandleEscape = true);	// Receive Particle leaving the first Sphere of another Particle in this Sphere.
+	void ReceiveParticleFromCapture(UniquePtr<ParticleBase> & particlePtr, const bool shouldHandleEscape = true);	// Receive Particle entering this Sphere from the host Particle's host Sphere.
 
 	void DonateParticlesToInner();
 	void DonateParticlesToOuter();

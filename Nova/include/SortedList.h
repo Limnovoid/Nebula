@@ -231,7 +231,7 @@ SortedList<T, TPredicate, TContainer>::ConstIterator SortedList<T, TPredicate, T
 template<typename T, typename TPredicate, template <typename> class TContainer>
 bool SortedList<T, TPredicate, TContainer>::Sort(Iterator &pos)
 {
-	Iterator newPos = m_container.end();
+	Iterator newPos = pos;
 
 	if (m_container.end() != pos)
 	{
@@ -242,7 +242,7 @@ bool SortedList<T, TPredicate, TContainer>::Sort(Iterator &pos)
 			newPos = FindSortedPosForwards(*pos, nextPos);
 	}
 
-	if ((m_container.end() == newPos) && (pos != m_container.begin()))
+	if ((newPos == pos) && (pos != m_container.begin()))
 	{
 		Iterator prevPos = pos;
 		--prevPos;
@@ -251,7 +251,7 @@ bool SortedList<T, TPredicate, TContainer>::Sort(Iterator &pos)
 			newPos = FindSortedPosBackwards(*pos, prevPos);
 	}
 
-	if (m_container.end() == newPos)
+	if (newPos == pos)
 		return false; // Item did not move - nothing to do.
 
 	newPos = m_container.emplace(newPos, std::move(*pos));

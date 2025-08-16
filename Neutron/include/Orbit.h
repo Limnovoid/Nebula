@@ -86,6 +86,7 @@ public:
 	Orbit();
 
 	Section & GetCurrentSection();
+	Section const& GetCurrentSection() const;
 
 private:
 	using SectionList = std::deque<UniquePtr<Section>>;
@@ -98,6 +99,15 @@ private:
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline Orbit::Section & Orbit::GetCurrentSection()
+{
+	assert(m_currentSectionIndex < m_sections.size());
+
+	return *m_sections[m_currentSectionIndex];
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline Orbit::Section const& Orbit::GetCurrentSection() const
 {
 	assert(m_currentSectionIndex < m_sections.size());
 

@@ -278,28 +278,27 @@ inline ParticleBase * OrbitalSystem::NonInfluencingSpace::FindPrimary(ScalingSph
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void OrbitalSystem::NonInfluencingSpace::ComputePrimaryKinetics(ScalingSphereBase const* pScaledSpace, Vector3 & position,
+inline void OrbitalSystem::NonInfluencingSpace::ComputePrimaryKinetics(ScalingSphereBase const* pScalingSphere, Vector3 & position,
 	Vector3 & velocity)
 {
-	assert(nullptr != pScaledSpace);
+	assert(nullptr != pScalingSphere);
 
 	position = 0.f;
 	velocity = 0.f;
 
 	float scaleFactor = 1.f;
-	ParticleBase const* pHostParticle = pScaledSpace->GetHostParticle();
 
-	while (!pScaledSpace->IsInfluencing())
+	while (!pScalingSphere->IsInfluencing())
 	{
-		ParticleBase const*const pHostParticle = pScaledSpace->GetHostParticle();
-		ScalingSphereBase const*const pHostSpace = pHostParticle->GetHostSphere();
+		ParticleBase const*const pHostParticle = pScalingSphere->GetHostParticle();
+		ScalingSphereBase const*const pHostSphere = pHostParticle->GetHostSphere();
 
-		scaleFactor *= (pHostSpace->GetTrueRadius() / pScaledSpace->GetTrueRadius());
+		scaleFactor *= (pHostSphere->GetTrueRadius() / pScalingSphere->GetTrueRadius());
 
 		position -= pHostParticle->GetPosition() * scaleFactor;
 		velocity -= pHostParticle->GetVelocity() * scaleFactor;
 
-		pScaledSpace = pHostSpace;
+		pScalingSphere = pHostSphere;
 	}
 }
 

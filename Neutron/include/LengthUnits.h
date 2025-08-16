@@ -28,12 +28,12 @@ public:
 	void Set(const float value);
 	void Set(const Relative relative, ScalingSphereBase const& scalingSphereBase);
 
-	operator float() const;
+	constexpr operator float() const;
 
-	const Absolute operator+(const float rhs) const;
-	const Absolute operator-(const float rhs) const;
-	const Absolute operator*(const float rhs) const;
-	const Absolute operator/(const float rhs) const;
+	constexpr Absolute operator+(const float rhs) const;
+	constexpr Absolute operator-(const float rhs) const;
+	constexpr Absolute operator*(const float rhs) const;
+	constexpr Absolute operator/(const float rhs) const;
 
 	Absolute operator+=(const float rhs);
 	Absolute operator-=(const float rhs);
@@ -67,35 +67,35 @@ inline void Absolute::Set(const float value)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline Absolute::operator float() const
+inline constexpr Absolute::operator float() const
 {
 	return m_value;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline const Absolute Absolute::operator+(const float rhs) const
+inline constexpr Absolute Absolute::operator+(const float rhs) const
 {
 	return Absolute(m_value + rhs);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline const Absolute Absolute::operator-(const float rhs) const
+inline constexpr Absolute Absolute::operator-(const float rhs) const
 {
 	return Absolute(m_value - rhs);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline const Absolute Absolute::operator*(const float rhs) const
+inline constexpr Absolute Absolute::operator*(const float rhs) const
 {
 	return Absolute(m_value * rhs);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline const Absolute Absolute::operator/(const float rhs) const
+inline constexpr Absolute Absolute::operator/(const float rhs) const
 {
 	return Absolute(m_value / rhs);
 }
