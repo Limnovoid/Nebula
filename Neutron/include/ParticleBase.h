@@ -3,9 +3,8 @@
 
 #include "NebulaTypes.h"
 #include "ScalingSphereList.h"
-#include "Vector3.h"
 #include "Uuid.h"
-#include "NeedsInitializationHelper.h"
+#include "Types.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -41,7 +40,7 @@ public:
 	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
 	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles);
 	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
-	Result ResizeSphereOfInfluence(ScalingSphereBase * pSphereOfInfluenceBase, const float trueRadius);
+	Result ResizeSphereOfInfluence(const float trueRadius);
 
 	ScalingSphereBase * GetHostSphere() const;
 	ScalingSphereBase * GetFirstSphere() const;

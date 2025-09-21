@@ -1,11 +1,9 @@
 #ifndef NEUTRON_I_SCALED_SPACE_H
 #define NEUTRON_I_SCALED_SPACE_H
 
-#include "LengthUnits.h"
-#include "Vector3.h"
 #include "Constants.h"
 #include "Uuid.h"
-#include "NeedsInitializationHelper.h"
+#include "Types.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {

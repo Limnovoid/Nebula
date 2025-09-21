@@ -8,59 +8,59 @@ namespace Neutron // -----------------------------------------------------------
 namespace Length // --------------------------------------------------------------------------------------------------------------
 {
 
-Absolute::Absolute(const Relative relative, ScalingSphereBase const& scalingSphereBase) :
-	m_value(relative.ToAbsoluteValue(scalingSphereBase))
+Absolute::Absolute(Relative const& relative, ScalingSphereBase const& scalingSphereBase) :
+	Base(relative.ToAbsoluteValue(scalingSphereBase))
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Relative Absolute::ToRelative(ScalingSphereBase const& scalingSphereBase) const
+const Relative Absolute::ToRelative(ScalingSphereBase const& scalingSphereBase) const
 {
 	return Relative(ToRelativeValue(scalingSphereBase));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-float Absolute::ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const
+const float Absolute::ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const
 {
-	return m_value / scalingSphereBase.GetTrueRadius();
+	return Get() / scalingSphereBase.GetTrueRadius();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void Absolute::Set(const Relative relative, ScalingSphereBase const& scalingSphereBase)
+void Absolute::Set(Relative const& relative, ScalingSphereBase const& scalingSphereBase)
 {
-	m_value = relative.ToAbsoluteValue(scalingSphereBase);
+	Base::Set(relative.ToAbsoluteValue(scalingSphereBase));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Relative::Relative(const Absolute absolute, ScalingSphereBase const& scalingSphereBase) :
-	m_value(absolute.ToRelativeValue(scalingSphereBase))
+Relative::Relative(Absolute const& absolute, ScalingSphereBase const& scalingSphereBase) :
+	Base(absolute.ToRelativeValue(scalingSphereBase))
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Absolute Relative::ToAbsolute(ScalingSphereBase const& scalingSphereBase) const
+const Absolute Relative::ToAbsolute(ScalingSphereBase const& scalingSphereBase) const
 {
 	return Absolute(ToAbsoluteValue(scalingSphereBase));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-float Relative::ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const
+const float Relative::ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const
 {
-	return m_value * scalingSphereBase.GetTrueRadius();
+	return Get() * scalingSphereBase.GetTrueRadius();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void Relative::Set(const Absolute relative, ScalingSphereBase const& scalingSphereBase)
+void Relative::Set(Absolute const& relative, ScalingSphereBase const& scalingSphereBase)
 {
-	m_value = relative.ToRelativeValue(scalingSphereBase);
+	Base::Set(relative.ToRelativeValue(scalingSphereBase));
 }
 
 } // namespace Length -------------------------------------------------------------------------------------------------------------

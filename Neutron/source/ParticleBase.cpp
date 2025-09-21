@@ -107,13 +107,15 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result ParticleBase::ResizeSphereOfInfluence(ScalingSphereBase * pSphereOfInfluenceBase, const float trueRadius)
+Result ParticleBase::ResizeSphereOfInfluence(const float trueRadius)
 {
-	assert(GetSphereOfInfluence() == pSphereOfInfluenceBase);
+	assert(IsInfluencing());
+
+	ScalingSphereBase * pScalingSphereBase = GetSphereOfInfluence();
 
 	assert(false); // TODO...
 
-	return ResizeScalingSphereImpl(pSphereOfInfluenceBase, trueRadius);
+	return ResizeScalingSphereImpl(pScalingSphereBase, trueRadius);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

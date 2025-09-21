@@ -233,18 +233,18 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(hostSpace.GetTrueRadius(), HOST_SPACE_RADIUS.Get(), "Host space true radius");
 	testHandler.Assert(hostSpace.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Host space's host particle");
 	testHandler.Assert(hostSpace.GetGravityParameter(),
-		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS, HOST_MASS), "Host space gravity parameter");
+		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS.Get(), HOST_MASS), "Host space gravity parameter");
 	testHandler.Assert(hostSpace.IsInfluencing(), true, "Host space is influencing");
 	testHandler.Assert(hostSpace.GetPrimary()->m_uuid, hostParticle.m_uuid, "Host space's primary");
 	testHandler.Assert(hostSpace.GetPrimaryPosition(), Vector3::ZERO, "Host space primary position");
 	testHandler.Assert(hostSpace.GetPrimaryVelocity(), Vector3::ZERO, "Host space primary velocity");
 
-	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS / 10.f);
+	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS.Get() / 10.f);
 
 	testHandler.Assert(scaledSpace2.GetRadius(), 0.1f, "Scaled space 2 radius");
 	testHandler.Assert(scaledSpace2.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 2 host particle");
 	testHandler.Assert(scaledSpace2.GetGravityParameter(),
-		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS / 10.f, HOST_MASS), "Scaled space 2 gravity parameter");
+		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS.Get() / 10.f, HOST_MASS), "Scaled space 2 gravity parameter");
 	testHandler.Assert(scaledSpace2.IsInfluencing(), true, "Scaled space 2 is influencing");
 	testHandler.Assert(scaledSpace2.GetPrimary()->m_uuid, hostParticle.m_uuid, "Scaled space 2 primary");
 	testHandler.Assert(scaledSpace2.GetPrimaryPosition(), Vector3::ZERO, "Scaled space 2 primary position");
@@ -255,13 +255,13 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(scaledSpace3.GetRadius(), 0.1f, "Scaled space 3 radius");
 	testHandler.Assert(scaledSpace3.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 3 host particle");
 	testHandler.Assert(scaledSpace3.GetGravityParameter(),
-		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS / 100.f, HOST_MASS), "Scaled space 3 gravity parameter");
+		ScalingSphereBase::ComputeScaledGravityParameter(HOST_SPACE_RADIUS.Get() / 100.f, HOST_MASS), "Scaled space 3 gravity parameter");
 	testHandler.Assert(scaledSpace3.IsInfluencing(), true, "Scaled space 3 is influencing");
 	testHandler.Assert(scaledSpace3.GetPrimary()->m_uuid, hostParticle.m_uuid, "Scaled space 3 primary");
 	testHandler.Assert(scaledSpace3.GetPrimaryPosition(), Vector3::ZERO, "Scaled space 3 primary position");
 	testHandler.Assert(scaledSpace3.GetPrimaryVelocity(), Vector3::ZERO, "Scaled space 3 primary velocity");
 
-	testHandler.Assert(orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS * 0.5f) == nullptr, true, "Invalid radius fails ScalingSphere creation");
+	testHandler.Assert(orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS.Get() * 0.5f) == nullptr, true, "Invalid radius fails ScalingSphere creation");
 
 	/*try
 	{
@@ -273,7 +273,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 		isException = true;
 	}*/
 
-	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&scaledSpace2, 0.5f * HOST_SPACE_RADIUS),
+	testHandler.Assert(orbitalSystem.ResizeScalingSphere(&scaledSpace2, 0.5f * HOST_SPACE_RADIUS.Get()),
 		Result(RESULT_CODE_SUCCESS), "ResizeScalingSphere succeeds");
 
 	ScalingSphereBase & smallestSpace = *hostParticle.GetScalingSphereList().Back();
@@ -305,7 +305,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(particle.GetScalingSphereList().Size(), 0ull, "PassiveParticle attached spaces");
 
 	const Length::Relative particleScaledSpaceRadius(0.05f);
-	const Length::Absolute particleScaledSpaceAbsoluteRadius = HOST_SPACE_RADIUS * particleScaledSpaceRadius;
+	const Length::Absolute particleScaledSpaceAbsoluteRadius = particleScaledSpaceRadius.ToAbsolute(hostSpace);
 
 	ScalingSphereBase & particleScaledSpace = *orbitalSystem.CreateScalingSphere(&particle, particleScaledSpaceAbsoluteRadius);
 
@@ -695,14 +695,35 @@ void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 		return true;
 	}, true, true, "Remove S1");
 
-	using AbsVector3 = TVector3<Length::Absolute>;
-
 	const AbsVector3 absZero = AbsVector3::ZERO;
 	const AbsVector3 absX1 = AbsVector3::X1;
 	const AbsVector3 absY1 = AbsVector3::Y1;
 	const AbsVector3 absZ1 = AbsVector3::Z1;
 
 	const AbsVector3 absV1 = absZero + absX1 + absY1 + absZ1;
+
+	const RelVector3 relZero = RelVector3::ZERO;
+	const RelVector3 relX1 = RelVector3::X1;
+	const RelVector3 relY1 = RelVector3::Y1;
+	const RelVector3 relZ1 = RelVector3::Z1;
+
+	const RelVector3 relV1 = relZero + relX1 + relY1 + relZ1;
+
+	const AbsVector3 absV2 = relV1; // Correctly fails to compile due to explicit constructor.
+	const RelVector3 relV2 = absV1; // Correctly fails to compile due to explicit constructor.
+	const AbsVector3 absV2 = absV1 + relV1; // Correctly fails to compile due to explicit constructor.
+	const RelVector3 relV2 = relV1 + absV1; // Correctly fails to compile due to explicit constructor.
+
+	const RelVector3 relV2 = RelVector3(
+		Length::Relative(absV1.X().Get()),
+		Length::Relative(absV1.Y().Get()),
+		Length::Relative(absV1.Z().Get()));
+
+	RelVector3 relV3;
+	AbsVector3 absV3;
+
+	relV3 = relV3 + absV3;
+	absV3 = relV3 + absV3;
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

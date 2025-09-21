@@ -161,6 +161,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Exception.cpp" />
+    <ClCompile Include="source\ExplicitArithmetic.cpp" />
     <ClCompile Include="source\Nebula.cpp" />
     <ClCompile Include="source\File.cpp" />
     <ClCompile Include="source\ITestScript.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="include\Bitset.h" />
     <ClInclude Include="include\ConstString.h" />
     <ClInclude Include="include\Exception.h" />
+    <ClInclude Include="include\ExplicitArithmetic.h" />
     <ClInclude Include="include\File.h" />
     <ClInclude Include="include\Format.h" />
     <ClInclude Include="include\NeedsInitializationHelper.h" />

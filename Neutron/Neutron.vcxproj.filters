@@ -48,6 +48,9 @@
     <ClInclude Include="include\LengthUnits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Neutron.cpp">

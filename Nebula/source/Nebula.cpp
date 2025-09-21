@@ -4,6 +4,7 @@
 #include "Bitset.h"
 #include "ConstString.h"
 #include "Exception.h"
+#include "ExplicitArithmetic.h"
 #include "File.h"
 #include "Format.h"
 #include "GetTypenameHelper.h"
@@ -171,6 +172,7 @@ void AddTests(TestHandler & testHandler)
 	testHandler.Register(MakeShared<TestScriptExceptions>(), "Nebula");
 	testHandler.Register(MakeShared<TestHandlerTestScript>(), "Nebula");
 	testHandler.Register(MakeShared<RandomTestScript>(), "Nebula");
+	testHandler.Register(MakeShared<ExplicitArithmeticTestScript>(), "Nebula");
 
 	/*constexpr ConstString constString = "cstr1";
 	std::cout << constString << std::endl;

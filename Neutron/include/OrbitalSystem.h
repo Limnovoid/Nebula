@@ -5,9 +5,8 @@
 #include "NebulaTypes.h"
 #include "ParticleBase.h"
 #include "ScalingSphereBase.h"
-#include "Vector3.h"
 #include "Orbit.h"
-#include "LengthUnits.h"
+#include "Types.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {

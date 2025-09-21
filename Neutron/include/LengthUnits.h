@@ -1,6 +1,8 @@
 #ifndef NEUTRON_LENGTH_UNITS_H
 #define NEUTRON_LENGTH_UNITS_H
 
+#include "ExplicitArithmetic.h"
+
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
@@ -9,178 +11,56 @@ class ScalingSphereBase;
 namespace Length // --------------------------------------------------------------------------------------------------------------
 {
 
+struct ExplicitArithmeticTokenAbsolute {};
+struct ExplicitArithmeticTokenRelative {};
 class Relative;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class Absolute
+class Absolute : public Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenAbsolute>
 {
+	using Base = Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenAbsolute>;
+
 public:
 	constexpr explicit Absolute(const float value);
-	Absolute(const Relative relative, ScalingSphereBase const& scalingSphereBase);
+	Absolute(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
 
-	float Get() const;
+	const Relative ToRelative(ScalingSphereBase const& scalingSphereBase) const;
+	const float ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const;
 
-	Relative ToRelative(ScalingSphereBase const& scalingSphereBase) const;
-	float ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const;
-
-	void Set(const float value);
-	void Set(const Relative relative, ScalingSphereBase const& scalingSphereBase);
-
-	constexpr operator float() const;
-
-	constexpr Absolute operator+(const float rhs) const;
-	constexpr Absolute operator-(const float rhs) const;
-	constexpr Absolute operator*(const float rhs) const;
-	constexpr Absolute operator/(const float rhs) const;
-
-	Absolute operator+=(const float rhs);
-	Absolute operator-=(const float rhs);
-	Absolute operator*=(const float rhs);
-	Absolute operator/=(const float rhs);
-
-private:
-	float	m_value;
+	void Set(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline constexpr Absolute::Absolute(const float value) :
-	m_value(value)
+	Base(value)
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
-
-inline float Absolute::Get() const
-{
-	return m_value;
-}
-
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void Absolute::Set(const float value)
+class Relative : public Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenRelative>
 {
-	m_value = value;
-}
+	using Base = Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenRelative>;
 
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline constexpr Absolute::operator float() const
-{
-	return m_value;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline constexpr Absolute Absolute::operator+(const float rhs) const
-{
-	return Absolute(m_value + rhs);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline constexpr Absolute Absolute::operator-(const float rhs) const
-{
-	return Absolute(m_value - rhs);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline constexpr Absolute Absolute::operator*(const float rhs) const
-{
-	return Absolute(m_value * rhs);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline constexpr Absolute Absolute::operator/(const float rhs) const
-{
-	return Absolute(m_value / rhs);
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Absolute Absolute::operator+=(const float rhs)
-{
-	m_value += rhs;
-	return *this;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Absolute Absolute::operator-=(const float rhs)
-{
-	m_value -= rhs;
-	return *this;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Absolute Absolute::operator*=(const float rhs)
-{
-	m_value *= rhs;
-	return *this;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Absolute Absolute::operator/=(const float rhs)
-{
-	m_value /= rhs;
-	return *this;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------
-
-class Relative
-{
 public:
 	constexpr explicit Relative(const float value);
-	Relative(const Absolute absolute, ScalingSphereBase const& scalingSphereBase);
+	Relative(Absolute const& absolute, ScalingSphereBase const& scalingSphereBase);
 
-	float Get() const;
+	const Absolute ToAbsolute(ScalingSphereBase const& scalingSphereBase) const;
+	const float ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const;
 
-	Absolute ToAbsolute(ScalingSphereBase const& scalingSphereBase) const;
-	float ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const;
-
-	void Set(const float value);
-	void Set(const Absolute absolute, ScalingSphereBase const& scalingSphereBase);
-
-	operator float() const;
-
-private:
-	float	m_value;
+	void Set(Absolute const& absolute, ScalingSphereBase const& scalingSphereBase);
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
 inline constexpr Relative::Relative(const float value) :
-	m_value(value)
+	Base(value)
 {
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline float Relative::Get() const
-{
-	return m_value;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline void Relative::Set(const float value)
-{
-	m_value = value;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline Relative::operator float() const
-{
-	return m_value;
 }
 
 } // namespace Length -------------------------------------------------------------------------------------------------------------
