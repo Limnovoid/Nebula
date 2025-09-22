@@ -1,12 +1,12 @@
-#ifndef NEBULA_EXPLICIT_H
-#define NEBULA_EXPLICIT_H
+#ifndef NEBULA_EXPLICIT_ARITHMETIC_H
+#define NEBULA_EXPLICIT_ARITHMETIC_H
 
 #include "ITestScript.h"
 
 namespace Nebula // -----------------------------------------------------------------------------------------------------------------
 {
 
-template<typename T, typename TOKEN>
+template<typename T, typename CRTP>
 class TExplicitArithmetic
 {
 public:
@@ -24,31 +24,31 @@ public:
 	constexpr bool operator<=(TExplicitArithmetic const& rhs) const							{ return m_value <= rhs.m_value; }
 	constexpr bool operator>=(TExplicitArithmetic const& rhs) const							{ return m_value >= rhs.m_value; }
 	constexpr bool operator==(const T rhs) const											{ return m_value == rhs; }
-	constexpr bool operator!=(const T rhs) const											{ return m_value != rhs; }
+	//constexpr bool operator!=(const T rhs) const											{ return m_value != rhs; }
 	constexpr bool operator<(const T rhs) const												{ return m_value < rhs; }
 	constexpr bool operator>(const T rhs) const												{ return m_value > rhs; }
 	constexpr bool operator<=(const T rhs) const											{ return m_value <= rhs; }
 	constexpr bool operator>=(const T rhs) const											{ return m_value >= rhs; }
 
-	constexpr const TExplicitArithmetic operator-() const									{ return TExplicitArithmetic(-m_value); }
+	constexpr const CRTP operator-() const													{ return CRTP(-m_value); }
 
-	constexpr const TExplicitArithmetic operator+(TExplicitArithmetic const& rhs) const		{ return TExplicitArithmetic(m_value + rhs.m_value); }
-	constexpr const TExplicitArithmetic operator-(TExplicitArithmetic const& rhs) const		{ return TExplicitArithmetic(m_value - rhs.m_value); }
-	constexpr const TExplicitArithmetic operator*(TExplicitArithmetic const& rhs) const		{ return TExplicitArithmetic(m_value * rhs.m_value); }
-	constexpr const TExplicitArithmetic operator/(TExplicitArithmetic const& rhs) const		{ return TExplicitArithmetic(m_value / rhs.m_value); }
-	constexpr const TExplicitArithmetic operator+(const T rhs) const						{ return TExplicitArithmetic(m_value + rhs); }
-	constexpr const TExplicitArithmetic operator-(const T rhs) const						{ return TExplicitArithmetic(m_value - rhs); }
-	constexpr const TExplicitArithmetic operator*(const T rhs) const						{ return TExplicitArithmetic(m_value * rhs); }
-	constexpr const TExplicitArithmetic operator/(const T rhs) const						{ return TExplicitArithmetic(m_value / rhs); }
+	constexpr const CRTP operator+(TExplicitArithmetic const& rhs) const					{ return CRTP(m_value + rhs.m_value); }
+	constexpr const CRTP operator-(TExplicitArithmetic const& rhs) const					{ return CRTP(m_value - rhs.m_value); }
+	constexpr const CRTP operator*(TExplicitArithmetic const& rhs) const					{ return CRTP(m_value * rhs.m_value); }
+	constexpr const CRTP operator/(TExplicitArithmetic const& rhs) const					{ return CRTP(m_value / rhs.m_value); }
+	constexpr const CRTP operator+(const T rhs) const										{ return CRTP(m_value + rhs); }
+	constexpr const CRTP operator-(const T rhs) const										{ return CRTP(m_value - rhs); }
+	constexpr const CRTP operator*(const T rhs) const										{ return CRTP(m_value * rhs); }
+	constexpr const CRTP operator/(const T rhs) const										{ return CRTP(m_value / rhs); }
 
-	constexpr TExplicitArithmetic & operator+=(TExplicitArithmetic const& rhs);
-	constexpr TExplicitArithmetic & operator-=(TExplicitArithmetic const& rhs);
-	constexpr TExplicitArithmetic & operator*=(TExplicitArithmetic const& rhs);
-	constexpr TExplicitArithmetic & operator/=(TExplicitArithmetic const& rhs);
-	constexpr TExplicitArithmetic & operator+=(const T rhs);
-	constexpr TExplicitArithmetic & operator-=(const T rhs);
-	constexpr TExplicitArithmetic & operator*=(const T rhs);
-	constexpr TExplicitArithmetic & operator/=(const T rhs);
+	constexpr CRTP & operator+=(TExplicitArithmetic const& rhs);
+	constexpr CRTP & operator-=(TExplicitArithmetic const& rhs);
+	constexpr CRTP & operator*=(TExplicitArithmetic const& rhs);
+	constexpr CRTP & operator/=(TExplicitArithmetic const& rhs);
+	constexpr CRTP & operator+=(const T rhs);
+	constexpr CRTP & operator-=(const T rhs);
+	constexpr CRTP & operator*=(const T rhs);
+	constexpr CRTP & operator/=(const T rhs);
 
 private:
 	T	m_value;
@@ -56,129 +56,129 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN>::TExplicitArithmetic(const T value) :
+template<typename T, typename CRTP>
+inline constexpr TExplicitArithmetic<T, CRTP>::TExplicitArithmetic(const T value) :
 	m_value(value)
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr const T TExplicitArithmetic<T, TOKEN>::Get() const
+template<typename T, typename CRTP>
+inline constexpr const T TExplicitArithmetic<T, CRTP>::Get() const
 {
 	return m_value;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline void TExplicitArithmetic<T, TOKEN>::Set(const T value)
+template<typename T, typename CRTP>
+inline void TExplicitArithmetic<T, CRTP>::Set(const T value)
 {
 	m_value = value;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator+=(const TExplicitArithmetic<T, TOKEN> &rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator+=(const TExplicitArithmetic<T, CRTP> &rhs)
 {
 	m_value += rhs.m_value;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator-=(const TExplicitArithmetic<T, TOKEN> &rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator-=(const TExplicitArithmetic<T, CRTP> &rhs)
 {
 	m_value -= rhs.m_value;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator*=(const TExplicitArithmetic<T, TOKEN> &rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator*=(const TExplicitArithmetic<T, CRTP> &rhs)
 {
 	m_value *= rhs.m_value;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator/=(const TExplicitArithmetic<T, TOKEN> &rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator/=(const TExplicitArithmetic<T, CRTP> &rhs)
 {
 	m_value /= rhs.m_value;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator+=(const T rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator+=(const T rhs)
 {
 	m_value += rhs;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator-=(const T rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator-=(const T rhs)
 {
 	m_value -= rhs;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator*=(const T rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator*=(const T rhs)
 {
 	m_value *= rhs;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr TExplicitArithmetic<T, TOKEN> & TExplicitArithmetic<T, TOKEN>::operator/=(const T rhs)
+template<typename T, typename CRTP>
+inline constexpr CRTP & TExplicitArithmetic<T, CRTP>::operator/=(const T rhs)
 {
 	m_value /= rhs;
-	return *this;
+	return *static_cast<CRTP *>(this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr bool operator<(const T lhs, TExplicitArithmetic<T, TOKEN> const& rhs)
+template<typename T, typename CRTP>
+inline constexpr bool operator<(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
 {
 	return rhs > lhs;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr bool operator>(const T lhs, TExplicitArithmetic<T, TOKEN> const& rhs)
+template<typename T, typename CRTP>
+inline constexpr bool operator>(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
 {
 	return rhs < lhs;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr bool operator<=(const T lhs, TExplicitArithmetic<T, TOKEN> const& rhs)
+template<typename T, typename CRTP>
+inline constexpr bool operator<=(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
 {
 	return rhs >= lhs;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename TOKEN>
-inline constexpr bool operator>=(const T lhs, TExplicitArithmetic<T, TOKEN> const& rhs)
+template<typename T, typename CRTP>
+inline constexpr bool operator>=(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
 {
 	return rhs <= lhs;
 }
@@ -198,4 +198,4 @@ protected:
 
 } // namespace Nebula ---------------------------------------------------------------------------------------------------------------
 
-#endif//NEBULA_EXPLICIT_H
+#endif//NEBULA_EXPLICIT_ARITHMETIC_H

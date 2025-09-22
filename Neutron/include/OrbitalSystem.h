@@ -118,7 +118,7 @@ class OrbitalSystem
 	};
 
 public:
-	OrbitalSystem(const float hostMass, const Length::Absolute hostSphereAbsoluteRadius);
+	OrbitalSystem(const float hostMass, Length::Absolute const& hostSphereAbsoluteRadius);
 
 	ParticleBase * GetHostParticle();
 	ScalingSphereBase * GetHostSphere();
@@ -128,8 +128,8 @@ public:
 	/// <param name="trueRadius"> The true radius (meters). </param>
 	/// <returns> Reference to the created space. </returns>
 	/// <exception cref="ApiException"> Invalid parameter. </exception>
-	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius);
-	ScalingSphereBase * CreateScalingSphere(ScalingSphereBase * pOuterSphere, const Length::Relative radius);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, Length::Absolute const& radius);
+	ScalingSphereBase * CreateScalingSphere(ScalingSphereBase * pOuterSphere, Length::Relative const& radius);
 
 	/// <summary> Create a particle. </summary>
 	/// <param name="hostSpace"> The scaled space in which the particle will be placed. </param>
@@ -163,7 +163,7 @@ public:
 	void DestroyScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles);
 
 private:
-	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius, const bool isInfluencing);
+	ScalingSphereBase * CreateScalingSphere(ParticleBase * pHostParticle, Length::Absolute const& radius, const bool isInfluencing);
 
 	UniquePtr<HostParticle>	m_pHostParticle;	// Pointer to the interface of the host particle around which all other particles in the system orbit.
 };
@@ -472,6 +472,19 @@ class ScalingSphereListTestScript : public Nebula::ITestScript
 public:
 	ScalingSphereListTestScript();
 	virtual ~ScalingSphereListTestScript();
+
+protected:
+	virtual void RunImpl(Nebula::TestHandler & testHandler) override;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class RelAbsVectorTestScript : public Nebula::ITestScript
+{
+public:
+	RelAbsVectorTestScript();
+	virtual ~RelAbsVectorTestScript();
 
 protected:
 	virtual void RunImpl(Nebula::TestHandler & testHandler) override;

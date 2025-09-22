@@ -6,14 +6,14 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-OrbitalSystem::OrbitalSystem(const float hostMass, const Length::Absolute hostSphereAbsoluteRadius) :
+OrbitalSystem::OrbitalSystem(const float hostMass, Length::Absolute const& hostSphereAbsoluteRadius) :
 	m_pHostParticle(MakeUnique<HostParticle>(hostMass, hostSphereAbsoluteRadius))
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, Length::Absolute const& radius)
 {
 	const bool isInfluencing = pHostParticle->IsInfluencing() &&
 		(radius < pHostParticle->GetSphereOfInfluence()->GetTrueRadius());
@@ -23,7 +23,7 @@ ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParti
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ScalingSphereBase * pOuterSphere, const Length::Relative radius)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ScalingSphereBase * pOuterSphere, Length::Relative const& radius)
 {
 	return CreateScalingSphere(pOuterSphere->GetHostParticle(), radius.ToAbsolute(*pOuterSphere));
 }
@@ -91,7 +91,7 @@ void OrbitalSystem::DestroyScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, const Length::Absolute radius, const bool isInfluencing)
+ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParticle, Length::Absolute const& radius, const bool isInfluencing)
 {
 	ScalingSphereBase * pNewScalingSphere = nullptr;
 
@@ -239,7 +239,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(hostSpace.GetPrimaryPosition(), Vector3::ZERO, "Host space primary position");
 	testHandler.Assert(hostSpace.GetPrimaryVelocity(), Vector3::ZERO, "Host space primary velocity");
 
-	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS.Get() / 10.f);
+	ScalingSphereBase & scaledSpace2 = *orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS / 10.f);
 
 	testHandler.Assert(scaledSpace2.GetRadius(), 0.1f, "Scaled space 2 radius");
 	testHandler.Assert(scaledSpace2.GetHostParticle()->m_uuid, hostParticle.m_uuid, "Scaled space 2 host particle");
@@ -261,7 +261,7 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert(scaledSpace3.GetPrimaryPosition(), Vector3::ZERO, "Scaled space 3 primary position");
 	testHandler.Assert(scaledSpace3.GetPrimaryVelocity(), Vector3::ZERO, "Scaled space 3 primary velocity");
 
-	testHandler.Assert(orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS.Get() * 0.5f) == nullptr, true, "Invalid radius fails ScalingSphere creation");
+	testHandler.Assert(orbitalSystem.CreateScalingSphere(&hostParticle, HOST_SPACE_RADIUS * 0.5f) == nullptr, true, "Invalid radius fails ScalingSphere creation");
 
 	/*try
 	{
@@ -322,8 +322,8 @@ void OrbitalSystemTestScript::RunImpl(TestHandler & testHandler)
 
 	testHandler.Assert(particleScaledSpace.IsInfluencing(), false, "PassiveParticle scaled space is influencing");
 	testHandler.Assert(particleScaledSpace.GetPrimary()->m_uuid, hostParticle.m_uuid, "PassiveParticle scaled space primary");
-	testHandler.Assert(sqrtf(particleScaledSpace.GetPrimaryPosition().SqareMagnitude()), orbitRadius / particleScaledSpaceRadius, "PassiveParticle scaled space primary distance");
-	testHandler.Assert(particleScaledSpace.GetPrimaryVelocity(), particleVelocity * -1.f / particleScaledSpaceRadius, "PassiveParticle scaled space primary velocity");
+	testHandler.Assert(sqrtf(particleScaledSpace.GetPrimaryPosition().SqareMagnitude()), orbitRadius / particleScaledSpaceRadius.Get(), "PassiveParticle scaled space primary distance");
+	testHandler.Assert(particleScaledSpace.GetPrimaryVelocity(), particleVelocity * -1.f / particleScaledSpaceRadius.Get(), "PassiveParticle scaled space primary velocity");
 
 	const float particleScaledSpaceNewRadius = 0.04f;
 	const float particleScaledSpaceNewTrueRadius = particle.GetHostSphere()->GetTrueRadius() * particleScaledSpaceNewRadius;
@@ -482,33 +482,36 @@ ResizeScalingSpheresTestScript::~ResizeScalingSpheresTestScript()
 
 void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 {
-	static constexpr float HOST_MASS = 1e10f;
-	static constexpr Length::Absolute HOST_SPHERE_ABSOLUTE_RADIUS(1000.f);
+	using namespace Length;
 
-	static constexpr float P0_ORBIT_RADIUS = 0.5f;
-	static constexpr Vector3 P0_POSITION = { P0_ORBIT_RADIUS, 0.f, 0.f };
+	static constexpr float HOST_MASS = 1e10f;
+	static constexpr Absolute HOST_SPHERE_ABSOLUTE_RADIUS(1000.f);
+
+	static constexpr Relative P0_ORBIT_RADIUS(0.5f);
+	static constexpr RelVector3 P0_POSITION = { P0_ORBIT_RADIUS, Relative(0.f), Relative(0.f) };
 	static constexpr float P0_MASS = 1e5f;
 
-	static constexpr Length::Absolute S1_ABSOLUTE_RADIUS(200.f);
-	static constexpr Length::Absolute S2_ABSOLUTE_RADIUS(40.f);
-	static constexpr Length::Absolute S3_ABSOLUTE_RADIUS(8.f);
-	static constexpr Length::Relative S1_RELATIVE_RADIUS(S1_ABSOLUTE_RADIUS / HOST_SPHERE_ABSOLUTE_RADIUS);
-	static constexpr Length::Relative S2_RELATIVE_RADIUS(S2_ABSOLUTE_RADIUS / S1_ABSOLUTE_RADIUS);
-	static constexpr Length::Relative S3_RELATIVE_RADIUS(S3_ABSOLUTE_RADIUS / S2_ABSOLUTE_RADIUS);
+	static constexpr Absolute S1_ABSOLUTE_RADIUS(200.f);
+	static constexpr Absolute S2_ABSOLUTE_RADIUS(40.f);
+	static constexpr Absolute S3_ABSOLUTE_RADIUS(8.f);
 
-	static constexpr float P1_ORBIT_RADIUS = 0.9f;
-	static constexpr float P2_ORBIT_RADIUS = 0.5f;
-	static constexpr float P3_ORBIT_RADIUS = 0.5f;
-	static constexpr Vector3 P1_POSITION = { P1_ORBIT_RADIUS, 0.f, 0.f };
-	static constexpr Vector3 P2_POSITION = { P2_ORBIT_RADIUS, 0.f, 0.f };
-	static constexpr Vector3 P3_POSITION = { P3_ORBIT_RADIUS, 0.f, 0.f };
+	static constexpr Relative P1_ORBIT_RADIUS(0.9f);
+	static constexpr Relative P2_ORBIT_RADIUS(0.5f);
+	static constexpr Relative P3_ORBIT_RADIUS(0.5f);
+	static constexpr RelVector3 P1_POSITION = { P1_ORBIT_RADIUS, Relative(0.f), Relative(0.f) };
+	static constexpr RelVector3 P2_POSITION = { P2_ORBIT_RADIUS, Relative(0.f), Relative(0.f) };
+	static constexpr RelVector3 P3_POSITION = { P3_ORBIT_RADIUS, Relative(0.f), Relative(0.f) };
 	static constexpr float P1_MASS = 1.f;
 	static constexpr float P2_MASS = 1.f;
 	static constexpr float P3_MASS = 1.f;
 
 	OrbitalSystem orbitalSystem(HOST_MASS, HOST_SPHERE_ABSOLUTE_RADIUS);
 
-	const Vector3 P0_VELOCITY = { 0.f, orbitalSystem.GetHostSphere()->CircularOrbitSpeed(P0_ORBIT_RADIUS), 0.f };
+	static const Relative S1_RELATIVE_RADIUS(S1_ABSOLUTE_RADIUS, *orbitalSystem.GetHostSphere());
+	static const Relative S2_RELATIVE_RADIUS(S2_ABSOLUTE_RADIUS, *orbitalSystem.GetHostSphere());
+	static const Relative S3_RELATIVE_RADIUS(S3_ABSOLUTE_RADIUS, *orbitalSystem.GetHostSphere());
+
+	const RelVector3 P0_VELOCITY = { 0.f, orbitalSystem.GetHostSphere()->CircularOrbitSpeed(P0_ORBIT_RADIUS), 0.f };
 
 	ParticleBase *const pP0 = orbitalSystem.CreateParticle(orbitalSystem.GetHostSphere(), P0_MASS, P0_POSITION, Vector3::Y1, false);
 	assert(nullptr != pP0);
@@ -543,7 +546,7 @@ void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.Assert<Result, bool>([&](bool)
 	{
 		static const Length::Absolute S2_NEW_ABSOLUTE_RADIUS(10.f);
-		static const Length::Relative S2_NEW_RELATIVE_RADIUS(S2_NEW_ABSOLUTE_RADIUS / S1_ABSOLUTE_RADIUS);
+		static const Length::Relative S2_NEW_RELATIVE_RADIUS(S2_NEW_ABSOLUTE_RADIUS, *pS1);
 		static const Vector3 P2_NEW_POSITION = P2_POSITION * S2_RELATIVE_RADIUS;
 
 		const Result result = pP0->ResizeScalingSphere(pS2, S2_NEW_ABSOLUTE_RADIUS);
@@ -694,7 +697,26 @@ void ResizeScalingSpheresTestScript::RunImpl(TestHandler & testHandler)
 
 		return true;
 	}, true, true, "Remove S1");
+}
 
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+RelAbsVectorTestScript::RelAbsVectorTestScript() :
+	ITestScript("Rel/AbsVector")
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+RelAbsVectorTestScript::~RelAbsVectorTestScript()
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void RelAbsVectorTestScript::RunImpl(TestHandler & testHandler)
+{
 	const AbsVector3 absZero = AbsVector3::ZERO;
 	const AbsVector3 absX1 = AbsVector3::X1;
 	const AbsVector3 absY1 = AbsVector3::Y1;

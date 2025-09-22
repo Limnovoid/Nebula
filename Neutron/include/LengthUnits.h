@@ -11,16 +11,14 @@ class ScalingSphereBase;
 namespace Length // --------------------------------------------------------------------------------------------------------------
 {
 
-struct ExplicitArithmeticTokenAbsolute {};
-struct ExplicitArithmeticTokenRelative {};
 class Relative;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class Absolute : public Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenAbsolute>
+class Absolute : public Nebula::TExplicitArithmetic<float, Absolute>
 {
-	using Base = Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenAbsolute>;
+	using Base = Nebula::TExplicitArithmetic<float, Absolute>;
 
 public:
 	constexpr explicit Absolute(const float value);
@@ -42,9 +40,9 @@ inline constexpr Absolute::Absolute(const float value) :
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class Relative : public Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenRelative>
+class Relative : public Nebula::TExplicitArithmetic<float, Relative>
 {
-	using Base = Nebula::TExplicitArithmetic<float, ExplicitArithmeticTokenRelative>;
+	using Base = Nebula::TExplicitArithmetic<float, Relative>;
 
 public:
 	constexpr explicit Relative(const float value);

@@ -51,7 +51,7 @@ public:
 	ParticleBase * AddParticle(UniquePtr<ParticleBase> && particleBasePtr);
 	UniquePtr<ParticleBase> RemoveParticle(ParticleBase * pParticleBase);
 
-	float CircularOrbitSpeed(float orbitRadius) const;
+	float CircularOrbitSpeed(Length::Relative const& orbitRadius) const;
 
 	void HandleResized(const float previousTrueRadius);
 	void HandleNewInnerSphere();
@@ -82,18 +82,17 @@ protected:
 	void DonateParticlesToInner();
 	void DonateParticlesToOuter();
 
-	ParticleBase *				m_pHostParticle;
-	ParticleList				m_particles;
+	ParticleBase *			m_pHostParticle;
+	ParticleList			m_particles;
 
-	float						m_trueRadius;		// Radius in meters.
-	float						m_radius;			// Radius relative to superior scaling space.
-	float						m_squareRadius;		// Radius squared.
-	float						m_gravityParameter;	// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	Length::Absolute		m_absoluteRadius;		// Radius in meters.
+	Length::Relative		m_radius;				// Radius relative to outer sphere.
+	Length::Relative		m_squareRadius;			// Radius squared.
+	Length::Relative		m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
-	ScalingSphereBase *			m_pOuterSphere;
-	ScalingSphereBase *			m_pInnerSphere;
-
+	ScalingSphereBase *		m_pOuterSphere;
+	ScalingSphereBase *		m_pInnerSphere;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -169,7 +168,7 @@ inline float ScalingSphereBase::GetGravityParameter() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::CircularOrbitSpeed(float orbitRadius) const
+inline float ScalingSphereBase::CircularOrbitSpeed(Length::Relative const& orbitRadius) const
 {
 	// Velocity magnitude of a circular orbit = sqrt(gravity parameter / orbit radius).
 	return sqrtf(m_gravityParameter / orbitRadius);
