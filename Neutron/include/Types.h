@@ -1,15 +1,15 @@
 #ifndef NEUTRON_TYPES_H
 #define NEUTRON_TYPES_H
 
-#include "LengthUnits.h"
+#include "Units.h"
 #include "Vector3.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-class AbsVector3 : public TVector3<Length::Absolute>
+class AbsVector3 : public TVector3<Unit::Absolute>
 {
-	using Base = TVector3<Length::Absolute>;
+	using Base = TVector3<Unit::Absolute>;
 public:
 	using TVector3::TVector3;
 
@@ -20,8 +20,8 @@ public:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline AbsVector3::AbsVector3(const float x, const float y, const float z) :
-	Base(Length::Absolute(x), Length::Absolute(y), Length::Absolute(z))
+inline constexpr AbsVector3::AbsVector3(const float x, const float y, const float z) :
+	Base(Unit::Absolute(x), Unit::Absolute(y), Unit::Absolute(z))
 {
 }
 
@@ -35,9 +35,9 @@ inline const Vector3 AbsVector3::Get() const
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class RelVector3 : public TVector3<Length::Relative>
+class RelVector3 : public TVector3<Unit::Relative>
 {
-	using Base = TVector3<Length::Relative>;
+	using Base = TVector3<Unit::Relative>;
 
 public:
 	using TVector3::TVector3;
@@ -49,8 +49,8 @@ public:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline RelVector3::RelVector3(const float x, const float y, const float z) :
-	Base(Length::Relative(x), Length::Relative(y), Length::Relative(z))
+inline constexpr RelVector3::RelVector3(const float x, const float y, const float z) :
+	Base(Unit::Relative(x), Unit::Relative(y), Unit::Relative(z))
 {
 }
 

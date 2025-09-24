@@ -24,7 +24,7 @@ const Relative Absolute::ToRelative(ScalingSphereBase const& scalingSphereBase) 
 
 const float Absolute::ToRelativeValue(ScalingSphereBase const& scalingSphereBase) const
 {
-	return Get() / scalingSphereBase.GetTrueRadius();
+	return Get() / scalingSphereBase.GetAbsoluteRadius().Get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ const Absolute Relative::ToAbsolute(ScalingSphereBase const& scalingSphereBase) 
 
 const float Relative::ToAbsoluteValue(ScalingSphereBase const& scalingSphereBase) const
 {
-	return Get() * scalingSphereBase.GetTrueRadius();
+	return Get() * scalingSphereBase.GetAbsoluteRadius().Get();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

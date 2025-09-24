@@ -45,7 +45,7 @@
     <ClInclude Include="include\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\LengthUnits.h">
+    <ClInclude Include="include\Units.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Types.h">

@@ -24,7 +24,7 @@ public:
 	constexpr bool operator<=(TExplicitArithmetic const& rhs) const							{ return m_value <= rhs.m_value; }
 	constexpr bool operator>=(TExplicitArithmetic const& rhs) const							{ return m_value >= rhs.m_value; }
 	constexpr bool operator==(const T rhs) const											{ return m_value == rhs; }
-	//constexpr bool operator!=(const T rhs) const											{ return m_value != rhs; }
+	constexpr bool operator!=(const T rhs) const											{ return m_value != rhs; }
 	constexpr bool operator<(const T rhs) const												{ return m_value < rhs; }
 	constexpr bool operator>(const T rhs) const												{ return m_value > rhs; }
 	constexpr bool operator<=(const T rhs) const											{ return m_value <= rhs; }

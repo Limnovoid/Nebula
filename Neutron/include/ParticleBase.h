@@ -18,6 +18,11 @@ using namespace Nova;
 class ParticleBase
 {
 public:
+	/// <summary> Compute the radius of influence for an influencing particle. </summary>
+	/// <param name="orbitRadius"> The orbit radius of the influencing particle (relative or absolute). </param>
+	/// <param name="particleMass"> The mass of the influencing particle. </param>
+	/// <param name="primaryMass"> The mass of the primary particle. </param>
+	/// <returns> The radius of influence (relative or absolute, the same as the orbit radius). </returns>
 	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
 
 	ParticleBase(ScalingSphereBase * pHostSphere, float mass);
@@ -26,21 +31,21 @@ public:
 	void SetHostSphere(ScalingSphereBase * pHostSphere);
 	void SetMass(const float mass);
 
-	virtual void SetPosition(Vector3 const& position) = 0;
-	virtual void SetVelocity(Vector3 const& velocity) = 0;
-	virtual void Rescale(const float rescaleFactor) = 0;
+	virtual void SetPosition(RelVector3 const& position) = 0;
+	virtual void SetVelocity(RelVector3 const& velocity) = 0;
+	virtual void Rescale(Unit::Relative const& rescaleFactor) = 0;
 	virtual void Initialize() = 0;
 
 	virtual bool IsInfluencing() const = 0;
 	virtual ScalingSphereBase * GetSphereOfInfluence() const = 0;
-	virtual Vector3 const& GetPosition() const = 0;
-	virtual Vector3 const& GetVelocity() const = 0;
+	virtual RelVector3 const& GetPosition() const = 0;
+	virtual RelVector3 const& GetVelocity() const = 0;
 	virtual class Orbit const* GetOrbit() const = 0;
 
 	ScalingSphereBase * AddScalingSphere(UniquePtr<ScalingSphereBase> && scalingSphereBasePtr);
 	UniquePtr<ScalingSphereBase> RemoveScalingSphere(ScalingSphereBase * pScalingSphereBase, const bool shouldDonateParticles);
-	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
-	Result ResizeSphereOfInfluence(const float trueRadius);
+	Result ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, Unit::Absolute const& absoluteRadius);
+	Result ResizeSphereOfInfluence(Unit::Absolute const& absoluteRadius);
 
 	ScalingSphereBase * GetHostSphere() const;
 	ScalingSphereBase * GetFirstSphere() const;
@@ -50,7 +55,7 @@ public:
 	Uuid						m_uuid;
 
 private:
-	Result ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, const float trueRadius);
+	Result ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, Unit::Absolute const& absoluteRadius);
 
 	ScalingSphereBase *			m_pHostSphere;		// Pointer to the scaling spheres in which this particle is moving, or the orbital system's host space if this particle is the system host particle.
 	ScalingSphereList			m_attachedSpheres;	// List of pointers to scaling spheres attached to this particle.

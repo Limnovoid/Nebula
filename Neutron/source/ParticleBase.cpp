@@ -55,18 +55,18 @@ UniquePtr<ScalingSphereBase> ParticleBase::RemoveScalingSphere(ScalingSphereBase
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, const float trueRadius)
+Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase, Unit::Absolute const& absoluteRadius)
 {
 	assert(pScalingSphereBase->GetHostParticle() == this);
 	assert(GetSphereOfInfluence() != pScalingSphereBase);
 
-	if ((pScalingSphereBase->IsInfluencing() && (GetSphereOfInfluence()->GetTrueRadius() < trueRadius)) ||
-		(IsInfluencing() && !pScalingSphereBase->IsInfluencing() && (trueRadius < GetSphereOfInfluence()->GetTrueRadius())))
+	if ((pScalingSphereBase->IsInfluencing() && (GetSphereOfInfluence()->GetAbsoluteRadius() < absoluteRadius)) ||
+		(IsInfluencing() && !pScalingSphereBase->IsInfluencing() && (absoluteRadius < GetSphereOfInfluence()->GetAbsoluteRadius())))
 	{
 		return RESULT_CODE_INVALID_PARAMETER; // Changing whether the ScalingSphere is influencing is not currently supported.
 	}
 
-	const float previousTrueRadius = pScalingSphereBase->GetTrueRadius();
+	const Unit::Absolute previousAbsoluteRadius = pScalingSphereBase->GetAbsoluteRadius();
 	ScalingSphereBase *const pPreviousInnerSphere = pScalingSphereBase->GetInnerSphere();
 
 	ScalingSphereList::Iterator scalingSphereIter = m_attachedSpheres.Find(pScalingSphereBase);
@@ -74,7 +74,7 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 	if (m_attachedSpheres.End() == scalingSphereIter)
 		return RESULT_CODE_NOT_FOUND;
 
-	pScalingSphereBase->SetTrueRadius(trueRadius);
+	pScalingSphereBase->SetAbsoluteRadius(absoluteRadius);
 
 	const bool hasScalingSphereOrderChanged = m_attachedSpheres.Sort(scalingSphereIter);
 	assert(scalingSphereIter->get() == pScalingSphereBase);
@@ -92,7 +92,7 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 		pPreviousInnerSphere->Initialize();
 	}
 
-	pScalingSphereBase->HandleResized(previousTrueRadius);
+	pScalingSphereBase->HandleResized(previousAbsoluteRadius);
 
 	if (nullptr != pScalingSphereBase->GetOuterSphere())
 	{
@@ -107,7 +107,7 @@ Result ParticleBase::ResizeScalingSphere(ScalingSphereBase * pScalingSphereBase,
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result ParticleBase::ResizeSphereOfInfluence(const float trueRadius)
+Result ParticleBase::ResizeSphereOfInfluence(Unit::Absolute const& absoluteRadius)
 {
 	assert(IsInfluencing());
 
@@ -115,14 +115,14 @@ Result ParticleBase::ResizeSphereOfInfluence(const float trueRadius)
 
 	assert(false); // TODO...
 
-	return ResizeScalingSphereImpl(pScalingSphereBase, trueRadius);
+	return ResizeScalingSphereImpl(pScalingSphereBase, absoluteRadius);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Result ParticleBase::ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, const float trueRadius)
+Result ParticleBase::ResizeScalingSphereImpl(ScalingSphereBase * pScalingSphereBase, Unit::Absolute const& absoluteRadius)
 {
-	assert(false); // TODO...
+	assert(false); // TODO - refactor common code from ResizeScalingSphere() into here...
 
 	return RESULT_CODE_NOT_IMPLEMENTED;
 }

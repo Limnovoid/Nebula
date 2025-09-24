@@ -24,12 +24,12 @@ public:
 	/// <param name="absoluteRadius"> The absolute radius of the scaling sphere whose gravitational parameter is being computed. </param>
 	/// <param name="primaryMass"> The mass of the scaling sphere's primary. </param>
 	/// <returns> The scaled gravitational parameter. </returns>
-	static float ComputeScaledGravityParameter(float absoluteRadius, float primaryMass);
+	static Unit::Relative ComputeScaledGravityParameter(Unit::Absolute const& absoluteRadius, float primaryMass);
 
-	ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius);
+	ScalingSphereBase(ParticleBase * pHostParticle, Unit::Absolute const& absoluteRadius);
 	virtual ~ScalingSphereBase() = default;
 
-	void SetTrueRadius(const float trueRadius);
+	void SetAbsoluteRadius(const Unit::Absolute const& absoluteRadius);
 
 	virtual void Initialize();
 
@@ -38,22 +38,22 @@ public:
 	ScalingSphereBase * GetOuterSphere() const;
 	ScalingSphereBase * GetInnerSphere() const;
 
-	float GetTrueRadius() const;
-	float GetRadius() const;
-	float GetSquareRadius() const;
-	float GetGravityParameter() const;
+	Unit::Absolute GetAbsoluteRadius() const;
+	Unit::Relative GetRadius() const;
+	Unit::Relative GetSquareRadius() const;
+	Unit::Relative GetGravityParameter() const;
 
 	virtual bool IsInfluencing() const = 0;
 	virtual ParticleBase const* GetPrimary() const = 0;
-	virtual Vector3 const& GetPrimaryPosition() const = 0;
-	virtual Vector3 const& GetPrimaryVelocity() const = 0;
+	virtual RelVector3 const& GetPrimaryPosition() const = 0;
+	virtual RelVector3 const& GetPrimaryVelocity() const = 0;
 
 	ParticleBase * AddParticle(UniquePtr<ParticleBase> && particleBasePtr);
 	UniquePtr<ParticleBase> RemoveParticle(ParticleBase * pParticleBase);
 
-	float CircularOrbitSpeed(Length::Relative const& orbitRadius) const;
+	Unit::Relative CircularOrbitSpeed(Unit::Relative const& orbitRadius) const;
 
-	void HandleResized(const float previousTrueRadius);
+	void HandleResized(Unit::Absolute const& previousAbsoluteRadius);
 	void HandleNewInnerSphere();
 	void HandleParticleSphereResized(ScalingSphereBase * pScalingSphere);
 	void HandleBeingRemoved(const bool shouldDonateParticles);
@@ -85,10 +85,10 @@ protected:
 	ParticleBase *			m_pHostParticle;
 	ParticleList			m_particles;
 
-	Length::Absolute		m_absoluteRadius;		// Radius in meters.
-	Length::Relative		m_radius;				// Radius relative to outer sphere.
-	Length::Relative		m_squareRadius;			// Radius squared.
-	Length::Relative		m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	Unit::Absolute		m_absoluteRadius;		// Radius in meters.
+	Unit::Relative		m_radius;				// Radius relative to outer sphere.
+	Unit::Relative		m_squareRadius;			// Square of relative radius.
+	Unit::Relative		m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
 	ScalingSphereBase *		m_pOuterSphere;
@@ -97,17 +97,17 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::ComputeScaledGravityParameter(float trueRadius, float primaryMass)
+inline Unit::Relative ScalingSphereBase::ComputeScaledGravityParameter(Unit::Absolute const& absoluteRadius, float primaryMass)
 {
 	// Gravity parameter / (true radius)^3 = G * M / r^3.
-	return kGravitational * primaryMass * powf(trueRadius, -3.f);
+	return Unit::Relative( kGravitational * primaryMass * powf(absoluteRadius.Get(), -3.f) );
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline void ScalingSphereBase::SetTrueRadius(const float trueRadius)
+inline void ScalingSphereBase::SetAbsoluteRadius(Unit::Absolute const& absoluteRadius)
 {
-	m_trueRadius = trueRadius;
+	m_absoluteRadius = absoluteRadius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -140,38 +140,38 @@ inline ScalingSphereBase * ScalingSphereBase::GetInnerSphere() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::GetTrueRadius() const
+inline Unit::Absolute ScalingSphereBase::GetAbsoluteRadius() const
 {
-	return m_trueRadius;
+	return m_absoluteRadius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::GetRadius() const
+inline Unit::Relative ScalingSphereBase::GetRadius() const
 {
 	return m_radius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::GetSquareRadius() const
+inline Unit::Relative ScalingSphereBase::GetSquareRadius() const
 {
 	return m_squareRadius;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::GetGravityParameter() const
+inline Unit::Relative ScalingSphereBase::GetGravityParameter() const
 {
 	return m_gravityParameter;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ScalingSphereBase::CircularOrbitSpeed(Length::Relative const& orbitRadius) const
+inline Unit::Relative ScalingSphereBase::CircularOrbitSpeed(Unit::Relative const& orbitRadius) const
 {
 	// Velocity magnitude of a circular orbit = sqrt(gravity parameter / orbit radius).
-	return sqrtf(m_gravityParameter / orbitRadius);
+	return Unit::Relative(sqrtf(( m_gravityParameter / orbitRadius ).Get()));
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

@@ -5,9 +5,9 @@
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, float trueRadius) :
+ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, Unit::Absolute const& absoluteRadius) :
 	m_pHostParticle(pHostParticle),
-	m_trueRadius(trueRadius),
+	m_absoluteRadius(absoluteRadius),
 	m_radius(1.f),
 	m_gravityParameter(0.f),
 	m_pOuterSphere(nullptr),
@@ -15,7 +15,7 @@ ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, float trueRad
 	m_squareRadius(0.f)
 {
 	assert(nullptr != m_pHostParticle);
-	assert(0.f < m_trueRadius);
+	assert(0.f < m_absoluteRadius);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -23,13 +23,13 @@ ScalingSphereBase::ScalingSphereBase(ParticleBase * pHostParticle, float trueRad
 void ScalingSphereBase::Initialize()
 {
 	if (nullptr == m_pOuterSphere)
-		m_radius = 1.f;
+		m_radius = Unit::Relative(1.f);
 	else
-		m_radius = m_trueRadius / m_pOuterSphere->m_trueRadius;
+		m_radius = m_absoluteRadius.ToRelative(*m_pOuterSphere);
 
 	m_squareRadius = m_radius * m_radius;
 
-	m_gravityParameter = ComputeScaledGravityParameter(m_trueRadius, GetPrimary()->GetMass());
+	m_gravityParameter = ComputeScaledGravityParameter(m_absoluteRadius, GetPrimary()->GetMass());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -72,14 +72,14 @@ UniquePtr<ParticleBase> ScalingSphereBase::RemoveParticle(ParticleBase * pPartic
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void ScalingSphereBase::HandleResized(const float previousTrueRadius)
+void ScalingSphereBase::HandleResized(Unit::Absolute const& previousAbsoluteRadius)
 {
-	const float particleRescaleFactor = previousTrueRadius / m_trueRadius;
+	const float particleRescaleFactor = (previousAbsoluteRadius / m_absoluteRadius).Get();
 
 	if (1.f == particleRescaleFactor)
 		return; // No re-scaling, nothing to do.
 
-	const bool hasTrueRadiusIncreased = (previousTrueRadius < m_trueRadius);
+	const bool hasRadiusIncreased = (previousAbsoluteRadius < m_absoluteRadius);
 
 	ParticleList::iterator particleListIterator = m_particles.begin();
 	while (m_particles.end() != particleListIterator)
@@ -90,7 +90,7 @@ void ScalingSphereBase::HandleResized(const float previousTrueRadius)
 
 		bool hasParticleEscaped;
 
-		if (hasTrueRadiusIncreased)
+		if (hasRadiusIncreased)
 			hasParticleEscaped = HandleParticleMaybeEscapedToInner(thisParticleIterator);
 		else // !hasTrueRadiusIncreased
 			hasParticleEscaped = HandleParticleMaybeEscapedToOuter(thisParticleIterator);
@@ -296,7 +296,7 @@ void ScalingSphereBase::ReceiveParticleFromInner(UniquePtr<ParticleBase> & parti
 	assert(particlePtr->GetHostSphere()->GetOuterSphere() == this);
 	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
-	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
+	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius().Get());
 	particlePtr->SetHostSphere(this);
 
 	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
@@ -326,7 +326,7 @@ void ScalingSphereBase::ReceiveParticleFromOuter(UniquePtr<ParticleBase> & parti
 	assert(particlePtr->GetHostSphere()->GetInnerSphere() == this);
 	assert(particlePtr->GetHostSphere()->GetHostParticle() == m_pHostParticle);
 
-	particlePtr->Rescale(1.f / m_radius);
+	particlePtr->Rescale(1.f / m_radius.Get());
 	particlePtr->SetHostSphere(this);
 
 	const ParticleList::iterator particleListIterator = m_particles.insert(m_particles.end(), std::move(particlePtr));
@@ -356,7 +356,7 @@ void ScalingSphereBase::ReceiveParticleFromEscape(UniquePtr<ParticleBase> & part
 	assert(std::find_if(m_particles.begin(), m_particles.end(), [&particlePtr](UniquePtr<ParticleBase> const& otherParticlePtr) {
 		return (otherParticlePtr.get() == particlePtr->GetHostSphere()->GetHostParticle()); }) != m_particles.end());
 
-	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius());
+	particlePtr->Rescale(particlePtr->GetHostSphere()->GetRadius().Get());
 
 	particlePtr->SetPosition(particlePtr->GetPosition() + particlePtr->GetHostSphere()->GetHostParticle()->GetPosition());
 	particlePtr->SetVelocity(particlePtr->GetVelocity() + particlePtr->GetHostSphere()->GetHostParticle()->GetVelocity());
@@ -395,7 +395,7 @@ void ScalingSphereBase::ReceiveParticleFromCapture(UniquePtr<ParticleBase> & par
 	particlePtr->SetPosition(particlePtr->GetPosition() - m_pHostParticle->GetPosition());
 	particlePtr->SetVelocity(particlePtr->GetVelocity() - m_pHostParticle->GetVelocity());
 
-	particlePtr->Rescale(1.f / m_radius);
+	particlePtr->Rescale(1.f / m_radius.Get());
 
 	particlePtr->SetHostSphere(this);
 

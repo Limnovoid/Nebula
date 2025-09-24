@@ -158,7 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Constants.h" />
-    <ClInclude Include="include\LengthUnits.h" />
+    <ClInclude Include="include\Units.h" />
     <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\ParticleBase.h" />
     <ClInclude Include="include\ScalingSphereBase.h" />
