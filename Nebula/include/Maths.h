@@ -41,6 +41,46 @@ inline constexpr int64_t Pow(int64_t base, int32_t exp)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
+template<CArithmetic T>
+inline T Pow(const T base, const T exponent)
+{
+	assert(false);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline float Pow<>(const float base, const float exponent)
+{
+	return powf(base, exponent);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline double Pow<>(const double base, const double exponent)
+{
+	return pow(base, exponent);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline long double Pow<>(const long double base, const long double exponent)
+{
+	return powl(base, exponent);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CGettableArithmetic T>
+inline T Pow(T const& base, T const& exponent)
+{
+	return T(Pow(base.Get(), exponent.Get()));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
 inline constexpr bool IsPowerOf2(uint64_t n)
 {
 	return (0 == (n & (n - 1)));
@@ -105,8 +145,8 @@ inline T Floor(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T Sqrt(T value)
+template<CArithmetic T>
+inline T Sqrt(const T value)
 {
 	assert(false);
 }
@@ -114,7 +154,7 @@ inline T Sqrt(T value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<>
-inline float Sqrt<>(float value)
+inline float Sqrt<>(const float value)
 {
 	return sqrtf(value);
 }
@@ -122,7 +162,7 @@ inline float Sqrt<>(float value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<>
-inline double Sqrt<>(double value)
+inline double Sqrt<>(const double value)
 {
 	return sqrt(value);
 }
@@ -130,9 +170,89 @@ inline double Sqrt<>(double value)
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 template<>
-inline long double Sqrt<>(long double value)
+inline long double Sqrt<>(const long double value)
 {
 	return sqrtl(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CGettableArithmetic T>
+inline T Sqrt(T const& value)
+{
+	return T(Sqrt(value.Get()));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CArithmetic T>
+inline T Clamp(const T value, const T min, const T max)
+{
+	return std::clamp(value, min, max);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CGettableArithmetic T>
+inline T Clamp(T const& value, T const& min, T const& max)
+{
+	return T(Clamp(value.Get(), min.Get(), max.Get()));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CArithmetic T>
+inline T Acos(const T value)
+{
+	assert(false);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline float Acos<>(const float value)
+{
+	return acosf(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline double Acos<>(const double value)
+{
+	return acos(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+inline long double Acos<>(const long double value)
+{
+	return acosl(value);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CGettableArithmetic T>
+inline T Acos(T const& value)
+{
+	return T(Acos(value.Get()));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CArithmetic T>
+inline T Epsilon()
+{
+	return std::numeric_limits<T>::epsilon();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+
+template<CGettableArithmetic T>
+inline T Epsilon()
+{
+	return T(Epsilon<T::ArithmeticType>());
 }
 
 } // namespace Maths --------------------------------------------------------------------------------------------------------------

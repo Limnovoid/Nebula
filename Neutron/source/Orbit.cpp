@@ -17,23 +17,21 @@ Orbit::Orbit() :
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-void Orbit::Elements::Compute(float gravityParameter, Vector3 const& position, Vector3 const& velocity)
+void Orbit::Elements::Compute(Unit::Relative const& gravityParameter, RelVector3 const& position, RelVector3 const& velocity)
 {
+	using namespace Unit;
+
 	// Angular momentum (H) = R x V.
 	position.PreciseCross(velocity, m_angularMomentum, m_perifocalZ);
 
-	Vector3 angularMomentumVector = m_angularMomentum * m_perifocalZ;
+	RelVector3 angularMomentumVector = m_angularMomentum * m_perifocalZ;
 
-	API_ASSERT_THROW(0 < m_angularMomentum, RESULT_CODE_INVALID_PARAMETER,
+	API_ASSERT_THROW(0.f < m_angularMomentum, RESULT_CODE_INVALID_PARAMETER,
 		Fmt::Format("Angular momentum evaluated to zero from position ({}), velocity ({}).", position, velocity));
 
-	m_parameter = m_angularMomentum * m_angularMomentum / gravityParameter; // Orbit parameter (p) = H^2 / g.
-	m_velocityK = gravityParameter / m_angularMomentum;
-	m_massK = gravityParameter * gravityParameter / powf(m_angularMomentum, 3.f);
+	RelVector3 positionDirection = position.Normalized();
 
-	Vector3 positionDirection = position.Normalized();
-
-	Vector3 eccentrictyVector = (velocity.PreciseCross(angularMomentumVector) / gravityParameter) - positionDirection;
+	Vector3 eccentrictyVector = ((velocity.PreciseCross(angularMomentumVector) / gravityParameter) - positionDirection).Get();
 	float eccentricitySquared = eccentrictyVector.SqareMagnitude();
 	m_eccentricity = Maths::Sqrt(eccentricitySquared); // Eccentricity (e) = | ((V X H) / u) - (R / r) |.
 
@@ -69,10 +67,16 @@ void Orbit::Elements::Compute(float gravityParameter, Vector3 const& position, V
 		}
 	}
 
+	m_parameter = m_angularMomentum * m_angularMomentum / gravityParameter; // Orbit parameter (p) = H^2 / g.
+	m_kVelocity = gravityParameter / m_angularMomentum;
+
+	if (1.f <= m_eccentricity)
+		m_kMass = gravityParameter * gravityParameter / Maths::Pow(m_angularMomentum, Unit::Relative(3));
+
 	m_semiMajor = m_parameter / eccentricityTerm; // Semi-major axis (a) = p / e'.
 	m_semiMinor = m_semiMajor * Maths::Sqrt(eccentricityTerm); // Semi-minor axis (b) = a * sqrt(e').
 
-	float periodSeconds = (kPIf * m_semiMajor * m_semiMinor) / m_angularMomentum; // Orbit period (t) = Pi * a * b / h.
+	float periodSeconds = kPIf * (m_semiMajor * m_semiMinor / m_angularMomentum).Get(); // Orbit period (t) = Pi * a * b / h.
 	m_period = Time::Microseconds::Convert(periodSeconds);
 
 	m_centreOffset = m_parameter / (1.f + m_eccentricity); // Signed distance (c) from occupied focus to the centre of the perifocal frame.
@@ -94,18 +98,18 @@ void Orbit::Elements::Compute(float gravityParameter, Vector3 const& position, V
 		throw Exception(RESULT_CODE_UNRECOGNIZED, "Unrecognized orbit type");
 	}
 
-	m_inclination = Vector3::AngleBetweenUnitVectors(m_perifocalZ, kReferenceZ); // Inclination (i), the angle between the reference and perifocal Z-axes = acos(Zp DOT Zr)
-	m_ascendingNodeDirection = m_perifocalZ.IsApproxParallel(kReferenceZ) ? m_perifocalX : kReferenceZ.Cross(m_perifocalZ).Normalized();
+	m_inclination = Radians(Vector3::AngleBetweenUnitVectors(m_perifocalZ.Get(), kReferenceZ)); // Inclination (i), the angle between the reference and perifocal Z-axes = acos(Zp DOT Zr)
+	m_ascendingNodeDirection = m_perifocalZ.IsApproxParallel(RelVector3(kReferenceZ)) ? m_perifocalX : RelVector3(kReferenceZ).Cross(m_perifocalZ).Normalized();
 
-	m_rightAscension = Vector3::AngleBetweenUnitVectors(m_ascendingNodeDirection, kReferenceX);
+	m_rightAscension = Radians(Vector3::AngleBetweenUnitVectors(m_ascendingNodeDirection.Get(), kReferenceX));
 	if (m_ascendingNodeDirection.Dot(kReferenceY) < 0.f)
 		m_rightAscension = kPI2f - m_rightAscension;
 
-	m_argumentPeriapsis = Vector3::AngleBetweenUnitVectors(m_ascendingNodeDirection, m_perifocalX);
+	m_argumentPeriapsis = Radians(RelVector3::AngleBetweenUnitVectors(m_ascendingNodeDirection, m_perifocalX).Get());
 	if (m_ascendingNodeDirection.Dot(m_perifocalY) < 0.f)
 		m_argumentPeriapsis = kPI2f - m_argumentPeriapsis;
 
-	// TODO - orientation ?
+	//m_orientation //TODO ...
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -128,9 +132,9 @@ void OrbitTestScript::RunImpl(TestHandler & testHandler)
 {
 	Orbit::Elements elements;
 
-	float gravityParameter = 1.f;
-	Vector3 position = { 1.f, 0.f, 0.f };
-	Vector3 velocity = { 0.f, 1.f, 0.f }; // Speed of circular orbit = sqrt(gravity parameter / orbit radius) -> sqrt(1 / 1) = 1
+	const Unit::Relative gravityParameter(1.f);
+	const RelVector3 position = { 1.f, 0.f, 0.f };
+	const RelVector3 velocity = { 0.f, 1.f, 0.f }; // Speed of circular orbit = sqrt(gravity parameter / orbit radius) -> sqrt(1 / 1) = 1
 
 	elements.Compute(gravityParameter, position, velocity);
 

@@ -171,7 +171,7 @@
     <ClInclude Include="include\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\LengthUnits.cpp" />
+    <ClCompile Include="source\Units.cpp" />
     <ClCompile Include="source\Neutron.cpp" />
     <ClCompile Include="source\Orbit.cpp" />
     <ClCompile Include="source\OrbitalSystem.cpp" />
@@ -180,6 +180,7 @@
     <ClCompile Include="source\ParticleBase.cpp" />
     <ClCompile Include="source\ScalingSphereBase.cpp" />
     <ClCompile Include="source\ScalingSphereList.cpp" />
+    <ClCompile Include="source\Types.cpp" />
     <ClCompile Include="source\Vector3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

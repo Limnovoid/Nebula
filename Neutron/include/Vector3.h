@@ -12,10 +12,15 @@ using namespace Nebula;
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
+template<typename T, typename CRTP = void>
 class TVector3
 {
+	friend class TVector3;
+
 public:
+	using TPass = std::conditional<CArithmetic<T>, T, T&>::type;
+	using TReturnVector3 = std::conditional<std::is_void_v<CRTP>, TVector3, CRTP>::type;
+
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
 	/// <param name="direction"> Storage for the direction of the computed cross product. </param>
@@ -24,7 +29,7 @@ public:
 
 	/// <param name="tolerance"> The vectors are approximately parallel if their dot product is greater than this tolerance. </param>
 	/// <returns> Whether the vectors are approximately parallel. </returns>
-	static bool AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance = std::numeric_limits<T>::epsilon());
+	static bool AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance = Maths::Epsilon<T>());
 
 	/// <summary>
 	/// Compute the angle (radians) between two unit vectors.
@@ -32,10 +37,23 @@ public:
 	/// </summary>
 	static T AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs);
 
+	//static constexpr TVector3 Zero()		{ return TVector3(T(0)); }
+	//static constexpr TVector3 X1()		{ return TVector3(T(1), T(0), T(0)); }
+	//static constexpr TVector3 Y1()		{ return TVector3(T(0), T(1), T(0)); }
+	//static constexpr TVector3 Z1()		{ return TVector3(T(0), T(0), T(1)); }
+
+	inline static constexpr ConstString		FORMAT_STRING = "{} {} {}";
+
+	static const TReturnVector3				ZERO;
+	static const TReturnVector3				X1;
+	static const TReturnVector3				Y1;
+	static const TReturnVector3				Z1;
+
+public:
 	constexpr TVector3();
-	constexpr TVector3(T v);
-	constexpr TVector3(T x, T y, T z);
 	constexpr TVector3(TVector3 const& rhs);
+	constexpr TVector3(const T v);
+	constexpr TVector3(const T x, const T y, const T z);
 	template<typename U> constexpr TVector3(TVector3<U> const& rhs);
 
 	/// <returns> The X-component. </returns>
@@ -54,13 +72,13 @@ public:
 	T SqareMagnitude() const;
 
 	/// <returns> A normalized copy of this vector. </returns>
-	TVector3 Normalized() const;
+	TReturnVector3 Normalized() const;
 
 	/// <returns> The dot product of this vector and another. </returns>
 	T Dot(TVector3 const& rhs) const;
 
 	/// <returns> The cross product of this vector (the left-hand side) and another (the right-hand side) = lhs x rhs. </returns>
-	TVector3 Cross(TVector3 const& rhs) const;
+	TReturnVector3 Cross(TVector3 const& rhs) const;
 
 	/// <summary> Compute the vector cross product = this x rhs. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
@@ -69,49 +87,44 @@ public:
 
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <returns> The cross product = lhs x rhs. </returns>
-	TVector3 PreciseCross(TVector3 const& rhs) const;
+	TReturnVector3 PreciseCross(TVector3 const& rhs) const;
 
 	/// <returns> Whether this and another vector are approximately parallel. </returns>
 	bool IsApproxParallel(TVector3 const& other, T tolerance = std::numeric_limits<T>::epsilon()) const;
 
 	/// <summary> Normalize this vector. </summary>
 	/// <returns> A reference to this (normalized) vector. </returns>
-	TVector3 & Normalize();
+	TReturnVector3 & Normalize();
 
 	bool operator==(TVector3 const& rhs) const;
 	bool operator!=(TVector3 const& rhs) const;
-	TVector3 operator+(TVector3 const& rhs) const;
-	TVector3 operator-(TVector3 const& rhs) const;
-	TVector3 operator*(const T scalar) const;
-	TVector3 operator/(const T scalar) const;
-	TVector3 & operator=(TVector3 const& rhs);
-	TVector3 & operator+=(TVector3 const& rhs);
-	TVector3 & operator-=(TVector3 const& rhs);
-	TVector3 & operator*=(const T scalar);
-	TVector3 & operator/=(const T scalar);
-
-	static const TVector3				ZERO;
-	static const TVector3				X1;
-	static const TVector3				Y1;
-	static const TVector3				Z1;
-
-	inline static constexpr ConstString	FORMAT_STRING = "{} {} {}";
+	TReturnVector3 operator+(TVector3 const& rhs) const;
+	TReturnVector3 operator-(TVector3 const& rhs) const;
+	TReturnVector3 operator*(const T scalar) const;
+	TReturnVector3 operator/(const T scalar) const;
+	TReturnVector3 & operator=(TVector3 const& rhs);
+	TReturnVector3 & operator+=(TVector3 const& rhs);
+	TReturnVector3 & operator-=(TVector3 const& rhs);
+	TReturnVector3 & operator*=(const T scalar);
+	TReturnVector3 & operator/=(const T scalar);
 
 private:
+	constexpr TVector3(TReturnVector3 const& rhs);
+
 	T									m_x, m_y, m_z;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> const TVector3<T>	TVector3<T>::ZERO	= { T(0) };
-template<typename T> const TVector3<T>	TVector3<T>::X1		= { T(1), T(0), T(0) };
-template<typename T> const TVector3<T>	TVector3<T>::Y1		= { T(0), T(1), T(0) };
-template<typename T> const TVector3<T>	TVector3<T>::Z1		= { T(0), T(0), T(1) };
+template<typename T, typename CRTP> const TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::ZERO		= { T(1) };
+template<typename T, typename CRTP> const TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::X1		= { T(1), T(0), T(0) };
+template<typename T, typename CRTP> const TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::Y1		= { T(0), T(1), T(0) };
+template<typename T, typename CRTP> const TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::Z1		= { T(0), T(0), T(1) };
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline void TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction)
+template<typename T, typename CRTP>
+inline void TVector3<T, CRTP>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, T & magnitude, TVector3 & direction)
 {
 	T lhsMagnitude = Maths::Sqrt<T>(lhs.SqareMagnitude());
 	T rhsMagnitude = Maths::Sqrt<T>(rhs.SqareMagnitude());
@@ -132,27 +145,27 @@ inline void TVector3<T>::PreciseCross(TVector3 const& lhs, TVector3 const& rhs, 
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline bool TVector3<T>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
+template<typename T, typename CRTP>
+inline bool TVector3<T, CRTP>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
 {
 	return ((static_cast<T>(1) - tolerance) < lhs.Dot(rhs));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs)
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::AngleBetweenUnitVectors(TVector3 const& lhs, TVector3 const& rhs)
 {
 	assert(T(1) == lhs.SqareMagnitude());
 	assert(T(1) == rhs.SqareMagnitude());
 
-	return std::acosf(std::clamp(lhs.Dot(rhs), T(-1), T(1))); // Clamp in case of precision error.
+	return T(Maths::Acos(Maths::Clamp(lhs.Dot(rhs), T(-1), T(1)))); // Clamp in case of precision error.
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline constexpr TVector3<T>::TVector3() :
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3() :
 	m_x(0),
 	m_y(0),
 	m_z(0)
@@ -161,28 +174,8 @@ inline constexpr TVector3<T>::TVector3() :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline constexpr TVector3<T>::TVector3(T v) :
-	m_x(v),
-	m_y(v),
-	m_z(v)
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T>::TVector3(T x, T y, T z) :
-	m_x(x),
-	m_y(y),
-	m_z(z)
-{
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
-inline constexpr TVector3<T>::TVector3(TVector3 const& rhs) :
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3(TVector3 const& rhs) :
 	m_x(rhs.m_x),
 	m_y(rhs.m_y),
 	m_z(rhs.m_z)
@@ -191,80 +184,100 @@ inline constexpr TVector3<T>::TVector3(TVector3 const& rhs) :
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-template<typename U>
-inline constexpr TVector3<T>::TVector3(TVector3<U> const& rhs) :
-	m_x(static_cast<T>(rhs.m_x)),
-	m_y(static_cast<T>(rhs.m_y)),
-	m_z(static_cast<T>(rhs.m_z))
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3(const T v) :
+	m_x(v),
+	m_y(v),
+	m_z(v)
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::X() const
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3(const T x, const T y, const T z) :
+	m_x(x),
+	m_y(y),
+	m_z(z)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename CRTP>
+template<typename U>
+inline constexpr TVector3<T, CRTP>::TVector3(TVector3<U> const& rhs) :
+	m_x(T(rhs.m_x)),
+	m_y(T(rhs.m_y)),
+	m_z(T(rhs.m_z))
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::X() const
 {
 	return m_x;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::Y() const
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::Y() const
 {
 	return m_y;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::Z() const
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::Z() const
 {
 	return m_z;
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline bool TVector3<T>::IsZero() const
+template<typename T, typename CRTP>
+inline bool TVector3<T, CRTP>::IsZero() const
 {
 	return (m_x == static_cast<T>(0)) && (m_y == static_cast<T>(0)) && (m_z == static_cast<T>(0));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::SqareMagnitude() const
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::SqareMagnitude() const
 {
 	return (m_x * m_x) + (m_y * m_y) + (m_z * m_z);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::Normalized() const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::Normalized() const
 {
-	T sqareMagnitude = SqareMagnitude();
+	const T sqareMagnitude = SqareMagnitude();
 
-	if (sqareMagnitude == 0)
-		return *this;
+	if (T(0) == sqareMagnitude)
+		return *static_cast<const TReturnVector3 *>(this);
 
-	return *this / Maths::Sqrt<T>(sqareMagnitude);
+	return *static_cast<const TReturnVector3 *>(this) / Maths::Sqrt<T>(sqareMagnitude);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline T TVector3<T>::Dot(TVector3<T> const& rhs) const
+template<typename T, typename CRTP>
+inline T TVector3<T, CRTP>::Dot(TVector3<T, CRTP> const& rhs) const
 {
 	return (m_x * rhs.m_x) + (m_y * rhs.m_y) + (m_z * rhs.m_z);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::Cross(TVector3<T, CRTP> const& rhs) const
 {
 	return {
 		(m_y * rhs.m_z) - (m_z * rhs.m_y),
@@ -275,161 +288,178 @@ inline TVector3<T> TVector3<T>::Cross(TVector3<T> const& rhs) const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline void TVector3<T>::PreciseCross(TVector3 const& rhs, T & magnitude, TVector3 & direction) const
+template<typename T, typename CRTP>
+inline void TVector3<T, CRTP>::PreciseCross(TVector3 const& rhs, T & magnitude, TVector3 & direction) const
 {
 	PreciseCross(*this, rhs, magnitude, direction);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::PreciseCross(TVector3 const& rhs) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::PreciseCross(TVector3 const& rhs) const
 {
-	T magnitude;
-	TVector3 direction;
+	// No need to construct temporary variables in every call - values are assigned by delegate PreciseCross().
+	static T magnitude = T(0);
+	static TVector3 direction(T(0));
 
 	PreciseCross(*this, rhs, magnitude, direction);
 
-	return magnitude * direction;
+	return TReturnVector3(magnitude * direction);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-bool TVector3<T>::IsApproxParallel(TVector3 const& other, T tolerance) const
+template<typename T, typename CRTP>
+bool TVector3<T, CRTP>::IsApproxParallel(TVector3 const& other, T tolerance) const
 {
 	return TVector3::AreApproxParallel(*this, other, tolerance);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T>& TVector3<T>::Normalize()
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::Normalize()
 {
 	T sqrMag = this->SqareMagnitude();
 
 	if (sqrMag == 0)
-		return *this;
+		return static_cast<TReturnVector3 &>(*this);
 
-	return (*this) /= sqrt(sqrMag);
+	return static_cast<TReturnVector3 &>((*this) /= Maths::Sqrt(sqrMag));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline bool TVector3<T>::operator==(TVector3 const& rhs) const
+template<typename T, typename CRTP>
+inline bool TVector3<T, CRTP>::operator==(TVector3 const& rhs) const
 {
 	return (m_x == rhs.m_x) && (m_y == rhs.m_y) && (m_z == rhs.m_z);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline bool TVector3<T>::operator!=(TVector3 const& rhs) const
+template<typename T, typename CRTP>
+inline bool TVector3<T, CRTP>::operator!=(TVector3 const& rhs) const
 {
 	return (m_x != rhs.m_x) || (m_y != rhs.m_y) || (m_z != rhs.m_z);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::operator+(TVector3 const& rhs) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::operator+(TVector3 const& rhs) const
 {
 	return { m_x + rhs.m_x, m_y + rhs.m_y, m_z + rhs.m_z };
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::operator-(TVector3 const& rhs) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::operator-(TVector3 const& rhs) const
 {
 	return { m_x - rhs.m_x, m_y - rhs.m_y, m_z - rhs.m_z };
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::operator*(const T scalar) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::operator*(const T scalar) const
 {
 	return { scalar * m_x, scalar * m_y, scalar * m_z };
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> TVector3<T>::operator/(const T scalar) const
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::operator/(const T scalar) const
 {
 	return { m_x / scalar, m_y / scalar, m_z / scalar };
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T> & TVector3<T>::operator=(TVector3 const& rhs)
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator=(TVector3 const& rhs)
 {
 	m_x = rhs.m_x;
 	m_y = rhs.m_y;
 	m_z = rhs.m_z;
 
-	return *this;
+	return static_cast<TReturnVector3 &>(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T>& TVector3<T>::operator+=(TVector3 const& rhs)
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator+=(TVector3 const& rhs)
 {
 	m_x += rhs.m_x;
 	m_y += rhs.m_y;
 	m_z += rhs.m_z;
 
-	return *this;
+	return static_cast<TReturnVector3 &>(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T>& TVector3<T>::operator-=(TVector3 const& rhs)
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator-=(TVector3 const& rhs)
 {
 	m_x -= rhs.m_x;
 	m_y -= rhs.m_y;
 	m_z -= rhs.m_z;
 
-	return *this;
+	return static_cast<TReturnVector3 &>(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T>& TVector3<T>::operator*=(const T scalar)
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator*=(const T scalar)
 {
 	m_x *= scalar;
 	m_y *= scalar;
 	m_z *= scalar;
 
-	return *this;
+	return static_cast<TReturnVector3 &>(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T>
-inline TVector3<T>& TVector3<T>::operator/=(const T scalar)
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator/=(const T scalar)
 {
 	m_x /= scalar;
 	m_y /= scalar;
 	m_z /= scalar;
 
-	return *this;
+	return static_cast<TReturnVector3 &>(*this);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3(TReturnVector3 const& rhs) :
+	TVector3(static_cast<TVector3 const&>(rhs))
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// Non-member Binary Operators
 // --------------------------------------------------------------------------------------------------------------------------------
 
-/* Non-member Binary Operators */
 
-template<typename T>
-inline TVector3<T> operator*(T scalar, TVector3<T> const& vector)
+template<CArithmetic T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 operator*(const T scalar, TVector3<T, CRTP> const& vector)
+{
+	return vector * scalar;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename CRTP>
+inline TVector3<T, CRTP>::TReturnVector3 operator*(T const& scalar, TVector3<T, CRTP> const& vector)
 {
 	return vector * scalar;
 }

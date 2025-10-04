@@ -72,6 +72,19 @@ concept IsVoid = std::is_void_v<T>;
 template<typename T, typename TOperand>
 concept IsCompareFunctor = std::is_invocable_r_v<bool, T, TOperand, TOperand>;
 
+template<typename T>
+concept CFundamental = std::is_fundamental_v<T>;
+
+template<typename T>
+concept CArithmetic = std::is_arithmetic_v<T>;
+
+template<typename T>
+concept CGettableArithmetic = requires (T const& value)
+{
+	CArithmetic<typename T::ArithmeticType>;
+	{ value.Get() } -> CArithmetic;
+};
+
 // Smart pointers -----------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 

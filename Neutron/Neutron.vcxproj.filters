@@ -80,7 +80,10 @@
     <ClCompile Include="source\Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\LengthUnits.cpp">
+    <ClCompile Include="source\Units.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

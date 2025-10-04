@@ -3,7 +3,7 @@
 
 #include "NebulaTypes.h"
 #include "ITestScript.h"
-#include "Vector3.h"
+#include "Types.h"
 #include "NeutronTime.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
@@ -35,42 +35,41 @@ public:
 		Elements() = default;
 
 		/// <summary>
-		/// Compute orbit elements from the given initial position and velocity relative to the primary.
+		/// Compute orbit elements from an initial position and velocity relative to the primary.
 		/// Assumes the orbiter's mass is vanishingly small relative to the primary.
 		/// </summary>
-		/// <param name="gravityParameter"> The gravity parameter of the primary. </param>
-		/// <param name="position"> Initial position of the orbiter relative to the primary. </param>
-		/// <param name="velocity"> Initial velocity of the orbiter relative to the primary. </param>
+		/// <param name="gravityParameter"> The gravity parameter of the primary as defined by the orbiter's host Sphere. </param>
+		/// <param name="position"> Initial position of the orbiter relative to the primary, in the units of the orbiter's host Sphere. </param>
+		/// <param name="velocity"> Initial velocity of the orbiter relative to the primary, in the units of the orbiter's host Sphere. </param>
 		/// <exception cref="ApiException"> Angular momentum evaluted to zero. </exception>
-		void Compute(float gravityParameter, Vector3 const& position, Vector3 const& velocity);
+		void Compute(Unit::Relative const& gravityParameter, RelVector3 const& position, RelVector3 const& velocity);
 
-		float				m_angularMomentum			= 0.f;			/// Orbital specific angular momentum
-		float				m_eccentricity				= 0.f;			/// Eccentricity
-
-		float				m_velocityK					= 0.f;			/// Constant factor of orbital velocity:             mu / h
-		float				m_massK						= 0.f;			/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
-
-		Type				m_type						= Type::Circle;	/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
+		Unit::Relative		m_angularMomentum			= Unit::Relative(0.f);	/// Orbital specific angular momentum
+		float				m_eccentricity				= 0.f;					/// Eccentricity (unitless)
+		Type				m_type						= Type::Circle;			/// Type of orbit - defined by eccentricity, indicates the type of shape which describes the orbit path
 
 		/* Dimensions */
-		float				m_semiMajor					= 0.f;
-		float				m_semiMinor					= 0.f;
-		float				m_centreOffset				= 0.f;			/// Signed distance from occupied focus to centre, measured along perifocal frame's x-axis.
-		Time::Microseconds	m_period					= 0;			/// Orbit period, measured in microseconds.
-		float				m_parameter					= 0.f;			/// Orbit parameter, or semi-latus rectum:   h^2 / mu
+		Unit::Relative		m_semiMajor					= Unit::Relative(0.f);
+		Unit::Relative		m_semiMinor					= Unit::Relative(0.f);
+		Unit::Relative		m_centreOffset				= Unit::Relative(0.f);	/// Signed distance from occupied focus to centre, measured along perifocal frame's x-axis.
+		Time::Microseconds	m_period					= 0;					/// Orbit period, measured in microseconds.
+		Unit::Relative		m_parameter					= Unit::Relative(0.f);	/// Orbit parameter, or semi-latus rectum:   h^2 / mu
 
 		/* Perifocal frame */
-		Vector3				m_perifocalX				= { 0.f };		/// The direction of the major axis.
-		Vector3				m_perifocalY				= { 0.f };		/// The direction of the minor axis.
-		Vector3				m_perifocalZ				= { 0.f };		/// The direction of the normal.
+		RelVector3			m_perifocalX				= RelVector3::ZERO;		/// The direction of the major axis.
+		RelVector3			m_perifocalY				= RelVector3::ZERO;		/// The direction of the minor axis.
+		RelVector3			m_perifocalZ				= RelVector3::ZERO;		/// The direction of the normal.
 
 		/* Orientation */
-		float				m_inclination				= 0.f;			/// Inclination.
-		Vector3				m_ascendingNodeDirection	= { 0.f };		/// Direction of ascending node.
-		float				m_rightAscension			= 0.f;			/// Right ascension of ascending node.
-		float				m_argumentPeriapsis			= 0.f;			/// Argument of periapsis.
+		Unit::Radians		m_inclination				= Unit::Radians(0);		/// Inclination.
+		RelVector3			m_ascendingNodeDirection	= RelVector3::ZERO;		/// Direction of ascending node.
+		Unit::Radians		m_rightAscension			= Unit::Radians(0);		/// Right ascension of ascending node.
+		Unit::Radians		m_argumentPeriapsis			= Unit::Radians(0);		/// Argument of periapsis.
+		//Quaternion		m_orientation;										/// Quaternion orientation of the perifocal frame relative to the reference frame.
 
-		//Quaternion m_orientation;										/// Quaternion orientation of the perifocal frame relative to the reference frame.
+		/* Constants of integration */
+		Unit::Relative		m_kVelocity = Unit::Relative(0.f);	/// Constant factor of orbital velocity:             mu / h
+		Unit::Relative		m_kMass = Unit::Relative(0.f);		/// Constant factor of mean anomaly for e >= 1:      mu^2 / h^3
 	};
 
 	class Section

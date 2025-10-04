@@ -1,11 +1,11 @@
-#include "LengthUnits.h"
+#include "Units.h"
 
 #include "ScalingSphereBase.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
 
-namespace Length // --------------------------------------------------------------------------------------------------------------
+namespace Unit // --------------------------------------------------------------------------------------------------------------
 {
 
 Absolute::Absolute(Relative const& relative, ScalingSphereBase const& scalingSphereBase) :
@@ -63,6 +63,6 @@ void Relative::Set(Absolute const& relative, ScalingSphereBase const& scalingSph
 	Base::Set(relative.ToRelativeValue(scalingSphereBase));
 }
 
-} // namespace Length -------------------------------------------------------------------------------------------------------------
+} // namespace Unit -------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

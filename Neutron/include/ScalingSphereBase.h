@@ -29,7 +29,7 @@ public:
 	ScalingSphereBase(ParticleBase * pHostParticle, Unit::Absolute const& absoluteRadius);
 	virtual ~ScalingSphereBase() = default;
 
-	void SetAbsoluteRadius(const Unit::Absolute const& absoluteRadius);
+	void SetAbsoluteRadius(Unit::Absolute const& absoluteRadius);
 
 	virtual void Initialize();
 
@@ -85,10 +85,10 @@ protected:
 	ParticleBase *			m_pHostParticle;
 	ParticleList			m_particles;
 
-	Unit::Absolute		m_absoluteRadius;		// Radius in meters.
-	Unit::Relative		m_radius;				// Radius relative to outer sphere.
-	Unit::Relative		m_squareRadius;			// Square of relative radius.
-	Unit::Relative		m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
+	Unit::Absolute			m_absoluteRadius;		// Radius in meters.
+	Unit::Relative			m_radius;				// Radius relative to outer sphere.
+	Unit::Relative			m_squareRadius;			// Square of relative radius.
+	Unit::Relative			m_gravityParameter;		// Locally scaled gravitational parameter = M * G / r^3 | G = gravitational constant, M = mass of local primary, r = true radius.
 
 private:
 	ScalingSphereBase *		m_pOuterSphere;
@@ -99,7 +99,7 @@ private:
 
 inline Unit::Relative ScalingSphereBase::ComputeScaledGravityParameter(Unit::Absolute const& absoluteRadius, float primaryMass)
 {
-	// Gravity parameter / (true radius)^3 = G * M / r^3.
+	// Gravity parameter / (true radius)^3 = G * M * r^-3.
 	return Unit::Relative( kGravitational * primaryMass * powf(absoluteRadius.Get(), -3.f) );
 }
 

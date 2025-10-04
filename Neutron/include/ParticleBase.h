@@ -23,7 +23,8 @@ public:
 	/// <param name="particleMass"> The mass of the influencing particle. </param>
 	/// <param name="primaryMass"> The mass of the primary particle. </param>
 	/// <returns> The radius of influence (relative or absolute, the same as the orbit radius). </returns>
-	static float ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass);
+	template<typename TUnit>
+	static const TUnit ComputeRadiusOfInfluence(TUnit const& orbitRadius, float particleMass, float primaryMass);
 
 	ParticleBase(ScalingSphereBase * pHostSphere, float mass);
 	virtual ~ParticleBase();
@@ -65,7 +66,8 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline float ParticleBase::ComputeRadiusOfInfluence(float orbitRadius, float particleMass, float primaryMass)
+template<typename TUnit>
+inline const TUnit ParticleBase::ComputeRadiusOfInfluence(TUnit const& orbitRadius, float particleMass, float primaryMass)
 {
 	return orbitRadius * powf(particleMass / primaryMass, 2.f / 5.f);
 }

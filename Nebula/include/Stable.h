@@ -22,5 +22,6 @@
 #include <random>
 #include <numeric>
 #include <deque>
+#include <type_traits>
 
 #endif//NEBULA_STABLE_H

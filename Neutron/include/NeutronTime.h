@@ -13,7 +13,9 @@ using namespace Nebula;
 namespace Time // -----------------------------------------------------------------------------------------------------------------
 {
 
-enum Granularity : uint32_t
+using GranularityEnumType = uint32_t;
+
+enum Granularity : GranularityEnumType
 {
 	Second			= 1,
 	Millisecond		= 1000,
@@ -78,9 +80,12 @@ template<Granularity NPerSecond>
 template<IsFloatingPoint T, Granularity NFromPerSecond>
 inline Period<NPerSecond> Period<NPerSecond>::Convert(T value)
 {
+	static_assert(GranularityEnumType(NPerSecond) < std::numeric_limits<T>::max());
+	static_assert(GranularityEnumType(NFromPerSecond) < std::numeric_limits<T>::max());
+
 	static constexpr T CONVERSION_RATIO = static_cast<T>(NPerSecond) / static_cast<T>(NFromPerSecond);
 
-	return Period(static_cast<int64_t>(value * CONVERSION_RATIO));
+	return Period(static_cast<int64_t>(CONVERSION_RATIO * value));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
