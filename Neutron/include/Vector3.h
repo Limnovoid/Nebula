@@ -18,8 +18,10 @@ class TVector3
 	friend class TVector3;
 
 public:
+	static constexpr bool IS_USING_CRTP = !std::is_void_v<CRTP>;
+
+	using TReturnVector3 = std::conditional<IS_USING_CRTP, CRTP, TVector3>::type;
 	using TPass = std::conditional<CArithmetic<T>, T, T&>::type;
-	using TReturnVector3 = std::conditional<std::is_void_v<CRTP>, TVector3, CRTP>::type;
 
 	/// <summary> Compute the vector cross product. Optimised for precision when operating on vector components with very different magnitudes. </summary>
 	/// <param name="magnitude"> Storage for the magnitude of the computed cross product. </param>
@@ -52,6 +54,7 @@ public:
 public:
 	constexpr TVector3();
 	constexpr TVector3(TVector3 const& rhs);
+	constexpr TVector3(TReturnVector3 const& rhs) requires IS_USING_CRTP;
 	constexpr TVector3(const T v);
 	constexpr TVector3(const T x, const T y, const T z);
 	template<typename U> constexpr TVector3(TVector3<U> const& rhs);
@@ -109,8 +112,6 @@ public:
 	TReturnVector3 & operator/=(const T scalar);
 
 private:
-	constexpr TVector3(TReturnVector3 const& rhs);
-
 	T									m_x, m_y, m_z;
 };
 
@@ -148,7 +149,7 @@ inline void TVector3<T, CRTP>::PreciseCross(TVector3 const& lhs, TVector3 const&
 template<typename T, typename CRTP>
 inline bool TVector3<T, CRTP>::AreApproxParallel(TVector3 const& lhs, TVector3 const& rhs, T tolerance)
 {
-	return ((static_cast<T>(1) - tolerance) < lhs.Dot(rhs));
+	return ((T(1) - tolerance) < lhs.Dot(rhs));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -176,6 +177,16 @@ inline constexpr TVector3<T, CRTP>::TVector3() :
 
 template<typename T, typename CRTP>
 inline constexpr TVector3<T, CRTP>::TVector3(TVector3 const& rhs) :
+	m_x(rhs.m_x),
+	m_y(rhs.m_y),
+	m_z(rhs.m_z)
+{
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T, typename CRTP>
+inline constexpr TVector3<T, CRTP>::TVector3(TReturnVector3 const& rhs) requires IS_USING_CRTP :
 	m_x(rhs.m_x),
 	m_y(rhs.m_y),
 	m_z(rhs.m_z)
@@ -439,11 +450,12 @@ inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator/=(const T
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename CRTP>
-inline constexpr TVector3<T, CRTP>::TVector3(TReturnVector3 const& rhs) :
-	TVector3(static_cast<TVector3 const&>(rhs))
-{
-}
+//template<typename T, typename CRTP>
+//template<typename UReturnVector3> requires (!std::is_void_v<CRTP> && std::is_same_v<UReturnVector3, typename TVector3<T, CRTP>::TReturnVector3>)
+//inline constexpr TVector3<T, CRTP>::TVector3(UReturnVector3 const& rhs) :
+//	TVector3(static_cast<TVector3 const&>(rhs))
+//{
+//}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // Non-member Binary Operators

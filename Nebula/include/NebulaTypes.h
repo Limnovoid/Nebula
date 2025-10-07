@@ -66,9 +66,6 @@ concept IsFormattable = requires (std::formatter<T> formatter, std::format_parse
 	{ formatter.format(t, formatCtx) };
 };
 
-template<typename T>
-concept IsVoid = std::is_void_v<T>;
-
 template<typename T, typename TOperand>
 concept IsCompareFunctor = std::is_invocable_r_v<bool, T, TOperand, TOperand>;
 
@@ -84,6 +81,12 @@ concept CGettableArithmetic = requires (T const& value)
 	CArithmetic<typename T::ArithmeticType>;
 	{ value.Get() } -> CArithmetic;
 };
+
+template<typename T, typename TBase>
+concept CDerivesFrom = std::is_base_of_v<TBase, T>;
+
+template<typename T>
+concept CVoid = std::is_void_v<T>;
 
 // Smart pointers -----------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------

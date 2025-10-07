@@ -274,7 +274,7 @@ bool ScalingSphereBase::HandleParticleMaybeCaptured(ParticleList::iterator parti
 	assert((this == pScalingSphere->GetHostParticle()->GetHostSphere()) && (this == pScalingSphere->GetOuterSphere()));
 	assert(pScalingSphere->GetHostParticle() != particleListIterator->get());
 
-	const Vector3 particleSeparation = (*particleListIterator)->GetPosition() - pScalingSphere->GetHostParticle()->GetPosition();
+	const RelVector3 particleSeparation = (*particleListIterator)->GetPosition() - pScalingSphere->GetHostParticle()->GetPosition();
 
 	if (pScalingSphere->GetSquareRadius() < particleSeparation.SqareMagnitude())
 		return false;

@@ -14,11 +14,15 @@ class RelVector3;
 class AbsVector3 : public TVector3<Unit::Absolute, AbsVector3>
 {
 	using Base = TVector3<Unit::Absolute, AbsVector3>;
+
+	friend class Base;
+
 public:
 	using Base::Base;
 
 	//constexpr AbsVector3(Base const& rhs);
-	constexpr AbsVector3(AbsVector3 const& rhs);
+	//constexpr AbsVector3(AbsVector3 const& rhs);
+	constexpr AbsVector3(const float value);
 	constexpr AbsVector3(const float x, const float y, const float z);
 
 	const Vector3 Get() const;
@@ -36,8 +40,15 @@ public:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline constexpr AbsVector3::AbsVector3(AbsVector3 const& rhs) :
-	Base(rhs)
+//inline constexpr AbsVector3::AbsVector3(AbsVector3 const& rhs) :
+//	Base(static_cast<Base const&>(rhs))
+//{
+//}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr AbsVector3::AbsVector3(const float value) :
+	Base(Unit::Absolute(value))
 {
 }
 
@@ -61,6 +72,8 @@ inline const Vector3 AbsVector3::Get() const
 class RelVector3 : public TVector3<Unit::Relative, RelVector3>
 {
 	using Base = TVector3<Unit::Relative, RelVector3>;
+
+	friend class Base;
 
 public:
 	using Base::Base;

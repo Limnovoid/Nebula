@@ -23,6 +23,7 @@ class Absolute : public Nebula::TExplicitArithmetic<float, Absolute>
 public:
 	using ArithmeticType = float;
 
+	constexpr Absolute();
 	constexpr explicit Absolute(const float value);
 	Absolute(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
 
@@ -31,6 +32,13 @@ public:
 
 	void Set(Relative const& relative, ScalingSphereBase const& scalingSphereBase);
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr Absolute::Absolute() :
+	Base()
+{
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +57,7 @@ class Relative : public Nebula::TExplicitArithmetic<float, Relative>
 public:
 	using ArithmeticType = float;
 
+	constexpr Relative();
 	constexpr explicit Relative(const float value);
 	Relative(Absolute const& absolute, ScalingSphereBase const& scalingSphereBase);
 
@@ -57,6 +66,13 @@ public:
 
 	void Set(Absolute const& absolute, ScalingSphereBase const& scalingSphereBase);
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+inline constexpr Relative::Relative() :
+	Base()
+{
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 

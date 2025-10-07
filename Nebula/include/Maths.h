@@ -252,7 +252,7 @@ inline T Epsilon()
 template<CGettableArithmetic T>
 inline T Epsilon()
 {
-	return T(Epsilon<T::ArithmeticType>());
+	return T(std::numeric_limits<typename T::ArithmeticType>());
 }
 
 } // namespace Maths --------------------------------------------------------------------------------------------------------------

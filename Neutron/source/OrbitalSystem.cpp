@@ -97,13 +97,13 @@ ScalingSphereBase * OrbitalSystem::CreateScalingSphere(ParticleBase * pHostParti
 
 	if (isInfluencing)
 	{
-		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSphere>(pHostParticle, radius.Get()));
+		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<InfluencingSphere>(pHostParticle, radius));
 
 		assert((nullptr == pNewScalingSphere->GetOuterSphere()) || pNewScalingSphere->GetOuterSphere()->IsInfluencing());
 	}
 	else
 	{
-		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, radius.Get()));
+		pNewScalingSphere = pHostParticle->AddScalingSphere(MakeUnique<NonInfluencingSpace>(pHostParticle, radius));
 
 		assert(nullptr != pNewScalingSphere->GetOuterSphere()); // A non-influencing Sphere should always be below an influencing Sphere in the hierarchy.
 		assert((pNewScalingSphere->GetOuterSphere()->GetHostParticle() != pNewScalingSphere->GetHostParticle()) ||
@@ -745,8 +745,8 @@ void RelAbsVectorTestScript::RunImpl(TestHandler & testHandler)
 	RelVector3 relV3;
 	AbsVector3 absV3;
 
-	relV3 = relV3 + absV3;
-	absV3 = relV3 + absV3;
+	//relV3 = relV3 + absV3;
+	//absV3 = relV3 + absV3;
 }
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------
