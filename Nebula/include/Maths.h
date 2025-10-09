@@ -41,10 +41,11 @@ inline constexpr int64_t Pow(int64_t base, int32_t exp)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<CArithmetic T>
+template<CFloatingPoint T>
 inline T Pow(const T base, const T exponent)
 {
-	assert(false);
+	static_assert(false);
+	return T(0);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -88,7 +89,7 @@ inline constexpr bool IsPowerOf2(uint64_t n)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsUInt<T>
+template<typename T> requires CUInt<T>
 inline constexpr size_t NumDigits(T value)
 {
 	return NumDigitsIntImpl(value, 1);
@@ -96,7 +97,7 @@ inline constexpr size_t NumDigits(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsSInt<T>
+template<typename T> requires CSInt<T>
 inline constexpr size_t NumDigits(T value)
 {
 	return NumDigitsIntImpl(Abs(value), 1);
@@ -104,7 +105,7 @@ inline constexpr size_t NumDigits(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsFloatingPoint<T>
+template<typename T> requires CFloatingPoint<T>
 inline constexpr size_t NumDigits(T value)
 {
 	/*T const absValue = Abs(value);
@@ -129,7 +130,7 @@ inline constexpr size_t NumDigits(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsFloatingPoint<T>
+template<typename T> requires CFloatingPoint<T>
 inline T Ceiling(T value)
 {
 	return std::ceil(value);
@@ -137,7 +138,7 @@ inline T Ceiling(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsFloatingPoint<T>
+template<typename T> requires CFloatingPoint<T>
 inline T Floor(T value)
 {
 	return std::floor(value);
@@ -145,10 +146,11 @@ inline T Floor(T value)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<CArithmetic T>
+template<CFloatingPoint T>
 inline T Sqrt(const T value)
 {
-	assert(false);
+	static_assert(false);
+	return T(0);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
@@ -201,10 +203,11 @@ inline T Clamp(T const& value, T const& min, T const& max)
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<CArithmetic T>
+template<CFloatingPoint T>
 inline T Acos(const T value)
 {
-	assert(false);
+	static_assert(false);
+	return T(0);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------

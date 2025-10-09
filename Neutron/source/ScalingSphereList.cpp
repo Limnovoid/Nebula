@@ -9,7 +9,7 @@ namespace Neutron // -----------------------------------------------------------
 
 bool ScalingSphereListPredicate::operator()(UniquePtr<ScalingSphereBase> const& lhs, UniquePtr<ScalingSphereBase> const& rhs)
 {
-	return lhs->GetTrueRadius() > rhs->GetTrueRadius();
+	return lhs->GetAbsoluteRadius() > rhs->GetAbsoluteRadius();
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

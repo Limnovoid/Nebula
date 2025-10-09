@@ -54,10 +54,10 @@ public:
 	constexpr CRTP & operator*=(const T rhs);
 	constexpr CRTP & operator/=(const T rhs);
 
-	friend constexpr const CRTP operator+(const T lhs, TExplicitArithmetic const& rhs);
-	friend constexpr const CRTP operator-(const T lhs, TExplicitArithmetic const& rhs);
-	friend constexpr const CRTP operator*(const T lhs, TExplicitArithmetic const& rhs);
-	friend constexpr const CRTP operator/(const T lhs, TExplicitArithmetic const& rhs);
+	template<typename U, typename UCRTP> friend constexpr const UCRTP operator+(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs);
+	template<typename U, typename UCRTP> friend constexpr const UCRTP operator-(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs);
+	template<typename U, typename UCRTP> friend constexpr const UCRTP operator*(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs);
+	template<typename U, typename UCRTP> friend constexpr const UCRTP operator/(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs);
 
 private:
 	T	m_value;
@@ -90,7 +90,7 @@ inline void TExplicitArithmetic<T, CRTP>::Set(const T value)
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T, typename CRTP>
-constexpr const T TExplicitArithmetic<T, CRTP>::operator*() const
+inline constexpr const T TExplicitArithmetic<T, CRTP>::operator*() const
 {
 	return m_value;
 }
@@ -202,34 +202,34 @@ inline constexpr bool operator>=(const T lhs, TExplicitArithmetic<T, CRTP> const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename CRTP>
-inline constexpr const CRTP operator+(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
+template<typename U, typename UCRTP>
+inline constexpr const UCRTP operator+(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs)
 {
-	return CRTP(lhs + rhs.m_value);
+	return UCRTP(lhs + rhs.m_value);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename CRTP>
-inline constexpr const CRTP operator-(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
+template<typename U, typename UCRTP>
+inline constexpr const UCRTP operator-(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs)
 {
-	return CRTP(lhs - rhs.m_value);
+	return UCRTP(lhs - rhs.m_value);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename CRTP>
-inline constexpr const CRTP operator*(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
+template<typename U, typename UCRTP>
+inline constexpr const UCRTP operator*(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs)
 {
-	return CRTP(lhs * rhs.m_value);
+	return UCRTP(lhs * rhs.m_value);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, typename CRTP>
-inline constexpr const CRTP operator/(const T lhs, TExplicitArithmetic<T, CRTP> const& rhs)
+template<typename U, typename UCRTP>
+inline constexpr const UCRTP operator/(const U lhs, TExplicitArithmetic<U, UCRTP> const& rhs)
 {
-	return CRTP(lhs / rhs.m_value);
+	return UCRTP(lhs / rhs.m_value);
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

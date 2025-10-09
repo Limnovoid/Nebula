@@ -18,7 +18,7 @@ public:
 	/// <returns> A vector populated with the integers [0, max] in a random order. </returns>
 	static std::vector<size_t> GetRandomSequence(size_t const max);
 
-	template<IsInt T = size_t>
+	template<CInt T = size_t>
 	static T Integer(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max());
 
 private:

@@ -310,7 +310,7 @@ inline void TVector3<T, CRTP>::PreciseCross(TVector3 const& rhs, T & magnitude, 
 template<typename T, typename CRTP>
 inline TVector3<T, CRTP>::TReturnVector3 TVector3<T, CRTP>::PreciseCross(TVector3 const& rhs) const
 {
-	// No need to construct temporary variables in every call - values are assigned by delegate PreciseCross().
+	// No need to construct temporary variables in every call - values are assigned by call to PreciseCross().
 	static T magnitude = T(0);
 	static TVector3 direction(T(0));
 
@@ -462,16 +462,8 @@ inline TVector3<T, CRTP>::TReturnVector3 & TVector3<T, CRTP>::operator/=(const T
 // --------------------------------------------------------------------------------------------------------------------------------
 
 
-template<CArithmetic T, typename CRTP>
-inline TVector3<T, CRTP>::TReturnVector3 operator*(const T scalar, TVector3<T, CRTP> const& vector)
-{
-	return vector * scalar;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
 template<typename T, typename CRTP>
-inline TVector3<T, CRTP>::TReturnVector3 operator*(T const& scalar, TVector3<T, CRTP> const& vector)
+inline TVector3<T, CRTP>::TReturnVector3 operator*(const typename TVector3<T, CRTP>::TPass scalar, TVector3<T, CRTP> const& vector)
 {
 	return vector * scalar;
 }

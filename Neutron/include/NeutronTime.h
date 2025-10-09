@@ -35,12 +35,12 @@ public:
 	template<Granularity NFromPerSecond>
 	static Period Convert(Period<NFromPerSecond> const fromPeriod);
 
-	template<IsFloatingPoint T, Granularity NFromPerSecond = Second>
+	template<CFloatingPoint T, Granularity NFromPerSecond = Second>
 	static Period Convert(T value);
 
 	Period(int64_t value);
 
-	template<IsInt T = int64_t>
+	template<CInt T = int64_t>
 	int64_t Get() const;
 
 	template<Granularity NToPerSecond>
@@ -77,7 +77,7 @@ inline Period<NPerSecond> Period<NPerSecond>::Convert(Period<NFromPerSecond> con
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<Granularity NPerSecond>
-template<IsFloatingPoint T, Granularity NFromPerSecond>
+template<CFloatingPoint T, Granularity NFromPerSecond>
 inline Period<NPerSecond> Period<NPerSecond>::Convert(T value)
 {
 	static_assert(GranularityEnumType(NPerSecond) < std::numeric_limits<T>::max());
@@ -99,7 +99,7 @@ inline Period<NPerSecond>::Period(int64_t value) :
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<Granularity NPerSecond>
-template<IsInt T>
+template<CInt T>
 inline int64_t Period<NPerSecond>::Get() const
 {
 	return static_cast<T>(m_value);

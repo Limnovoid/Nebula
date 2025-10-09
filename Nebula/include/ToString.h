@@ -7,7 +7,7 @@
 namespace // detail
 {
 
-template<typename T> requires Nebula::IsInt<T>
+template<typename T> requires Nebula::CInt<T>
 inline size_t ToStringImpl(T value, char * stringBuffer, size_t startOffset)
 {
 	do
@@ -39,7 +39,7 @@ inline constexpr String ToString(bool const value)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsUInt<T>
+template<typename T> requires CUInt<T>
 inline String ToString(T value)
 {
 	static constexpr size_t maxDigits = Maths::NumDigits(std::numeric_limits<T>::max());
@@ -52,7 +52,7 @@ inline String ToString(T value)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T> requires IsSInt<T>
+template<typename T> requires CSInt<T>
 inline String ToString(T value)
 {
 	static constexpr size_t maxDigits = Maths::NumDigits(std::numeric_limits<T>::max());

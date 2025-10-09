@@ -20,7 +20,7 @@ using namespace Nebula;
 /// </summary>
 /// <typeparam name="T"> The type to store in the queue. </typeparam>
 /// <typeparam name="TCompareFunctor"> The type of the comparison functor. </typeparam>
-template<typename T, IsCompareFunctor<T> TCompareFunctor = std::less<T>, IsCompareFunctor<T> TEqualsFunctor = std::equal_to<T>>
+template<typename T, CCompareFunctor<T> TCompareFunctor = std::less<T>, CCompareFunctor<T> TEqualsFunctor = std::equal_to<T>>
 class PriorityQueue
 {
 public:
@@ -70,14 +70,14 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::PriorityQueue()
 {
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 template<typename... TArgs>
 inline PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::PriorityQueue(TArgs... args) :
 	m_array(std::forward<TArgs>(args)...)
@@ -86,7 +86,7 @@ inline PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::PriorityQueue(TArgs...
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Insert(T const& t)
 {
 	m_array.push_back(t);
@@ -96,7 +96,7 @@ inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Insert(T const& t
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 template<typename... TArgs>
 inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Emplace(TArgs... args)
 {
@@ -107,7 +107,7 @@ inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Emplace(TArgs... 
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Pop()
 {
 	ASSERT_THROW(0 < m_array.size(), RESULT_CODE_EMPTY, "Cannot Pop from an empty container.");
@@ -136,7 +136,7 @@ inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Pop()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::SortFront()
 {
 	size_t heapIndex = 1;
@@ -177,7 +177,7 @@ inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::SortFront()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Size() const
 {
 	return m_array.size();
@@ -185,7 +185,7 @@ inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Size() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline bool PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Empty() const
 {
 	return m_array.empty();
@@ -193,7 +193,7 @@ inline bool PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Empty() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline T & PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Front()
 {
 	return m_array.front();
@@ -201,7 +201,7 @@ inline T & PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Front()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline T const& PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Front() const
 {
 	return m_array.front();
@@ -209,7 +209,7 @@ inline T const& PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Front() const
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::SortBack()
 {
 	assert(0 < m_array.size());
@@ -231,7 +231,7 @@ inline void PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::SortBack()
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Parent(size_t index) const
 {
 	assert(0 < index);
@@ -241,7 +241,7 @@ inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::Parent(size_t i
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::LeftChild(size_t index) const
 {
 	return index * 2;
@@ -249,7 +249,7 @@ inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::LeftChild(size_
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename T, IsCompareFunctor<T> TCompareFunctor, IsCompareFunctor<T> TEqualsFunctor>
+template<typename T, CCompareFunctor<T> TCompareFunctor, CCompareFunctor<T> TEqualsFunctor>
 inline size_t PriorityQueue<T, TCompareFunctor, TEqualsFunctor>::RightChild(size_t index) const
 {
 	return (index * 2) + 1;

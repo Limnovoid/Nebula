@@ -98,6 +98,11 @@ void ExplicitArithmeticTestScript::RunImpl(Nebula::TestHandler & testHandler)
 		a1 += a1;
 		//a1 += b1; // Error, cannot convert argument.
 		a1 += 1.f;
+
+		1.f + a1;
+		1.f - a1;
+		1.f * a1;
+		1.f / a1;
 	}
 
 	constexpr A a0(0.f);

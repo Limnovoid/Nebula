@@ -27,7 +27,7 @@ std::vector<size_t> Random::GetRandomSequence(size_t const min, size_t const max
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<IsInt T>
+template<CInt T>
 T Random::Integer(T min, T max)
 {
 	std::uniform_int_distribution<T> distribution(min, max);

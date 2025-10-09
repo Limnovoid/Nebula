@@ -12,7 +12,7 @@
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-template<typename TTo> requires IsInt<TTo>
+template<typename TTo> requires CInt<TTo>
 inline Result ToType(char const from, TTo & to)
 {
 	to = static_cast<TTo>(from) - static_cast<TTo>('0');
@@ -25,7 +25,7 @@ inline Result ToType(char const from, TTo & to)
 namespace // detail
 {
 
-template<typename TTo> requires Nebula::IsInt<TTo>
+template<typename TTo> requires Nebula::CInt<TTo>
 Nebula::Result ToTypeImpl(Nebula::StringView const from, TTo & to)
 {
 	assert('-' != from.front()); // Encoded value should never be signed.
@@ -62,7 +62,7 @@ Nebula::Result ToTypeImpl(Nebula::StringView const from, TTo & to)
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-template<typename TTo> requires IsUInt<TTo>
+template<typename TTo> requires CUInt<TTo>
 inline Result ToType(StringView from, TTo & to)
 {
 	return ToTypeImpl<TTo>(from, to);
@@ -70,7 +70,7 @@ inline Result ToType(StringView from, TTo & to)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TTo> requires IsSInt<TTo>
+template<typename TTo> requires CSInt<TTo>
 inline Result ToType(StringView from, TTo & to)
 {
 	bool const isNegative = ('-' == from.front());
@@ -126,7 +126,7 @@ inline bool IsNumeric(StringView const valueStringView)
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-template<typename TTo> requires IsInt<TTo>
+template<typename TTo> requires CInt<TTo>
 class UnitTestCharToType : public IUnitTest<TTo, char>
 {
 public:

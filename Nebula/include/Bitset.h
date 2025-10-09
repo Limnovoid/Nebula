@@ -14,10 +14,10 @@ class Bitset : std::bitset<NBits>
 public:
 	Bitset();
 
-	template<IsUInt UInt>
+	template<CUInt UInt>
 	Bitset(UInt uInt);
 
-	template<IsInt Int>
+	template<CInt Int>
 	Int To() const;
 };
 
@@ -32,7 +32,7 @@ Bitset<NBits>::Bitset() :
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<size_t NBits>
-template<IsUInt UInt>
+template<CUInt UInt>
 Bitset<NBits>::Bitset(UInt uInt) :
 	Base(uInt)
 {
@@ -41,7 +41,7 @@ Bitset<NBits>::Bitset(UInt uInt) :
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<size_t NBits>
-template<IsInt Int>
+template<CInt Int>
 Int Bitset<NBits>::To() const
 {
 	return static_cast<Int>(Base::to_ulong());

@@ -13,53 +13,53 @@ using byte_t = uint8_t;
 // --------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-concept IsSigned = std::is_signed_v<T>;
+concept CSigned = std::is_signed_v<T>;
 
 template<typename T>
-concept IsUnsigned = std::is_unsigned_v<T>;
+concept CUnsigned = std::is_unsigned_v<T>;
 
 template<typename T>
-concept IsInt = std::is_integral_v<T> && requires
+concept CInt = std::is_integral_v<T> && requires
 {
 	std::numeric_limits<T>::max();
 	std::numeric_limits<T>::min();
 };
 
 template<typename T>
-concept IsUInt = IsInt<T> && !IsSigned<T>;
+concept CUInt = CInt<T> && !CSigned<T>;
 
 template<typename T>
-concept IsSInt = IsInt<T> && IsSigned<T>;
+concept CSInt = CInt<T> && CSigned<T>;
 
 template<typename T>
-concept IsFloatingPoint = std::is_floating_point_v<T>;
+concept CFloatingPoint = std::is_floating_point_v<T>;
 
 template<typename T, typename... TArgs>
-concept IsInvocable = std::is_invocable_v<T, TArgs...>;
+concept CInvocable = std::is_invocable_v<T, TArgs...>;
 
 template<typename T>
-concept IsWriteable = requires (std::ostream & outputStream, T const& value)
+concept CWriteable = requires (std::ostream & outputStream, T const& value)
 {
 	{ outputStream << value };
 };
 
 template<typename T>
-concept IsReadable = requires (std::istream & inputStream, T const& value)
+concept CReadable = requires (std::istream & inputStream, T const& value)
 {
 	{ inputStream >> value };
 };
 
 template<typename T>
-concept IsReadWriteable = IsWriteable<T> && IsReadable<T>;
+concept CReadWriteable = CWriteable<T> && CReadable<T>;
 
 template<typename T>
-concept IsStringType = requires (T t)
+concept CStringType = requires (T t)
 {
 	{ String(t) };
 };
 
 template<typename T>
-concept IsFormattable = requires (std::formatter<T> formatter, std::format_parse_context & parseCtx,
+concept CFormattable = requires (std::formatter<T> formatter, std::format_parse_context & parseCtx,
 	std::format_context & formatCtx, T const& t)
 {
 	{ formatter.parse(parseCtx) };
@@ -67,7 +67,7 @@ concept IsFormattable = requires (std::formatter<T> formatter, std::format_parse
 };
 
 template<typename T, typename TOperand>
-concept IsCompareFunctor = std::is_invocable_r_v<bool, T, TOperand, TOperand>;
+concept CCompareFunctor = std::is_invocable_r_v<bool, T, TOperand, TOperand>;
 
 template<typename T>
 concept CFundamental = std::is_fundamental_v<T>;

@@ -34,7 +34,7 @@
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
 
-template<typename TTo> requires IsInt<TTo>
+template<typename TTo> requires CInt<TTo>
 class TestScriptCharToType : public ITestScript
 {
 public:
@@ -145,7 +145,7 @@ public:
 	Func	m_func;
 };
 
-template<typename T> requires IsFormattable<T>
+template<typename T> requires CFormattable<T>
 String GetFormatted(T const& t)
 {
 	return Fmt::Format("Formatted = {}", t);
