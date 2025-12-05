@@ -4,13 +4,11 @@
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
-	
+
 UiApplication::UiApplication(Settings const& settings) :
 	m_rootMenu(settings.m_applicationName, true),
-	m_io(std::cout, std::cin),
-	m_testHandler(settings.m_testHandlerSettings)
+	m_io(std::cout, std::cin)
 {
-	m_rootMenu.AddOption(m_testHandler.GetMenu());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------

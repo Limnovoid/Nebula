@@ -12,6 +12,9 @@ using byte_t = uint8_t;
 // Type constraints & Concepts -------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
+template<typename T, typename TOther>
+concept CIsSame = std::is_same_v<T, TOther>;
+
 template<typename T>
 concept CSigned = std::is_signed_v<T>;
 
@@ -87,6 +90,9 @@ concept CDerivesFrom = std::is_base_of_v<TBase, T>;
 
 template<typename T>
 concept CVoid = std::is_void_v<T>;
+
+template<typename TFrom, typename TTo>
+concept CConvertableTo = std::convertible_to<TFrom, TTo>;
 
 // Smart pointers -----------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------

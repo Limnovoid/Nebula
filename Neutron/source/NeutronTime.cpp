@@ -90,6 +90,58 @@ void TimeTestScript::RunImpl(TestHandler & testHandler)
 	Microseconds microseconds2 = microseconds1.Add(seconds2);
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<Time::Granularity TFromPerSecond, Time::Granularity TToPerSecond>
+struct IndexConverter
+{
+	Time::Period<TToPerSecond> operator()(const ITest::Sequence::Index index)
+	{
+		return Time::Period<TToPerSecond>::Convert(Time::Period<TFromPerSecond>(index));
+	}
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void TimeTest::Run() const
+{
+	Sequence sequence(0, 1000, 100);
+
+	// 1 second -> other.
+	AssertSequence("Convert seconds to seconds", sequence, [this](const Sequence::Index index)
+	{
+		Time::Seconds lhs = IndexConverter<Second, Second>()(index), rhs = Seconds(index * Second);
+		AssertOperator(Fmt::Format("<{}> seconds == <{}> seconds", index, rhs), lhs, Equal(rhs));
+	});
+
+	AssertSequence("Convert seconds to milliseconds", sequence, [this](const Sequence::Index index)
+	{
+		Time::Milliseconds lhs = IndexConverter<Second, Millisecond>()(index), rhs = Milliseconds(index * Millisecond);
+		AssertOperator(Fmt::Format("<{}> seconds == <{}> milliseconds", index, rhs), lhs, Equal(rhs));
+	});
+
+	AssertSequence("Convert seconds to microseconds", sequence, [this](const Sequence::Index index)
+	{
+		Time::Microseconds lhs = IndexConverter<Second, Microsecond>()(index), rhs = Microseconds(index * Microsecond);
+		AssertOperator(Fmt::Format("<{}> seconds == <{}> microseconds", index, rhs), lhs, Equal(rhs));
+	});
+
+	AssertSequence("Convert seconds to nanoseconds", sequence, [this](const Sequence::Index index)
+	{
+		Time::Nanoseconds lhs = IndexConverter<Second, Nanosecond>()(index), rhs = Nanoseconds(index * Nanosecond);
+		AssertOperator(Fmt::Format("<{}> seconds == <{}> nanoseconds", index, rhs), lhs, Equal(rhs));
+	});
+
+	// TEMP
+	AssertSequence("INTENTIONAL FAIL - Convert seconds to seconds", sequence, [this](const Sequence::Index index)
+	{
+		Time::Seconds lhs(0), rhs = Seconds(index * Second);
+		AssertOperator(Fmt::Format("INTENTIONAL FAIL - <{}> seconds == <{}> seconds", index, rhs), lhs, Equal(rhs));
+	});
+}
+
 } // namespace Time ---------------------------------------------------------------------------------------------------------------
 
 } // namespace Neutron ------------------------------------------------------------------------------------------------------------

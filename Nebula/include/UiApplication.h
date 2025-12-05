@@ -13,7 +13,6 @@ public:
 	struct Settings
 	{
 		String					m_applicationName;
-		TestHandler::Settings	m_testHandlerSettings;
 	};
 
 	UiApplication(Settings const& settings);
@@ -27,7 +26,6 @@ public:
 private:
 	UiMenu					m_rootMenu;
 	UiIo					m_io;
-	TestHandler				m_testHandler;
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -35,13 +33,6 @@ private:
 inline UiMenu & UiApplication::GetRootMenu()
 {
 	return m_rootMenu;
-}
-
-// --------------------------------------------------------------------------------------------------------------------------------
-
-inline TestHandler & UiApplication::GetTestHandler()
-{
-	return m_testHandler;
 }
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

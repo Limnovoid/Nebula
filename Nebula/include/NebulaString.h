@@ -34,15 +34,16 @@ public:
 	constexpr String(String && string);
 	constexpr String(std::string const& string);
 	constexpr String(char const*const cstr);
-	constexpr String(char character);
-	constexpr String(StringView stringView);
+	constexpr String(char const*const cstr, const size_t length);
+	constexpr String(const char character);
+	constexpr String(const StringView stringView);
 
 	constexpr String & operator=(String const& string);
 	constexpr String & operator=(String && string);
 	constexpr String & operator=(std::string const& string);
 	constexpr String & operator=(char const*const cstr);
 	constexpr String & operator=(char character);
-	constexpr String & operator=(StringView stringView);
+	constexpr String & operator=(const StringView stringView);
 };
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -117,22 +118,23 @@ inline constexpr String String::ToLower(StringView string)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline constexpr String::String()										: std::string("") {}
-inline constexpr String::String(String const& string)					: std::string(string) {}
-inline constexpr String::String(String && string)						: std::string(std::forward<String>(string)) {}
-inline constexpr String::String(std::string const& string)				: std::string(string) {}
-inline constexpr String::String(char const*const cstr)					: std::string(cstr) {}
-inline constexpr String::String(char character)							: std::string(1, character) {}
-inline constexpr String::String(StringView stringView)					: std::string(stringView.data(), stringView.length()) {}
+inline constexpr String::String()												: std::string("") {}
+inline constexpr String::String(String const& string)							: std::string(string) {}
+inline constexpr String::String(String && string)								: std::string(std::forward<String>(string)) {}
+inline constexpr String::String(std::string const& string)						: std::string(string) {}
+inline constexpr String::String(char const*const cstr)							: std::string(cstr) {}
+inline constexpr String::String(char const*const cstr, const size_t length)		: std::string(cstr, length) {}
+inline constexpr String::String(const char character)							: std::string(1, character) {}
+inline constexpr String::String(const StringView stringView)					: std::string(stringView.data(), stringView.length()) {}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-inline constexpr String & String::operator=(String const& string)		{ std::string::operator=(string); return *this; }
-inline constexpr String & String::operator=(String && string)			{ std::string::operator=(std::forward<std::string>(string)); return *this; }
-inline constexpr String & String::operator=(std::string const& string)	{ std::string::operator=(string); return *this; }
-inline constexpr String & String::operator=(char const*const cstr)		{ std::string::operator=(cstr); return *this; }
-inline constexpr String & String::operator=(char character)				{ std::string::operator=(character); return *this; }
-inline constexpr String & String::operator=(StringView stringView)		{ std::string::operator=(stringView); return *this; }
+inline constexpr String & String::operator=(String const& string)				{ std::string::operator=(string); return *this; }
+inline constexpr String & String::operator=(String && string)					{ std::string::operator=(std::forward<std::string>(string)); return *this; }
+inline constexpr String & String::operator=(std::string const& string)			{ std::string::operator=(string); return *this; }
+inline constexpr String & String::operator=(char const*const cstr)				{ std::string::operator=(cstr); return *this; }
+inline constexpr String & String::operator=(const char character)				{ std::string::operator=(character); return *this; }
+inline constexpr String & String::operator=(const StringView stringView)		{ std::string::operator=(stringView); return *this; }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -157,6 +159,19 @@ struct std::formatter<Nebula::String> : std::formatter<char const*>
 	auto format(Nebula::String const& string, std::format_context & ctx) const
 	{
 		return std::format_to(ctx.out(), "{}", string.c_str());
+	}
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<>
+struct std::hash<Nebula::String>
+{
+	size_t operator()(Nebula::String const& string) const
+	{
+		static const std::hash<std::string> s_hash;
+
+		return s_hash(string);
 	}
 };
 

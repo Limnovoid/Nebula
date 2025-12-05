@@ -8,10 +8,14 @@ template<size_t NSize>
 class ConstString
 {
 public:
+	static constexpr size_t Size();
+	static constexpr size_t Length();
+
 	constexpr ConstString(char c = '\0');
 	constexpr ConstString(char const(& string)[NSize]);
 
 	constexpr char const* Get() const;
+	constexpr String ToString() const;
 
 	constexpr char & operator[](size_t index);
 	constexpr char const& operator[](size_t index) const;
@@ -28,6 +32,22 @@ private:
 
 	std::array<char, NSize>	m_cstr;
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<size_t NSize>
+constexpr size_t ConstString<NSize>::Size()
+{
+	return NSize;
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<size_t NSize>
+constexpr size_t ConstString<NSize>::Length()
+{
+	return NSize;
+}
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
@@ -52,6 +72,14 @@ template<size_t NSize>
 constexpr char const* ConstString<NSize>::Get() const
 {
 	return m_cstr.data();
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<size_t NSize>
+constexpr String ConstString<NSize>::ToString() const
+{
+	return String(m_cstr.data());
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------
@@ -153,6 +181,15 @@ constexpr auto ConstCat(char const(&... strings)[NSizes])
 
 	return finalString;
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+concept CConstString = requires (T const& constString)
+{
+	{ T::Size() } -> CConvertableTo<size_t>;
+	CIsSame<T, ConstString<T::Size()>>;
+};
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------
 

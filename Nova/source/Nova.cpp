@@ -1,15 +1,5 @@
 #include "Nova.h"
 
-// Include all project headers for library building.
-#include "AnchoredList.h"
-#include "BinaryTree.h"
-#include "Footprint.h"
-#include "HeapBlock.h"
-#include "HeapBlockList.h"
-#include "PriorityQueue.h"
-#include "RedBlackTree.h"
-#include "SortedList.h"
-
 namespace Nova // -----------------------------------------------------------------------------------------------------------------
 {
 

@@ -2,6 +2,7 @@
 #define NEBULA_RANDOM_H
 
 #include "ITestScript.h"
+#include "TestHandler2.h"
 
 namespace Nebula // ---------------------------------------------------------------------------------------------------------------
 {
@@ -53,6 +54,20 @@ public:
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class RandomTest : public TTest<RandomTest>
+{
+public:
+	inline static ConstString NAME = "Random";
+	inline static ConstString SUITE = "NEBULA";
+
+	virtual ~RandomTest() = default;
+
+	virtual void Run() const override;
 };
 
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

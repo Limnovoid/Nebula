@@ -1,11 +1,5 @@
 #include "Neutron.h"
 
-// Include all project headers for library building.
-#include "Vector3.h"
-#include "NeutronTime.h"
-#include "OrbitalSystem.h"
-#include "Orbit.h"
-
 #include "NebulaTypes.h" // For pool testing.
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------

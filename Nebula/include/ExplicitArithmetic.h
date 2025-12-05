@@ -2,6 +2,7 @@
 #define NEBULA_EXPLICIT_ARITHMETIC_H
 
 #include "ITestScript.h"
+#include "TestHandler2.h"
 
 namespace Nebula // -----------------------------------------------------------------------------------------------------------------
 {
@@ -235,14 +236,28 @@ inline constexpr const UCRTP operator/(const U lhs, TExplicitArithmetic<U, UCRTP
 // --------------------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------
 
-class ExplicitArithmeticTestScript : public Nebula::ITestScript
+class ExplicitArithmeticTestScript : public ITestScript
 {
 public:
 	ExplicitArithmeticTestScript();
 	virtual ~ExplicitArithmeticTestScript();
 
 protected:
-	virtual void RunImpl(Nebula::TestHandler & testHandler) override;
+	virtual void RunImpl(TestHandler & testHandler) override;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class ExplicitArithmeticTest : public TTest<ExplicitArithmeticTest>
+{
+public:
+	inline static ConstString NAME = "ExplicitArithmetic";
+	inline static ConstString SUITE = "NEBULA";
+
+	virtual ~ExplicitArithmeticTest() = default;
+
+	virtual void Run() const override;
 };
 
 } // namespace Nebula ---------------------------------------------------------------------------------------------------------------

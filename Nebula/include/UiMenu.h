@@ -34,7 +34,6 @@ public:
 	StringView GetHeader() const;
 
 private:
-
 	String					m_prompt;
 	StringView				m_header;
 	OptionList				m_options;

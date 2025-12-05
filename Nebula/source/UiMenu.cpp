@@ -13,7 +13,7 @@ UiMenu::UiMenu(StringView header, bool isRootMenu) :
 	m_isExecuting(false)
 {
 	size_t nPromptCharacters = m_prompt.size();
-	m_prompt += "...";
+	m_prompt += " ...";
 	m_header = StringView(m_prompt.data(), nPromptCharacters); // Initialize after the above line in case the append causes a reallocation (invalidating the string view).
 
 	m_returnOption = MakeShared<UiOption>((isRootMenu ? "Exit" : "Return"), [this](UiIo const& uiIo) { Return(); }, isRootMenu);

@@ -23,5 +23,6 @@
 #include <numeric>
 #include <deque>
 #include <type_traits>
+#include <stack>
 
 #endif//NEBULA_STABLE_H

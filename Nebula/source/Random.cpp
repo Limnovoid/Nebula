@@ -71,4 +71,25 @@ void RandomTestScript::RunImpl(TestHandler & testHandler)
 	testHandler.SetOutputMode(outputMode);
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+void RandomTest::Run() const
+{
+	std::unordered_map<uint64_t, size_t> uuidCounts;
+
+	Sequence randomIntegersSequence(0, 1000000, 1);
+	AssertSequence("Random integers are unique", randomIntegersSequence, [this, &uuidCounts](const Sequence::Index index)
+	{
+		const uint64_t randomInteger = Random::Integer<uint64_t>();
+
+		auto [iter, isNewElement] = uuidCounts.try_emplace(randomInteger, 1);
+
+		if (!isNewElement)
+			++(iter->second);
+
+		Assert(Fmt::Format("Random::Integer returned <{}> - total instances = {}", randomInteger, iter->second), isNewElement);
+	});
+}
+
 } // namespace Nebula -------------------------------------------------------------------------------------------------------------

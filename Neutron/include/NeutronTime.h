@@ -2,6 +2,7 @@
 #define NEUTRON_TIME_H
 
 #include "TestHandler.h"
+#include "TestHandler2.h"
 
 namespace Neutron // --------------------------------------------------------------------------------------------------------------
 {
@@ -247,6 +248,20 @@ public:
 
 protected:
 	virtual void RunImpl(TestHandler & testHandler) override;
+};
+
+// --------------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------
+
+class TimeTest : public TTest<TimeTest>
+{
+public:
+	inline static ConstString NAME = "Time";
+	inline static ConstString SUITE = "NEUTRON";
+
+	virtual ~TimeTest() = default;
+
+	virtual void Run() const override;
 };
 
 } // namespace Time ---------------------------------------------------------------------------------------------------------------

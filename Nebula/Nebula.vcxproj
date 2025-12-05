@@ -169,6 +169,7 @@
     <ClCompile Include="source\Random.cpp" />
     <ClCompile Include="source\Result.cpp" />
     <ClCompile Include="source\TestHandler.cpp" />
+    <ClCompile Include="source\TestHandler2.cpp" />
     <ClCompile Include="source\ToString.cpp" />
     <ClCompile Include="source\ToType.cpp" />
     <ClCompile Include="source\UiApplication.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="include\File.h" />
     <ClInclude Include="include\Format.h" />
     <ClInclude Include="include\NeedsInitializationHelper.h" />
+    <ClInclude Include="include\TestHandler2.h" />
     <ClInclude Include="include\TestTypes.h" />
     <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Typename.h" />
