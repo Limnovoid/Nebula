@@ -2,4 +2,4 @@ LimnNebula
 // --------------------------------------------------------------------------------------------------------------------------------
 
 Brief:
-Repository for general development utilities and classes.
+Orbital physics simulation and navigation algorithms.
